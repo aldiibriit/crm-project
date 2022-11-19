@@ -12,10 +12,14 @@ import (
 // UserRepository is contract what userRepository can do to db
 type UserRepository interface {
 	InsertUser(user entity.User) entity.User
+	InsertUserSales(user entity.TblUser) error
 	UpdateUser(user entity.User) entity.User
 	VerifyCredential(email string, password string) interface{}
 	IsDuplicateEmail(email string) (tx *gorm.DB)
 	FindByEmail(email string) entity.User
+	FindByEmail2(email string) entity.TblUser
+	CheckUserExist(email string) bool
+	UpdateOrCreate(data entity.TblUser)
 	ProfileUser(userID string) entity.User
 }
 
@@ -34,6 +38,14 @@ func (db *userConnection) InsertUser(user entity.User) entity.User {
 	user.Password = hashAndSalt([]byte(user.Password))
 	db.connection.Save(&user)
 	return user
+}
+
+func (db *userConnection) InsertUserSales(user entity.TblUser) error {
+	err := db.connection.Create(&user).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (db *userConnection) UpdateUser(user entity.User) entity.User {
@@ -65,14 +77,41 @@ func (db *userConnection) IsDuplicateEmail(email string) (tx *gorm.DB) {
 
 func (db *userConnection) FindByEmail(email string) entity.User {
 	var user entity.User
-	db.connection.Where("email = ?", email).Take(&user)
+	// db.connection.Where("email = ?", email).Take(&user)
+	db.connection.Debug().Raw("SELECT * from users where email = ?", email).Take(&user)
 	return user
+}
+
+func (db *userConnection) FindByEmail2(email string) entity.TblUser {
+	var user entity.TblUser
+	// db.connection.Where("email = ?", email).Take(&user)
+	db.connection.Raw("SELECT * from tbl_user where email = ?", email).Find(&user)
+	return user
+}
+
+func (db *userConnection) CheckUserExist(email string) bool {
+	var user entity.TblUser
+	db.connection.Debug().Raw("SELECT * from tbl_user where email = ?", email).Find(&user)
+	if user.Email == "" {
+		return false
+	}
+	return true
 }
 
 func (db *userConnection) ProfileUser(userID string) entity.User {
 	var user entity.User
 	db.connection.Preload("Books").Preload("Books.User").Find(&user, userID)
 	return user
+}
+
+func (db *userConnection) UpdateOrCreate(data entity.TblUser) {
+	var checker entity.TblUser
+	db.connection.Raw("SELECT * FROM tbl_user where email = ?", data.Email).Take(&checker)
+	if checker.Email == "" {
+		db.connection.Save(&data)
+	} else if checker.Email != "" {
+		db.connection.Model(&entity.TblUser{}).Where("email = ?", data.Email).Updates(&data)
+	}
 }
 
 func hashAndSalt(pwd []byte) string {

@@ -127,9 +127,31 @@ func RsaDecryptFromFEInBE(ciphertext []byte) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// privateKey := priv.(*rsa.PrivateKey)
 	plainData, err := rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
 	if err != nil {
-		log.Fatalln("error in decrypt data in BE")
+		log.Fatalln("error in decrypt data in BE", err.Error())
+	}
+	return string(plainData), nil
+}
+
+func RsaDecryptFromFEInBEJava(ciphertext []byte) (string, error) {
+	privateKeyBEJava, err := ioutil.ReadFile("privateBEJava.pem")
+	if err != nil {
+		log.Panicln("error in read privateKeyBEJava")
+	}
+	block, _ := pem.Decode(privateKeyBEJava)
+	if block == nil {
+		return "", errors.New("error in pem decode privateKeyBEJava")
+	}
+	priv, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return "", err
+	}
+	privateKey := priv.(*rsa.PrivateKey)
+	plainData, err := rsa.DecryptPKCS1v15(rand.Reader, privateKey, ciphertext)
+	if err != nil {
+		log.Fatalln("error in decrypt data in BEJava")
 	}
 	return string(plainData), nil
 }
@@ -151,9 +173,30 @@ func RsaEncryptBEToFE(origData []byte) (string, error) {
 	pub := pubInterface.(*rsa.PublicKey)
 	encryptedData, err := rsa.EncryptPKCS1v15(rand.Reader, pub, origData)
 	if err != nil {
-		log.Panicln("error in encrypt Data")
+		log.Panicln("error in encrypt Data", err.Error())
 	}
 
 	result := base64.StdEncoding.EncodeToString([]byte(encryptedData))
 	return result, nil
+}
+
+func RsaDecryptFromBEInFE(ciphertext []byte) (string, error) {
+	privateKeyFE, err := ioutil.ReadFile("privateFE.pem")
+	if err != nil {
+		log.Panicln("error in read privateKeyFE")
+	}
+	block, _ := pem.Decode(privateKeyFE)
+	if block == nil {
+		return "", errors.New("error in pem decode privateKeyFE")
+	}
+	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return "", err
+	}
+	// privateKey := priv.(*rsa.PrivateKey)
+	plainData, err := rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
+	if err != nil {
+		log.Fatalln("error in decrypt data in FE")
+	}
+	return string(plainData), nil
 }
