@@ -92,7 +92,7 @@ func (service *emailService) limitExceed(email string, action int, urlEncoded st
 			CreatedAt:  nowTs,
 			UpdatedAt:  nowTs,
 		}
-		log.Println("Data : ", emailAttempt)
+		// log.Println("Data : ", emailAttempt)
 	}
 
 	service.emailAttemptRepository.UpdateOrCreate(emailAttempt)

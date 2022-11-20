@@ -106,7 +106,7 @@ func RsaEncryptFEToBE(origData []byte) (string, error) {
 	pub := pubInterface.(*rsa.PublicKey)
 	encryptedData, err := rsa.EncryptPKCS1v15(rand.Reader, pub, origData)
 	if err != nil {
-		log.Panicln("error in encrypt Data")
+		log.Println("error in encrypt Data", err.Error())
 	}
 
 	result := base64.StdEncoding.EncodeToString([]byte(encryptedData))
@@ -130,7 +130,7 @@ func RsaDecryptFromFEInBE(ciphertext []byte) (string, error) {
 	// privateKey := priv.(*rsa.PrivateKey)
 	plainData, err := rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
 	if err != nil {
-		log.Fatalln("error in decrypt data in BE", err.Error())
+		log.Fatalln("error in decrypt data in BE", err.Error(), string(ciphertext))
 	}
 	return string(plainData), nil
 }

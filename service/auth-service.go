@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"strconv"
 	"time"
 
 	"go-api/dto"
 	"go-api/dto/request/authRequestDTO"
 	"go-api/dto/request/emailRequestDTO"
 	responseDTO "go-api/dto/response"
+	"go-api/dto/response/authResponseDTO"
 	"go-api/entity"
 	"go-api/helper"
 	"go-api/repository"
@@ -92,6 +94,7 @@ func (service *authService) CreateUserSales(request dto.RegisterSalesDTO) respon
 		Type:           "Sales",
 		Status:         "Registered",
 		ID:             id,
+		IdResponse:     strconv.Itoa(id),
 		MobileNo:       request.SalesPhone,
 		ModifiedAt:     time.Now(),
 	}
@@ -143,11 +146,13 @@ func (service *authService) CreateUserSales(request dto.RegisterSalesDTO) respon
 		return response
 	}
 
+	encryptedCreatedUser := serializeCreatedUser(userToCreate)
+
 	response.HttpCode = 200
 	response.MetadataResponse = nil
 	response.ResponseCode = "00"
 	response.ResponseDesc = "Success"
-	response.ResponseData = salesToCreate
+	response.ResponseData = encryptedCreatedUser
 	response.Summary = nil
 
 	return response
@@ -169,8 +174,13 @@ func (service *authService) ActivateUser(request authRequestDTO.ActivateRequestD
 		return response
 	}
 
-	if request.Action == 1 || request.Action == 2 {
-		emailAttempt := service.emailAttemptRepository.FindByEmailAndAction(request.Email, request.Action)
+	intAction, err := strconv.Atoi(request.Action)
+	if err != nil {
+		log.Println("Error when convert action to string at auth service line 175 ", err.Error())
+	}
+
+	if intAction == 1 || intAction == 2 {
+		emailAttempt := service.emailAttemptRepository.FindByEmailAndAction(request.Email, intAction)
 		fmt.Println(emailAttempt)
 		if emailAttempt.Email == "" {
 			response.HttpCode = 422
@@ -242,11 +252,13 @@ func (service *authService) ActivateUser(request authRequestDTO.ActivateRequestD
 		service.userRepository.UpdateOrCreate(user)
 	}
 
+	userIdentity := serializeActivatedUser(user)
+
 	response.HttpCode = 200
 	response.MetadataResponse = nil
 	response.ResponseCode = "00"
 	response.ResponseDesc = "Success"
-	response.ResponseData = user
+	response.ResponseData = userIdentity
 	response.Summary = nil
 
 	return response
@@ -279,7 +291,7 @@ func (service *authService) PasswordConfirmation(request dto.PasswordConfirmatio
 	response.MetadataResponse = nil
 	response.ResponseCode = "00"
 	response.ResponseDesc = "Success"
-	response.ResponseData = updatedUser
+	response.ResponseData = nil
 	response.Summary = nil
 	return response
 }
@@ -297,4 +309,40 @@ func comparePassword(hashedPwd string, plainPassword []byte) bool {
 		return false
 	}
 	return true
+}
+
+func serializeCreatedUser(request interface{}) entity.TblUser {
+	data := request.(entity.TblUser)
+
+	encryptedIdResponse, _ := helper.RsaEncryptBEToFE([]byte(strconv.Itoa(data.ID)))
+	encryptedEmail, _ := helper.RsaEncryptBEToFE([]byte(data.Email))
+	encryptedMobileNo, _ := helper.RsaEncryptBEToFE([]byte(data.MobileNo))
+	encryptedRegistrationId, _ := helper.RsaEncryptBEToFE([]byte(data.RegistrationId))
+	encryptedStatus, _ := helper.RsaEncryptBEToFE([]byte(data.Status))
+	encryptedType, _ := helper.RsaEncryptBEToFE([]byte(data.Type))
+	encryptedCreatedAt, _ := helper.RsaEncryptBEToFE([]byte(data.CreatedAt.String()))
+	encryptedModifiedAt, _ := helper.RsaEncryptBEToFE([]byte(data.ModifiedAt.String()))
+
+	var result entity.TblUser
+
+	result.IdResponse = encryptedIdResponse
+	result.Email = encryptedEmail
+	result.MobileNo = encryptedMobileNo
+	result.RegistrationId = encryptedRegistrationId
+	result.Status = encryptedStatus
+	result.Type = encryptedType
+	result.CreatedAtRes = encryptedCreatedAt
+	result.ModifiedAtRes = encryptedModifiedAt
+	return result
+}
+
+func serializeActivatedUser(request interface{}) authResponseDTO.UserIndetityDtoRes {
+	data := request.(entity.TblUser)
+
+	encryptedUsername, _ := helper.RsaEncryptBEToFE([]byte(data.Email))
+
+	var result authResponseDTO.UserIndetityDtoRes
+
+	result.Username = encryptedUsername
+	return result
 }

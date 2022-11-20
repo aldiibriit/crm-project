@@ -93,12 +93,8 @@ func (c *authController) RegisterSales(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
-
-	// if !c.authService.IsDuplicateEmail(registerSalesDTO.EmailSales) {
-	// 	response := helper.BuildErrorResponse("Failed to process request", "Duplicate email", helper.EmptyObj{})
-	// 	ctx.JSON(http.StatusConflict, response)
-	// } else {
-	createdUser := c.authService.CreateUserSales(registerSalesDTO)
+	decryptedRequest := deserializeCreateSalesRequest(registerSalesDTO)
+	createdUser := c.authService.CreateUserSales(decryptedRequest)
 	ctx.JSON(createdUser.HttpCode, createdUser)
 }
 
@@ -111,7 +107,9 @@ func (c *authController) ActivateUser(ctx *gin.Context) {
 		return
 	}
 
-	res := c.authService.ActivateUser(activateRequestDTO)
+	decryptedRequest := deserializeActivateUserDTO(activateRequestDTO)
+
+	res := c.authService.ActivateUser(decryptedRequest)
 	ctx.JSON(res.HttpCode, res)
 }
 
@@ -151,7 +149,8 @@ func (c *authController) PasswordConfirmation(ctx *gin.Context) {
 		return
 	}
 
-	res := c.authService.PasswordConfirmation(passwordConfirmationDTO)
+	decryptedRequest := deserializePasswordConfirmationRequest(passwordConfirmationDTO)
+	res := c.authService.PasswordConfirmation(decryptedRequest)
 	ctx.JSON(res.HttpCode, res)
 }
 
@@ -168,6 +167,68 @@ func deserializeLoginRequest(request interface{}) dto.LoginDTO {
 
 	result.Email = plainTextEmail
 	result.Password = plainTextPassword
+
+	return result
+}
+
+func deserializePasswordConfirmationRequest(request interface{}) dto.PasswordConfirmationDTO {
+	loginDTO := request.(dto.PasswordConfirmationDTO)
+
+	cipheTextEmail, _ := base64.StdEncoding.DecodeString(loginDTO.Email)
+	cipheTextNewPassword, _ := base64.StdEncoding.DecodeString(loginDTO.NewPassword)
+	cipheTextRetypeNewPassword, _ := base64.StdEncoding.DecodeString(loginDTO.RetypeNewPassword)
+	plainTextEmail, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
+	plainTextNewPassword, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextNewPassword))
+	plainTextRetypeNewPassword, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextRetypeNewPassword))
+
+	var result dto.PasswordConfirmationDTO
+
+	result.Email = plainTextEmail
+	result.NewPassword = plainTextNewPassword
+	result.RetypeNewPassword = plainTextRetypeNewPassword
+
+	return result
+}
+
+func deserializeCreateSalesRequest(request interface{}) dto.RegisterSalesDTO {
+	loginDTO := request.(dto.RegisterSalesDTO)
+
+	cipheTextEmailSales, _ := base64.StdEncoding.DecodeString(loginDTO.EmailSales)
+	cipheTextEmailDeveloper, _ := base64.StdEncoding.DecodeString(loginDTO.EmailDeveloper)
+	cipheTextSalesName, _ := base64.StdEncoding.DecodeString(loginDTO.SalesName)
+	cipheTextSalesPhone, _ := base64.StdEncoding.DecodeString(loginDTO.SalesPhone)
+	cipheTextRegisteredBy, _ := base64.StdEncoding.DecodeString(loginDTO.RegisteredBy)
+	plainTextEmailSales, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailSales))
+	plainTextEmailDeveloper, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailDeveloper))
+	plainTextSalesName, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextSalesName))
+	plainTextSalesPhone, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextSalesPhone))
+	plainTextRegisteredBy, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextRegisteredBy))
+
+	var result dto.RegisterSalesDTO
+
+	result.EmailSales = plainTextEmailSales
+	result.EmailDeveloper = plainTextEmailDeveloper
+	result.SalesName = plainTextSalesName
+	result.SalesPhone = plainTextSalesPhone
+	result.RegisteredBy = plainTextRegisteredBy
+
+	return result
+}
+
+func deserializeActivateUserDTO(request interface{}) authRequestDTO.ActivateRequestDTO {
+	loginDTO := request.(authRequestDTO.ActivateRequestDTO)
+
+	cipheTextEmail, _ := base64.StdEncoding.DecodeString(loginDTO.Email)
+	cipheTextAction, _ := base64.StdEncoding.DecodeString(loginDTO.Action)
+	plainTextEmail, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
+	plainTextAction, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextAction))
+
+	var result authRequestDTO.ActivateRequestDTO
+
+	result.Email = plainTextEmail
+	result.UrlEncoded = loginDTO.UrlEncoded
+	result.RegistrationId = loginDTO.RegistrationId
+	result.Action = plainTextAction
 
 	return result
 }

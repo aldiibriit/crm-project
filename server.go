@@ -38,12 +38,12 @@ var (
 )
 
 // func main() {
-// 	nama := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njg1ODkxOTgsImlhdCI6MTY2ODU4ODg5OCwic3ViIjoiMSJ9.THit_ZcNbO6h9tLHZbXYRh-m0H5EV3LE-8-n4nCxueM"
-// 	encrypt, _ := helper.RsaEncryptFEToBE([]byte(nama))
-// 	fmt.Println(encrypt)
-// 	// // decodedNama, _ := base64.StdEncoding.DecodeString("XJMxFQg1jlCIzG5VXOcZqOWlCxkfcfIt7GgZNG19BYFHbIxxkM1XjSqpGgCjWxdb0fjtMzKtlct9/L9fLKB/xJo8MZGWK+uLcppVyB626K0X4SGml3iFS5YL/p/EpHFTu6h5YvpIBxBgZx9F1r6LMl+UAiaJiE28xPT4hy+oAj6ZcSM8P/0cUUyCOvxPHBeSXh7RGvKLYebTMdglgCMVACe28pkFKc4vIEd7f8q9cvQkJ52n6/TG9cN1zjBMVS4ZwUbSI/1slzgwbNrUF21ZnSg7nJkIS+ndUWZ4t0H0ynSRe1Pnt45uAyofq0qV4atZcNKyZgRp9zTNyI2cCx1l8DonmuYrOlQA367Rsu6wEJIsjrmXM47T2LO7s0h6QMJR/wScSY1RRPxLnmb13XnLp244MJZBJ66ZDGsASa/XLqcn6WL7FbTazVt94ixqLAUjGalkZTTE/i5RAwVP36X1LxKUFmAhz5OzIj6MhspT3sbhGVN1NamVoE1Phll3e6lQI7VRfaSSvHzEZeR33LXmCeFxas+/V4eeJYuagrNwgd+Sym2RJk8/4vnk1E5pdkPDUlCOz2JCGUM0rlOBDClMshZqvQuKTTaGaXHgNJ1nO61bJ+4zy4PpuyZYPOXoBonw2IfyhduKoasxDYvsYn2CWExHcpnwFjAmeyApwFPz9NQ=")
-// 	// // plainNama, _ := helper.RsaDecryptFromBEInFE(decodedNama)
-// 	// // fmt.Println(plainNama)
+// 	Password := "506808"
+// 	encryptedPassword, _ := helper.RsaEncryptFEToBE([]byte(Password))
+// 	fmt.Println("Password : ", encryptedPassword)
+// 	// decodedNama, _ := base64.StdEncoding.DecodeString("bGkE14BjXuuP/Sn/0Rd9DO5FupG2IOGbbSZzYZwT0UUZjsGTD2I4c4X5X6TR0gCuT40cOk16+bSg5UAzY9V560GyY79cq/7DjwnMiGd6X9tzZmrp1tGxujZcf5hnbLqZs/tblK/l/8g/Bk67Wx6ASB7CNC2GbPELspc5r3io0tQ7CTXzDgbmGPtex1gqQamPI07chewqtiqyRsGgJJ3g5KZf5GHN3iCMKCLrLs2HTfBPOdWqPy2e5a29aqPdTlmpVaQmgZSC+kbM7IgCn9OHZNdEd2ZJU0z38PSlWrz3TDwWV7lst8mil3z5BUPDjF2DVRExOkRqPvPZckiLP3Xk6W/ugV9pHkKrxRsice0CAIMFmc3vc0lUWCIMkX2Oc+zHbtaMdz6RcrNAlqB/WLIbpXrzr61u3k0PVFShns074bbwrygsl/M24g/2aLotZWIvUoCNDNhTOjOVXOKUQD+ZzCgGNWPvHWwwq8PphLR1WoUdffqX2ZC+uSrawhiOKoOEytuBN27hiQ4J8WqNYINb8zWsug59TjcKW6mX9Gy47NJ3CpZf+H8KQiJZkZaEfyFPsDOJanXUWu8VlyVGr38SFfHPx/1CHebKWwMV8YjKelkszccNDY9SPlMIqAktt2G63r6atEpuNxLeFhNL0tgKct3LdcG6FXezR3X02m72Tt8=")
+// 	// plainNama, _ := helper.RsaDecryptFromBEInFE(decodedNama)
+// 	// fmt.Println(plainNama)
 // 	// id := uuid.New()
 // 	// fmt.Println(reflect.TypeOf(id))
 // 	// fmt.Println(reflect.TypeOf(id.String()))

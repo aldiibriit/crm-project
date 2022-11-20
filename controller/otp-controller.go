@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/base64"
 	"go-api/helper"
 	"go-api/service"
 	"net/http"
@@ -33,6 +34,24 @@ func (controller *otpController) ValidateOTP(ctx *gin.Context) {
 		return
 	}
 
-	res := controller.otpService.ValidateOTP(validateOTPRequest)
+	decryptedRequest := deserializeValidateOTPRequest(validateOTPRequest)
+
+	res := controller.otpService.ValidateOTP(decryptedRequest)
 	ctx.JSON(res.HttpCode, res)
+}
+
+func deserializeValidateOTPRequest(request interface{}) otpRequestDTO.ValidateOTPRequest {
+	otpDTO := request.(otpRequestDTO.ValidateOTPRequest)
+
+	cipheTextOTP, _ := base64.StdEncoding.DecodeString(otpDTO.OTP)
+	cipheTextEmail, _ := base64.StdEncoding.DecodeString(otpDTO.Email)
+	plainTextOTP, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextOTP))
+	plainTextEmail, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
+
+	var result otpRequestDTO.ValidateOTPRequest
+
+	result.OTP = plainTextOTP
+	result.Email = plainTextEmail
+
+	return result
 }

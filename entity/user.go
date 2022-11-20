@@ -13,13 +13,16 @@ type User struct {
 }
 
 type TblUser struct {
-	ID             int `gorm:"column:id"`
+	ID             int    `gorm:"column:id" json:"-"`
+	IdResponse     string `json:"id" gorm:"-"`
 	Email          string
 	MobileNo       string
 	RegistrationId string
 	Status         string
 	Type           string
-	Password       string
-	CreatedAt      time.Time
-	ModifiedAt     time.Time
+	Password       string    `json:"-"`
+	CreatedAt      time.Time `json:"-"`
+	ModifiedAt     time.Time `json:"-"`
+	CreatedAtRes   string    `json:"createdAt" gorm:"-"`
+	ModifiedAtRes  string    `json:"modifiedAt" gorm:"-"`
 }
