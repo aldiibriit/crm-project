@@ -83,12 +83,15 @@ func (service *authService) CreateUser(user dto.RegisterDTO) entity.User {
 func (service *authService) CreateUserSales(request dto.RegisterSalesDTO) responseDTO.Response {
 	var response responseDTO.Response
 
+	LatestID := service.userRepository.GetLatestId()
+	id := LatestID.ID + 1
+
 	userToCreate := entity.TblUser{
 		Email:          request.EmailSales,
 		RegistrationId: uuid.New().String(),
 		Type:           "Sales",
 		Status:         "Registered",
-		ID:             666,
+		ID:             id,
 		MobileNo:       request.SalesPhone,
 		ModifiedAt:     time.Now(),
 	}
@@ -97,7 +100,7 @@ func (service *authService) CreateUserSales(request dto.RegisterSalesDTO) respon
 		EmailDeveloper: request.EmailDeveloper,
 		EmailSales:     request.EmailSales,
 		RegisteredBy:   request.RegisteredBy,
-		RefferalCode:   uuid.New().String(),
+		RefferalCode:   helper.GenerateRefferalCode(6),
 		ModifiedAt:     time.Now(),
 	}
 
@@ -129,8 +132,6 @@ func (service *authService) CreateUserSales(request dto.RegisterSalesDTO) respon
 		UrlEncoded: urlEncoded,
 		Action:     1,
 	}
-
-	fmt.Println(emailRequest)
 
 	if !service.emailService.SendMessage(emailRequest) {
 		response.HttpCode = 422

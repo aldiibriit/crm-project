@@ -20,6 +20,7 @@ type UserRepository interface {
 	FindByEmail2(email string) entity.TblUser
 	CheckUserExist(email string) bool
 	UpdateOrCreate(data entity.TblUser)
+	GetLatestId() entity.TblUser
 	ProfileUser(userID string) entity.User
 }
 
@@ -112,6 +113,12 @@ func (db *userConnection) UpdateOrCreate(data entity.TblUser) {
 	} else if checker.Email != "" {
 		db.connection.Model(&entity.TblUser{}).Where("email = ?", data.Email).Updates(&data)
 	}
+}
+
+func (db *userConnection) GetLatestId() entity.TblUser {
+	var data entity.TblUser
+	db.connection.Raw("SELECT id from tbl_user order by id desc limit 1").Take(&data)
+	return data
 }
 
 func hashAndSalt(pwd []byte) string {
