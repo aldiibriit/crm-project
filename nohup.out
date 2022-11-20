@@ -1,0 +1,54 @@
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /api/auth/login           --> go-api/controller.AuthController.Login-fm (3 handlers)
+[GIN-debug] POST   /api/auth/register        --> go-api/controller.AuthController.Register-fm (3 handlers)
+[GIN-debug] POST   /api/auth/createToken     --> go-api/controller.AuthController.CreateToken-fm (3 handlers)
+[GIN-debug] POST   /api/auth/registerUserSales --> go-api/controller.AuthController.RegisterSales-fm (3 handlers)
+[GIN-debug] POST   /api/auth/activateUser    --> go-api/controller.AuthController.ActivateUser-fm (3 handlers)
+[GIN-debug] POST   /api/auth/passwordConfirmation --> go-api/controller.AuthController.PasswordConfirmation-fm (3 handlers)
+[GIN-debug] POST   /api/otp/validateOTP      --> go-api/controller.OTPController.ValidateOTP-fm (3 handlers)
+[GIN-debug] GET    /api/user/profile         --> go-api/controller.UserController.Profile-fm (4 handlers)
+[GIN-debug] PUT    /api/user/profile         --> go-api/controller.UserController.Update-fm (4 handlers)
+[GIN-debug] GET    /api/books/               --> go-api/controller.BookController.All-fm (4 handlers)
+[GIN-debug] POST   /api/books/               --> go-api/controller.BookController.Insert-fm (4 handlers)
+[GIN-debug] GET    /api/books/:id            --> go-api/controller.BookController.FindByID-fm (4 handlers)
+[GIN-debug] PUT    /api/books/:id            --> go-api/controller.BookController.Update-fm (4 handlers)
+[GIN-debug] DELETE /api/books/:id            --> go-api/controller.BookController.Delete-fm (4 handlers)
+[GIN-debug] POST   /api/properti/advancedFilter --> go-api/controller.PropertiController.AdvancedFilter-fm (3 handlers)
+[GIN-debug] POST   /test                     --> go-api/controller.TestController.TestEmail-fm (3 handlers)
+[GIN-debug] Listening and serving HTTP on :7177
+
+2022/11/20 10:34:36 [31;1m/home/ubuntu/go/src/golang_api-main/repository/otp-repository.go:37 [35;1mrecord not found
+[0m[33m[2.235ms] [34;1m[rows:0][0m SELECT * FROM `tbl_otp` WHERE otp = '379947' AND status = 'ON_REQUESTED' LIMIT 1
+2022/11/20 10:34:36 OTP Not Found
+2022/11/20 10:34:36 Error Invalid OTP[Modul=OtpService|Method=ValidateOTP
+
+2022/11/20 10:34:36 [31;1m/home/ubuntu/go/src/golang_api-main/repository/otp-attempt-repository.go:37 [35;1mrecord not found
+[0m[33m[1.389ms] [34;1m[rows:0][0m SELECT * FROM `tbl_otp_attempt` WHERE email = 'aldi.sptra86@gmail.com' LIMIT 1
+2022/11/20 10:34:36 Create new otp attempt
+
+2022/11/20 10:34:36 [31;1m/home/ubuntu/go/src/golang_api-main/repository/otp-attempt-repository.go:27 [35;1mrecord not found
+[0m[33m[1.287ms] [34;1m[rows:0][0m SELECT * FROM tbl_otp_attempt where email = 'aldi.sptra86@gmail.com'
+
+2022/11/20 10:34:36 [32m/home/ubuntu/go/src/golang_api-main/repository/otp-attempt-repository.go:29
+[0m[33m[6.064ms] [34;1m[rows:1][0m INSERT INTO `tbl_otp_attempt` (`id`,`email`,`otp_attempt`,`created_at`,`updated_at`) VALUES ('4c556cb2-4590-4d2b-95bc-a6054bff1a92','aldi.sptra86@gmail.com',1,'2022-11-20 10:34:36.98','2022-11-20 10:34:36.98')
+2022/11/20 10:34:36 Success Update OTP Attempt
+[GIN] 2022/11/20 - 10:34:36 | 422 |   11.388057ms |    172.16.1.209 | POST     "/api/otp/validateOTP"
+
+2022/11/20 10:34:51 [31;1m/home/ubuntu/go/src/golang_api-main/repository/otp-repository.go:37 [35;1mrecord not found
+[0m[33m[2.273ms] [34;1m[rows:0][0m SELECT * FROM `tbl_otp` WHERE otp = '379947' AND status = 'ON_REQUESTED' LIMIT 1
+2022/11/20 10:34:51 OTP Not Found
+2022/11/20 10:34:51 Error Invalid OTP[Modul=OtpService|Method=ValidateOTP
+2022/11/20 10:34:51 Object OTP Attempt Found
+
+2022/11/20 10:34:51 [32m/home/ubuntu/go/src/golang_api-main/repository/otp-attempt-repository.go:27
+[0m[33m[1.431ms] [34;1m[rows:1][0m SELECT * FROM tbl_otp_attempt where email = 'aldi.sptra86@gmail.com'
+
+2022/11/20 10:34:51 [32m/home/ubuntu/go/src/golang_api-main/repository/otp-attempt-repository.go:31
+[0m[33m[6.209ms] [34;1m[rows:1][0m UPDATE `tbl_otp_attempt` SET `id`='4c556cb2-4590-4d2b-95bc-a6054bff1a92',`email`='aldi.sptra86@gmail.com',`otp_attempt`=2,`created_at`='2022-11-20 10:34:36.98',`updated_at`='2022-11-20 10:34:51.369' WHERE email = 'aldi.sptra86@gmail.com'
+2022/11/20 10:34:51 Success Update OTP Attempt
+[GIN] 2022/11/20 - 10:34:51 | 422 |   12.223632ms |    172.16.1.209 | POST     "/api/otp/validateOTP"

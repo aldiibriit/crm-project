@@ -6,7 +6,7 @@ import (
 	"go-api/dto/request/otpRequestDTO"
 	responseDTO "go-api/dto/response"
 	"go-api/entity"
-	"golang_api-main/repository"
+	"go-api/repository"
 	"log"
 	"reflect"
 	"time"
