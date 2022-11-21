@@ -86,6 +86,7 @@ func (service *authService) CreateUserSales(request dto.RegisterSalesDTO) respon
 	var response responseDTO.Response
 
 	LatestID := service.userRepository.GetLatestId()
+
 	id := LatestID.ID + 1
 
 	userToCreate := entity.TblUser{
@@ -129,7 +130,7 @@ func (service *authService) CreateUserSales(request dto.RegisterSalesDTO) respon
 	}
 
 	urlEncrypted, _ := helper.RsaEncryptFEToBE([]byte(request.EmailSales))
-	urlEncoded := "http://dev.homespot.id/user/activate" + url.QueryEscape(urlEncrypted)
+	urlEncoded := "http://dev.homespot.id/user/activate/" + url.QueryEscape(urlEncrypted)
 	emailRequest := emailRequestDTO.EmailRequestDTO{
 		ToAddres:   request.EmailSales,
 		UrlEncoded: urlEncoded,
