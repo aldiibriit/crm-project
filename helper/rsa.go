@@ -93,7 +93,7 @@ func GenRsaKeyForFE(bits int) error {
 func RsaEncryptFEToBE(origData []byte) (string, error) {
 	publicKeyBE, err := ioutil.ReadFile("publicBE.pem")
 	if err != nil {
-		log.Panicln("error in read publicBE")
+		fmt.Println("error in read publicBE")
 	}
 
 	block, _ := pem.Decode(publicKeyBE)
@@ -118,7 +118,7 @@ func RsaEncryptFEToBE(origData []byte) (string, error) {
 func RsaDecryptFromFEInBE(ciphertext []byte) (string, error) {
 	privateKeyBE, err := ioutil.ReadFile("privateBE.pem")
 	if err != nil {
-		log.Panicln("error in read privateKeyBE")
+		fmt.Println("error in read privateKeyBE")
 	}
 	block, _ := pem.Decode(privateKeyBE)
 	if block == nil {
@@ -139,7 +139,7 @@ func RsaDecryptFromFEInBE(ciphertext []byte) (string, error) {
 func RsaDecryptFromFEInBEJava(ciphertext []byte) (string, error) {
 	privateKeyBEJava, err := ioutil.ReadFile("privateBEJava.pem")
 	if err != nil {
-		log.Panicln("error in read privateKeyBEJava")
+		fmt.Println("error in read privateKeyBEJava")
 	}
 	block, _ := pem.Decode(privateKeyBEJava)
 	if block == nil {
@@ -160,7 +160,7 @@ func RsaDecryptFromFEInBEJava(ciphertext []byte) (string, error) {
 func RsaEncryptBEToFE(origData []byte) (string, error) {
 	publicKeyFE, err := ioutil.ReadFile("publicFE.pem")
 	if err != nil {
-		log.Panicln("error in read publicFE")
+		fmt.Println("error in read publicFE")
 	}
 
 	block, _ := pem.Decode(publicKeyFE)
@@ -174,7 +174,7 @@ func RsaEncryptBEToFE(origData []byte) (string, error) {
 	pub := pubInterface.(*rsa.PublicKey)
 	encryptedData, err := rsa.EncryptPKCS1v15(rand.Reader, pub, origData)
 	if err != nil {
-		log.Panicln("error in encrypt Data", err.Error())
+		fmt.Println("error in encrypt Data", err.Error())
 	}
 
 	result := base64.StdEncoding.EncodeToString([]byte(encryptedData))
@@ -184,7 +184,7 @@ func RsaEncryptBEToFE(origData []byte) (string, error) {
 func RsaDecryptFromBEInFE(ciphertext []byte) (string, error) {
 	privateKeyFE, err := ioutil.ReadFile("privateFE.pem")
 	if err != nil {
-		log.Panicln("error in read privateKeyFE")
+		fmt.Println("error in read privateKeyFE")
 	}
 	block, _ := pem.Decode(privateKeyFE)
 	if block == nil {
