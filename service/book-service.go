@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"log"
 
 	"go-api/dto"
 	"go-api/entity"
@@ -36,7 +35,7 @@ func (service *bookService) Insert(b dto.BookCreateDTO) entity.Book {
 	book := entity.Book{}
 	err := smapping.FillStruct(&book, smapping.MapFields(&b))
 	if err != nil {
-		log.Fatalf("Failed map %v: ", err)
+		fmt.Println("Failed map %v: ", err)
 	}
 	res := service.bookRepository.InsertBook(book)
 	return res
@@ -46,7 +45,7 @@ func (service *bookService) Update(b dto.BookUpdateDTO) entity.Book {
 	book := entity.Book{}
 	err := smapping.FillStruct(&book, smapping.MapFields(&b))
 	if err != nil {
-		log.Fatalf("Failed map %v: ", err)
+		fmt.Println("Failed map %v: ", err)
 	}
 	res := service.bookRepository.UpdateBook(book)
 	return res

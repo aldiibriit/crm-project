@@ -1,8 +1,7 @@
 package service
 
 import (
-	"log"
-
+	"fmt"
 	"go-api/dto"
 	"go-api/entity"
 	"go-api/repository"
@@ -31,7 +30,7 @@ func (service *userService) Update(user dto.UserUpdateDTO) entity.User {
 	userToUpdate := entity.User{}
 	err := smapping.FillStruct(&userToUpdate, smapping.MapFields(&user))
 	if err != nil {
-		log.Fatalf("Failed map %v:", err)
+		fmt.Println("Failed map %v:", err)
 	}
 	updatedUser := service.userRepository.UpdateUser(userToUpdate)
 	return updatedUser

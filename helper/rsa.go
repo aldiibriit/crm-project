@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -130,7 +131,7 @@ func RsaDecryptFromFEInBE(ciphertext []byte) (string, error) {
 	// privateKey := priv.(*rsa.PrivateKey)
 	plainData, err := rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
 	if err != nil {
-		log.Fatalln("error in decrypt data in BE", err.Error(), string(ciphertext))
+		fmt.Println("error in decrypt data in BE", err.Error(), string(ciphertext))
 	}
 	return string(plainData), nil
 }
@@ -151,7 +152,7 @@ func RsaDecryptFromFEInBEJava(ciphertext []byte) (string, error) {
 	privateKey := priv.(*rsa.PrivateKey)
 	plainData, err := rsa.DecryptPKCS1v15(rand.Reader, privateKey, ciphertext)
 	if err != nil {
-		log.Fatalln("error in decrypt data in BEJava")
+		fmt.Println("error in decrypt data in BEJava")
 	}
 	return string(plainData), nil
 }
@@ -196,7 +197,7 @@ func RsaDecryptFromBEInFE(ciphertext []byte) (string, error) {
 	// privateKey := priv.(*rsa.PrivateKey)
 	plainData, err := rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
 	if err != nil {
-		log.Fatalln("error in decrypt data in FE")
+		fmt.Println("error in decrypt data in FE")
 	}
 	return string(plainData), nil
 }

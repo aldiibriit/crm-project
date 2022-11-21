@@ -76,7 +76,7 @@ func (service *authService) CreateUser(user dto.RegisterDTO) entity.User {
 	userToCreate := entity.User{}
 	err := smapping.FillStruct(&userToCreate, smapping.MapFields(&user))
 	if err != nil {
-		log.Fatalf("Failed map %v", err)
+		fmt.Println("Failed map %v", err)
 	}
 	res := service.userRepository.InsertUser(userToCreate)
 	return res
