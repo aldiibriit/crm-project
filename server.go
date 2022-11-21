@@ -29,16 +29,18 @@ var (
 	otpService             service.OTPService                = service.NewOTPService(otpRepository, emailService, otpAttemptRepository)
 	authService            service.AuthService               = service.NewAuthService(userRepository, salesRepository, emailService, emailAttemptRepository, otpService)
 	emailService           service.EmailService              = service.NewEmailService(emailAttemptRepository)
+	salesService           service.SalesService              = service.NewSalesService(salesRepository)
 	testController         controller.TestController         = controller.NewTestController(emailService)
 	authController         controller.AuthController         = controller.NewAuthController(authService, jwtService)
 	userController         controller.UserController         = controller.NewUserController(userService, jwtService)
 	bookController         controller.BookController         = controller.NewBookController(bookService, jwtService)
 	propertiController     controller.PropertiController     = controller.NewPropertiController(propertiService)
 	otpController          controller.OTPController          = controller.NEwOTPController(otpService)
+	salesController        controller.SalesController        = controller.NewSalesController(salesService)
 )
 
 // func main() {
-// 	Password := "506808"
+// 	Password := "3"
 // 	encryptedPassword, _ := helper.RsaEncryptFEToBE([]byte(Password))
 // 	fmt.Println("Password : ", encryptedPassword)
 // 	// decodedNama, _ := base64.StdEncoding.DecodeString("bGkE14BjXuuP/Sn/0Rd9DO5FupG2IOGbbSZzYZwT0UUZjsGTD2I4c4X5X6TR0gCuT40cOk16+bSg5UAzY9V560GyY79cq/7DjwnMiGd6X9tzZmrp1tGxujZcf5hnbLqZs/tblK/l/8g/Bk67Wx6ASB7CNC2GbPELspc5r3io0tQ7CTXzDgbmGPtex1gqQamPI07chewqtiqyRsGgJJ3g5KZf5GHN3iCMKCLrLs2HTfBPOdWqPy2e5a29aqPdTlmpVaQmgZSC+kbM7IgCn9OHZNdEd2ZJU0z38PSlWrz3TDwWV7lst8mil3z5BUPDjF2DVRExOkRqPvPZckiLP3Xk6W/ugV9pHkKrxRsice0CAIMFmc3vc0lUWCIMkX2Oc+zHbtaMdz6RcrNAlqB/WLIbpXrzr61u3k0PVFShns074bbwrygsl/M24g/2aLotZWIvUoCNDNhTOjOVXOKUQD+ZzCgGNWPvHWwwq8PphLR1WoUdffqX2ZC+uSrawhiOKoOEytuBN27hiQ4J8WqNYINb8zWsug59TjcKW6mX9Gy47NJ3CpZf+H8KQiJZkZaEfyFPsDOJanXUWu8VlyVGr38SFfHPx/1CHebKWwMV8YjKelkszccNDY9SPlMIqAktt2G63r6atEpuNxLeFhNL0tgKct3LdcG6FXezR3X02m72Tt8=")
@@ -66,6 +68,11 @@ func main() {
 	otpRoutes := r.Group("api/otp")
 	{
 		otpRoutes.POST("/validateOTP", otpController.ValidateOTP)
+	}
+
+	salesRoutes := r.Group("api/salesMIS")
+	{
+		salesRoutes.POST("/atDeveloper", salesController.MISDeveloper)
 	}
 
 	userRoutes := r.Group("api/user", middleware.AuthorizeJWT(jwtService))

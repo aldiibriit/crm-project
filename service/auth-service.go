@@ -104,6 +104,7 @@ func (service *authService) CreateUserSales(request dto.RegisterSalesDTO) respon
 		EmailDeveloper: request.EmailDeveloper,
 		EmailSales:     request.EmailSales,
 		RegisteredBy:   request.RegisteredBy,
+		SalesName:      request.SalesName,
 		RefferalCode:   helper.GenerateRefferalCode(6),
 		ModifiedAt:     time.Now(),
 	}

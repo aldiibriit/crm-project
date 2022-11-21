@@ -8,6 +8,7 @@ import (
 
 type SalesRepository interface {
 	InsertRelation(data entity.TblSales) error
+	FindByEmailDeveloper(emailDeveloper string) []entity.TblSales
 }
 
 type salesConnection struct {
@@ -26,4 +27,10 @@ func (db *salesConnection) InsertRelation(data entity.TblSales) error {
 		return err
 	}
 	return nil
+}
+
+func (db *salesConnection) FindByEmailDeveloper(emailDeveloper string) []entity.TblSales {
+	var result []entity.TblSales
+	db.connection.Raw("SELECT * FROM tbl_sales WHERE developer_email = ?", emailDeveloper).Find(&result)
+	return result
 }
