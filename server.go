@@ -58,15 +58,15 @@ func main() {
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
-			"http://localhost:3000",
+			"http://10.201.73.138:8080", "http://10.201.73.176:3000", "http://10.201.73.224:3000", "http://34.101.189.84:32340", "http://116.206.29.43:3000", "http://localhost:3000", "http://dev.homespot.id/", "http://api-dev.homespot.id",
 		},
-		AllowHeaders: []string{
-			"Origin",
-		},
-		ExposeHeaders: []string{
-			"Content-Length",
-			"Content-Type",
-		},
+		// AllowHeaders: []string{
+		// 	"Origin",
+		// },
+		// ExposeHeaders: []string{
+		// 	"Content-Length",
+		// 	"Content-Type",
+		// },
 		AllowMethods: []string{
 			"POST",
 			"GET",
