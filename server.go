@@ -63,6 +63,10 @@ func main() {
 		AllowHeaders: []string{
 			"Origin",
 		},
+		ExposeHeaders: []string{
+			"Content-Length",
+			"Content-Type",
+		},
 		AllowMethods: []string{
 			"POST",
 			"GET",
