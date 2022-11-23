@@ -3,6 +3,7 @@ package service
 import (
 	"go-api/dto/request/salesRequestDTO"
 	responseDTO "go-api/dto/response"
+	"go-api/dto/response/salesResponseDTO"
 	"go-api/entity"
 	"go-api/helper"
 	"go-api/repository"
@@ -11,6 +12,7 @@ import (
 
 type SalesService interface {
 	MISDeveloper(request salesRequestDTO.AllRequest) responseDTO.Response
+	MISSuperAdmin() responseDTO.Response
 }
 
 type salesService struct {
@@ -29,6 +31,22 @@ func (service *salesService) MISDeveloper(request salesRequestDTO.AllRequest) re
 	data := service.salesRepository.FindByEmailDeveloper(request.EmailDeveloper)
 
 	encryptedData := serializeMisDeveloper(data)
+	response.HttpCode = 200
+	response.MetadataResponse = nil
+	response.ResponseCode = "00"
+	response.ResponseDesc = "Success"
+	response.ResponseData = encryptedData
+	response.Summary = nil
+
+	return response
+}
+
+func (service *salesService) MISSuperAdmin() responseDTO.Response {
+	var response responseDTO.Response
+
+	data := service.salesRepository.MISSuperAdmin()
+
+	encryptedData := serializeMisSuperAdmin(data)
 	response.HttpCode = 200
 	response.MetadataResponse = nil
 	response.ResponseCode = "00"
@@ -60,6 +78,26 @@ func serializeMisDeveloper(request interface{}) []entity.TblSales {
 		result[i].CreatedAtRes = encryptedCreatedAt
 		result[i].ModifiedAtRes = encryptedModifiedAt
 		result[i].SalesName = encryptedSalesName
+	}
+
+	return result
+}
+
+func serializeMisSuperAdmin(request interface{}) []salesResponseDTO.MISSuperAdmin {
+	data := request.([]salesResponseDTO.MISSuperAdmin)
+	result := make([]salesResponseDTO.MISSuperAdmin, len(data))
+	for i, v := range data {
+		encryptedSalesName, _ := helper.RsaEncryptBEToFE([]byte(v.SalesName))
+		encryptedMetadata, _ := helper.RsaEncryptBEToFE([]byte(v.Metadata))
+		encryptedStatus, _ := helper.RsaEncryptBEToFE([]byte(v.Status))
+		encryptedJenisProperti, _ := helper.RsaEncryptBEToFE([]byte(v.JenisProperti))
+		encryptedTipeProperti, _ := helper.RsaEncryptBEToFE([]byte(v.TipeProperti))
+
+		result[i].SalesName = encryptedSalesName
+		result[i].Metadata = encryptedMetadata
+		result[i].Status = encryptedStatus
+		result[i].JenisProperti = encryptedJenisProperti
+		result[i].TipeProperti = encryptedTipeProperti
 	}
 
 	return result

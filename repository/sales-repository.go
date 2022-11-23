@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"go-api/dto/response/salesResponseDTO"
 	"go-api/entity"
 
 	"gorm.io/gorm"
@@ -9,6 +10,7 @@ import (
 type SalesRepository interface {
 	InsertRelation(data entity.TblSales) error
 	FindByEmailDeveloper(emailDeveloper string) []entity.TblSales
+	MISSuperAdmin() []salesResponseDTO.MISSuperAdmin
 }
 
 type salesConnection struct {
@@ -37,4 +39,15 @@ func (db *salesConnection) FindByEmailDeveloper(emailDeveloper string) []entity.
 	JOIN tbl_user tu ON tu.email = ts.sales_email
 	WHERE developer_email = ?`, emailDeveloper).Find(&result)
 	return result
+}
+
+func (db *salesConnection) MISSuperAdmin() []salesResponseDTO.MISSuperAdmin {
+	var data []salesResponseDTO.MISSuperAdmin
+	db.connection.Raw(`SELECT ts.sales_email ,ts.sales_name,(select json_extract(metadata,'$.name') from tbl_user tu2 where tu2.email = ts.developer_email)as metadata,tp.status,tp.jenis_properti,tp.tipe_properti
+	FROM tbl_project tp
+	JOIN tbl_sales ts on tp.email = ts.developer_email 
+	JOIN tbl_user tu on tu.email = ts.sales_email 
+	order by ts.sales_email 
+	`).Find(&data)
+	return data
 }

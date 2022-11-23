@@ -12,6 +12,7 @@ import (
 
 type SalesController interface {
 	MISDeveloper(ctx *gin.Context)
+	MISSuperAdmin(ctx *gin.Context)
 }
 
 type salesController struct {
@@ -48,6 +49,24 @@ func (controller *salesController) MISDeveloper(ctx *gin.Context) {
 	}
 
 	response = controller.salesService.MISDeveloper(decryptedRequest)
+	ctx.JSON(response.HttpCode, response)
+}
+
+func (controller *salesController) MISSuperAdmin(ctx *gin.Context) {
+	var response responseDTO.Response
+	var request salesRequestDTO.AllRequest
+	errDTO := ctx.ShouldBind(&request)
+	if errDTO != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.JSON(response.HttpCode, response)
+	}
+
+	response = controller.salesService.MISSuperAdmin()
 	ctx.JSON(response.HttpCode, response)
 }
 
