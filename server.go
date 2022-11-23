@@ -40,10 +40,10 @@ var (
 )
 
 // func main() {
-// 	Password := "feryganteng@yopmail.com"
-// 	encryptedPassword, _ := helper.RsaEncryptFEToBE([]byte(Password))
-// 	fmt.Println("Password : ", encryptedPassword)
-// 	// decodedNama, _ := base64.StdEncoding.DecodeString("D7SO96BeYYOUubuqnRj19FMmBL4N9D1wK+U2Ob5f9gC8okP6R5Z8uWZ1LJ3rEWgCmFVY8TS/iwnv2czoZe3nN+S88ATPkTFkI1LHSv+DrE711lkf9oxLnGvkmgkUDfBLXXgCAXNt+5HRwTwP2S4QKVOidj/cCTeRxsr9U0wgJMpsS2084dJ3N61ct6p4FwuZXKsR8m4mmwq20lkTEGbFPwFeAj3o2rUnAO0EOfnpOe8AznEOo6bFpVhFUyH12hLOI3l6O9ymp7X7uYQa27K+QLzPvR+Z3GY6S9GTX2in+hGjtMfRy/aK5muIAXh2PknEdGPtzusurehMOnqanD5GO6s0SJClUjE5o1LpbEYzl64vdH5YrJZ/6CMy6cny4qcQ7LToxUuQcGOEDeCXRvNVCvOgJieB5BKmwvhEDJcMCcOMG6qceAaYpZAImXS0YqBmGcO3zFHXlzXmWpbFEj8BZw6MmE8xyUT3Pfpt3/2FOPV9hKvY4aZvhYK7yhyaZWF+uQ+IGBC2IF5VWVkcRn/4geBIj79G60LvUFu8HiWeTDENCemCn3+Qi6yb9PrAANZ9ju93cuyN421tzlm4VYuds9/M82H5RbVcIo9lRCXdt80l8aliXWdFmkjOKRKUo9x8yP6Vzt7U5gkymiDh5nXrkZA8fQJoGKsy/E+o2CDNYQ4=")
+// 	// Password := "feryganteng@yopmail.com"
+// 	// encryptedPassword, _ := helper.RsaEncryptFEToBE([]byte(Password))
+// 	// fmt.Println("Password : ", encryptedPassword)
+// 	// decodedNama, _ := base64.StdEncoding.DecodeString("HZ6wNUg5TFd0E3hsq5BWPtPBGE3jlWsWWyfXlTuatglziKMhLj5yArbvuMlZrjw53PXH7+j0vI6m36jKzES3/wMC9C48Co7+aN4N/PBNU3eRQ8HQMuSkVdhbm17IrHTfL30iJcJxkkmwFIReHyROLlZD4M4f4H3KwTDnZ3v36h9qT5KBgmcwciRMJGhE2KjJqmahoW/5/4ElipOfImUycg0C4vngz40ZR1qHbt+84tgdhlhSXr6c4Txa+Xcz1fB/vRfv0bInFr+KLqJvFpD9ueelMKrhojT5zBjPp3bmeduwuja4R1PraAXFkKdCChzEkf0trOhrez/NHxlgpExrPjLihy+L8bJ1ixFNFzi3ZEwhzeyLToFZMExvtmi8o/E30OWVu7Mb19mZYKiThq8BNqwqaVYPT5RceIcdqbfNNVB3dr4XxxJ9zJHEshk27+6IGUO6PLFFka5/vLa4zAHZnDsw3BrVevqks/2EmI6Q6QxuQtDiRDy6xMVcQG8hbOqlzU9sliU5sXBU2lA6lnqQ6j0x2Lj3EQlufcSDmfxGqgRhBXZjgtolLokZ9xo+MmlW80B2YDwvs98Ob1hHZ26uhAZUJYMIwdx4aqEiJdFVxKBYQsyLptkoiyL6Si96fC9R7Uy13aZFvE79PLKHLtMkaWOSQWNo3PZWm6/dedo+jIw=")
 // 	// plainNama, _ := helper.RsaDecryptFromBEInFE(decodedNama)
 // 	// fmt.Println(plainNama)
 // 	// id := uuid.New()

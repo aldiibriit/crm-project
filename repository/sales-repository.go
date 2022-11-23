@@ -31,6 +31,10 @@ func (db *salesConnection) InsertRelation(data entity.TblSales) error {
 
 func (db *salesConnection) FindByEmailDeveloper(emailDeveloper string) []entity.TblSales {
 	var result []entity.TblSales
-	db.connection.Raw("SELECT * FROM tbl_sales WHERE developer_email = ?", emailDeveloper).Find(&result)
+	db.connection.Raw(`SELECT 
+	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name 
+	FROM tbl_sales ts
+	JOIN tbl_user tu ON tu.email = ts.sales_email
+	WHERE developer_email = ?`, emailDeveloper).Find(&result)
 	return result
 }
