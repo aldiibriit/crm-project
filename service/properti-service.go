@@ -4,6 +4,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	propertiDTO "go-api/dto/properti"
+	responseDTO "go-api/dto/response"
+	"go-api/dto/response/landingPageResponseDTO"
 	"go-api/helper"
 	"go-api/repository"
 	"strconv"
@@ -12,6 +14,7 @@ import (
 
 type PropertiService interface {
 	AdvancedFilter(b propertiDTO.AdvancedFilterDTO, bearerToken string) propertiDTO.Response
+	LandingPage() responseDTO.Response
 }
 
 type propertiService struct {
@@ -388,6 +391,25 @@ func (service *propertiService) AdvancedFilter(request propertiDTO.AdvancedFilte
 
 		response.ResponseData = listProperti
 	}
+
+	return response
+}
+
+func (service *propertiService) LandingPage() responseDTO.Response {
+	var response responseDTO.Response
+
+	// var listUserDtoRes landingPageResponseDTO.ListUserDtoRes
+	var data []landingPageResponseDTO.LandingPropertiDtoRes
+	var landingPageResponseDTORes landingPageResponseDTO.LandingPropertiDtoRes
+	var dataTerdekat []landingPageResponseDTO.DetailPropertiDtoRes = service.propertiRepository.FindNearby()
+	var data360 []landingPageResponseDTO.DetailPropertiDtoRes
+
+	landingPageResponseDTORes.PropertiTerdekat = dataTerdekat
+	landingPageResponseDTORes.Properti360 = data360
+
+	data = append(data, landingPageResponseDTORes)
+
+	response.ResponseData = data
 
 	return response
 }

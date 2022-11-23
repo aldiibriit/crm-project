@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"go-api/dto/request/otpRequestDTO"
+	responseDTO "go-api/dto/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,24 +35,38 @@ func (controller *otpController) ValidateOTP(ctx *gin.Context) {
 		return
 	}
 
-	decryptedRequest := deserializeValidateOTPRequest(validateOTPRequest)
+	decryptedRequest, err := deserializeValidateOTPRequest(validateOTPRequest)
+	if err != nil {
+		var response responseDTO.Response
+		response.HttpCode = 400
+		response.ResponseCode = "99"
+		response.ResponseDesc = "Error in deserialize " + err.Error()
+		response.ResponseData = nil
+		response.Summary = nil
+	}
 
 	res := controller.otpService.ValidateOTP(decryptedRequest)
 	ctx.JSON(res.HttpCode, res)
 }
 
-func deserializeValidateOTPRequest(request interface{}) otpRequestDTO.ValidateOTPRequest {
+func deserializeValidateOTPRequest(request interface{}) (otpRequestDTO.ValidateOTPRequest, error) {
 	otpDTO := request.(otpRequestDTO.ValidateOTPRequest)
 
 	cipheTextOTP, _ := base64.StdEncoding.DecodeString(otpDTO.OTP)
 	cipheTextEmail, _ := base64.StdEncoding.DecodeString(otpDTO.Email)
-	plainTextOTP, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextOTP))
-	plainTextEmail, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
+	plainTextOTP, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextOTP))
+	if err != nil {
+		return otpRequestDTO.ValidateOTPRequest{}, err
+	}
+	plainTextEmail, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
+	if err != nil {
+		return otpRequestDTO.ValidateOTPRequest{}, err
+	}
 
 	var result otpRequestDTO.ValidateOTPRequest
 
 	result.OTP = plainTextOTP
 	result.Email = plainTextEmail
 
-	return result
+	return result, nil
 }

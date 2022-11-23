@@ -11,6 +11,7 @@ import (
 
 type PropertiController interface {
 	AdvancedFilter(context *gin.Context)
+	LandingPage(context *gin.Context)
 }
 
 type propertiController struct {
@@ -37,4 +38,9 @@ func (c *propertiController) AdvancedFilter(context *gin.Context) {
 
 	result := c.propertiService.AdvancedFilter(advancedFilterDTO, bearerToken)
 	context.JSON(200, result)
+}
+
+func (c *propertiController) LandingPage(ctx *gin.Context) {
+	result := c.propertiService.LandingPage()
+	ctx.JSON(result.HttpCode, result)
 }

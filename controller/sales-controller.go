@@ -37,20 +37,32 @@ func (controller *salesController) MISDeveloper(ctx *gin.Context) {
 		response.ResponseData = nil
 		ctx.JSON(response.HttpCode, response)
 	}
-	decryptedRequest := deserializeAllMisDeveloperRequest(request)
+	decryptedRequest, err := deserializeAllMisDeveloperRequest(request)
+	if err != nil {
+		var response responseDTO.Response
+		response.HttpCode = 400
+		response.ResponseCode = "99"
+		response.ResponseDesc = "Error in deserialize " + err.Error()
+		response.ResponseData = nil
+		response.Summary = nil
+	}
+
 	response = controller.salesService.MISDeveloper(decryptedRequest)
 	ctx.JSON(response.HttpCode, response)
 }
 
-func deserializeAllMisDeveloperRequest(request interface{}) salesRequestDTO.AllRequest {
+func deserializeAllMisDeveloperRequest(request interface{}) (salesRequestDTO.AllRequest, error) {
 	otpDTO := request.(salesRequestDTO.AllRequest)
 
 	cipheTextEmailDeveloper, _ := base64.StdEncoding.DecodeString(otpDTO.EmailDeveloper)
-	plainTextEmailDeveloper, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailDeveloper))
+	plainTextEmailDeveloper, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailDeveloper))
+	if err != nil {
+		return salesRequestDTO.AllRequest{}, err
+	}
 
 	var result salesRequestDTO.AllRequest
 
 	result.EmailDeveloper = plainTextEmailDeveloper
 
-	return result
+	return result, nil
 }

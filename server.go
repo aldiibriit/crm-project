@@ -40,10 +40,10 @@ var (
 )
 
 // func main() {
-// 	Password := "3"
+// 	Password := "feryganteng@yopmail.com"
 // 	encryptedPassword, _ := helper.RsaEncryptFEToBE([]byte(Password))
 // 	fmt.Println("Password : ", encryptedPassword)
-// 	// decodedNama, _ := base64.StdEncoding.DecodeString("bGkE14BjXuuP/Sn/0Rd9DO5FupG2IOGbbSZzYZwT0UUZjsGTD2I4c4X5X6TR0gCuT40cOk16+bSg5UAzY9V560GyY79cq/7DjwnMiGd6X9tzZmrp1tGxujZcf5hnbLqZs/tblK/l/8g/Bk67Wx6ASB7CNC2GbPELspc5r3io0tQ7CTXzDgbmGPtex1gqQamPI07chewqtiqyRsGgJJ3g5KZf5GHN3iCMKCLrLs2HTfBPOdWqPy2e5a29aqPdTlmpVaQmgZSC+kbM7IgCn9OHZNdEd2ZJU0z38PSlWrz3TDwWV7lst8mil3z5BUPDjF2DVRExOkRqPvPZckiLP3Xk6W/ugV9pHkKrxRsice0CAIMFmc3vc0lUWCIMkX2Oc+zHbtaMdz6RcrNAlqB/WLIbpXrzr61u3k0PVFShns074bbwrygsl/M24g/2aLotZWIvUoCNDNhTOjOVXOKUQD+ZzCgGNWPvHWwwq8PphLR1WoUdffqX2ZC+uSrawhiOKoOEytuBN27hiQ4J8WqNYINb8zWsug59TjcKW6mX9Gy47NJ3CpZf+H8KQiJZkZaEfyFPsDOJanXUWu8VlyVGr38SFfHPx/1CHebKWwMV8YjKelkszccNDY9SPlMIqAktt2G63r6atEpuNxLeFhNL0tgKct3LdcG6FXezR3X02m72Tt8=")
+// 	// decodedNama, _ := base64.StdEncoding.DecodeString("D7SO96BeYYOUubuqnRj19FMmBL4N9D1wK+U2Ob5f9gC8okP6R5Z8uWZ1LJ3rEWgCmFVY8TS/iwnv2czoZe3nN+S88ATPkTFkI1LHSv+DrE711lkf9oxLnGvkmgkUDfBLXXgCAXNt+5HRwTwP2S4QKVOidj/cCTeRxsr9U0wgJMpsS2084dJ3N61ct6p4FwuZXKsR8m4mmwq20lkTEGbFPwFeAj3o2rUnAO0EOfnpOe8AznEOo6bFpVhFUyH12hLOI3l6O9ymp7X7uYQa27K+QLzPvR+Z3GY6S9GTX2in+hGjtMfRy/aK5muIAXh2PknEdGPtzusurehMOnqanD5GO6s0SJClUjE5o1LpbEYzl64vdH5YrJZ/6CMy6cny4qcQ7LToxUuQcGOEDeCXRvNVCvOgJieB5BKmwvhEDJcMCcOMG6qceAaYpZAImXS0YqBmGcO3zFHXlzXmWpbFEj8BZw6MmE8xyUT3Pfpt3/2FOPV9hKvY4aZvhYK7yhyaZWF+uQ+IGBC2IF5VWVkcRn/4geBIj79G60LvUFu8HiWeTDENCemCn3+Qi6yb9PrAANZ9ju93cuyN421tzlm4VYuds9/M82H5RbVcIo9lRCXdt80l8aliXWdFmkjOKRKUo9x8yP6Vzt7U5gkymiDh5nXrkZA8fQJoGKsy/E+o2CDNYQ4=")
 // 	// plainNama, _ := helper.RsaDecryptFromBEInFE(decodedNama)
 // 	// fmt.Println(plainNama)
 // 	// id := uuid.New()
@@ -93,6 +93,7 @@ func main() {
 	propertiRoutes := r.Group("api/properti")
 	{
 		propertiRoutes.POST("/advancedFilter", propertiController.AdvancedFilter)
+		propertiRoutes.POST("/landingPage", propertiController.LandingPage)
 	}
 
 	testRoutes := r.Group("/test")

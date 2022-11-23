@@ -9,6 +9,7 @@ import (
 
 	"go-api/dto"
 	"go-api/dto/request/authRequestDTO"
+	responseDTO "go-api/dto/response"
 	"go-api/entity"
 	"go-api/helper"
 	"go-api/service"
@@ -93,7 +94,16 @@ func (c *authController) RegisterSales(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
-	decryptedRequest := deserializeCreateSalesRequest(registerSalesDTO)
+	decryptedRequest, err := deserializeCreateSalesRequest(registerSalesDTO)
+	if err != nil {
+		var response responseDTO.Response
+		response.HttpCode = 400
+		response.ResponseCode = "99"
+		response.ResponseDesc = "Error in deserialize " + err.Error()
+		response.ResponseData = nil
+		response.Summary = nil
+	}
+
 	createdUser := c.authService.CreateUserSales(decryptedRequest)
 	ctx.JSON(createdUser.HttpCode, createdUser)
 }
@@ -107,7 +117,15 @@ func (c *authController) ActivateUser(ctx *gin.Context) {
 		return
 	}
 
-	decryptedRequest := deserializeActivateUserDTO(activateRequestDTO)
+	decryptedRequest, err := deserializeActivateUserDTO(activateRequestDTO)
+	if err != nil {
+		var response responseDTO.Response
+		response.HttpCode = 400
+		response.ResponseCode = "99"
+		response.ResponseDesc = "Error in deserialize " + err.Error()
+		response.ResponseData = nil
+		response.Summary = nil
+	}
 
 	res := c.authService.ActivateUser(decryptedRequest)
 	ctx.JSON(res.HttpCode, res)
@@ -124,7 +142,16 @@ func (c *authController) CreateToken(ctx *gin.Context) {
 		return
 	}
 
-	authRequestDecrypted := deserializeCreateTokenRequest(authRequestDTO)
+	authRequestDecrypted, err := deserializeCreateTokenRequest(authRequestDTO)
+	if err != nil {
+		var response responseDTO.Response
+		response.HttpCode = 400
+		response.ResponseCode = "99"
+		response.ResponseDesc = "Error in deserialize " + err.Error()
+		response.ResponseData = nil
+		response.Summary = nil
+	}
+
 	authRequestDTO.Email = authRequestDecrypted.Email
 	x := rand.Intn(10)
 	var xChangeId string = strconv.Itoa(x)
@@ -149,7 +176,16 @@ func (c *authController) PasswordConfirmation(ctx *gin.Context) {
 		return
 	}
 
-	decryptedRequest := deserializePasswordConfirmationRequest(passwordConfirmationDTO)
+	decryptedRequest, err := deserializePasswordConfirmationRequest(passwordConfirmationDTO)
+	if err != nil {
+		var response responseDTO.Response
+		response.HttpCode = 400
+		response.ResponseCode = "99"
+		response.ResponseDesc = "Error in deserialize " + err.Error()
+		response.ResponseData = nil
+		response.Summary = nil
+	}
+
 	res := c.authService.PasswordConfirmation(decryptedRequest)
 	ctx.JSON(res.HttpCode, res)
 }
@@ -171,15 +207,24 @@ func deserializeLoginRequest(request interface{}) dto.LoginDTO {
 	return result
 }
 
-func deserializePasswordConfirmationRequest(request interface{}) dto.PasswordConfirmationDTO {
+func deserializePasswordConfirmationRequest(request interface{}) (dto.PasswordConfirmationDTO, error) {
 	loginDTO := request.(dto.PasswordConfirmationDTO)
 
 	cipheTextEmail, _ := base64.StdEncoding.DecodeString(loginDTO.Email)
 	cipheTextNewPassword, _ := base64.StdEncoding.DecodeString(loginDTO.NewPassword)
 	cipheTextRetypeNewPassword, _ := base64.StdEncoding.DecodeString(loginDTO.RetypeNewPassword)
-	plainTextEmail, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
-	plainTextNewPassword, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextNewPassword))
-	plainTextRetypeNewPassword, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextRetypeNewPassword))
+	plainTextEmail, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
+	if err != nil {
+		return dto.PasswordConfirmationDTO{}, err
+	}
+	plainTextNewPassword, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextNewPassword))
+	if err != nil {
+		return dto.PasswordConfirmationDTO{}, err
+	}
+	plainTextRetypeNewPassword, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextRetypeNewPassword))
+	if err != nil {
+		return dto.PasswordConfirmationDTO{}, err
+	}
 
 	var result dto.PasswordConfirmationDTO
 
@@ -187,10 +232,10 @@ func deserializePasswordConfirmationRequest(request interface{}) dto.PasswordCon
 	result.NewPassword = plainTextNewPassword
 	result.RetypeNewPassword = plainTextRetypeNewPassword
 
-	return result
+	return result, nil
 }
 
-func deserializeCreateSalesRequest(request interface{}) dto.RegisterSalesDTO {
+func deserializeCreateSalesRequest(request interface{}) (dto.RegisterSalesDTO, error) {
 	loginDTO := request.(dto.RegisterSalesDTO)
 
 	cipheTextEmailSales, _ := base64.StdEncoding.DecodeString(loginDTO.EmailSales)
@@ -198,12 +243,26 @@ func deserializeCreateSalesRequest(request interface{}) dto.RegisterSalesDTO {
 	cipheTextSalesName, _ := base64.StdEncoding.DecodeString(loginDTO.SalesName)
 	cipheTextSalesPhone, _ := base64.StdEncoding.DecodeString(loginDTO.SalesPhone)
 	cipheTextRegisteredBy, _ := base64.StdEncoding.DecodeString(loginDTO.RegisteredBy)
-	plainTextEmailSales, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailSales))
-	plainTextEmailDeveloper, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailDeveloper))
-	plainTextSalesName, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextSalesName))
-	plainTextSalesPhone, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextSalesPhone))
-	plainTextRegisteredBy, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextRegisteredBy))
-
+	plainTextEmailSales, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailSales))
+	if err != nil {
+		return dto.RegisterSalesDTO{}, err
+	}
+	plainTextEmailDeveloper, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailDeveloper))
+	if err != nil {
+		return dto.RegisterSalesDTO{}, err
+	}
+	plainTextSalesName, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextSalesName))
+	if err != nil {
+		return dto.RegisterSalesDTO{}, err
+	}
+	plainTextSalesPhone, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextSalesPhone))
+	if err != nil {
+		return dto.RegisterSalesDTO{}, err
+	}
+	plainTextRegisteredBy, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextRegisteredBy))
+	if err != nil {
+		return dto.RegisterSalesDTO{}, err
+	}
 	var result dto.RegisterSalesDTO
 
 	result.EmailSales = plainTextEmailSales
@@ -212,17 +271,22 @@ func deserializeCreateSalesRequest(request interface{}) dto.RegisterSalesDTO {
 	result.SalesPhone = plainTextSalesPhone
 	result.RegisteredBy = plainTextRegisteredBy
 
-	return result
+	return result, nil
 }
 
-func deserializeActivateUserDTO(request interface{}) authRequestDTO.ActivateRequestDTO {
+func deserializeActivateUserDTO(request interface{}) (authRequestDTO.ActivateRequestDTO, error) {
 	loginDTO := request.(authRequestDTO.ActivateRequestDTO)
 
 	cipheTextEmail, _ := base64.StdEncoding.DecodeString(loginDTO.Email)
 	cipheTextAction, _ := base64.StdEncoding.DecodeString(loginDTO.Action)
-	plainTextEmail, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
-	plainTextAction, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextAction))
-
+	plainTextEmail, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
+	if err != nil {
+		return authRequestDTO.ActivateRequestDTO{}, err
+	}
+	plainTextAction, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextAction))
+	if err != nil {
+		return authRequestDTO.ActivateRequestDTO{}, err
+	}
 	var result authRequestDTO.ActivateRequestDTO
 
 	result.Email = plainTextEmail
@@ -230,18 +294,21 @@ func deserializeActivateUserDTO(request interface{}) authRequestDTO.ActivateRequ
 	result.RegistrationId = loginDTO.RegistrationId
 	result.Action = plainTextAction
 
-	return result
+	return result, nil
 }
 
-func deserializeCreateTokenRequest(request interface{}) authRequestDTO.AuthRequest {
+func deserializeCreateTokenRequest(request interface{}) (authRequestDTO.AuthRequest, error) {
 	authRequest := request.(authRequestDTO.AuthRequest)
 
 	cipheTextEmail, _ := base64.StdEncoding.DecodeString(authRequest.Email)
-	plainTextEmail, _ := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
+	plainTextEmail, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
+	if err != nil {
+		return authRequestDTO.AuthRequest{}, err
+	}
 
 	var result authRequestDTO.AuthRequest
 
 	result.Email = plainTextEmail
 
-	return result
+	return result, nil
 }
