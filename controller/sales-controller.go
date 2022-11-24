@@ -54,19 +54,18 @@ func (controller *salesController) MISDeveloper(ctx *gin.Context) {
 
 func (controller *salesController) MISSuperAdmin(ctx *gin.Context) {
 	var response responseDTO.Response
-	// var request salesRequestDTO.AllRequest
-	// errDTO := ctx.ShouldBind(&request)
-	// if errDTO != nil {
-	// 	response.HttpCode = 400
-	// 	response.MetadataResponse = nil
-	// 	response.ResponseCode = "99"
-	// 	response.ResponseDesc = errDTO.Error()
-	// 	response.Summary = nil
-	// 	response.ResponseData = nil
-	// 	ctx.JSON(response.HttpCode, response)
-	// }
+	var request salesRequestDTO.MISSuperAdminRequestDTO
+	errDTO := ctx.ShouldBind(&request)
+	if errDTO != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+	}
 
-	response = controller.salesService.MISSuperAdmin()
+	response = controller.salesService.MISSuperAdmin(request)
 	ctx.JSON(response.HttpCode, response)
 }
 

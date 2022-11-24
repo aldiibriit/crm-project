@@ -11,7 +11,7 @@ import (
 
 type SalesService interface {
 	MISDeveloper(request salesRequestDTO.AllRequest) responseDTO.Response
-	MISSuperAdmin() responseDTO.Response
+	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) responseDTO.Response
 }
 
 type salesService struct {
@@ -40,14 +40,15 @@ func (service *salesService) MISDeveloper(request salesRequestDTO.AllRequest) re
 	return response
 }
 
-func (service *salesService) MISSuperAdmin() responseDTO.Response {
+func (service *salesService) MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) responseDTO.Response {
 	var response responseDTO.Response
-
-	data := service.salesRepository.MISSuperAdmin()
-
+	var metadataResponse responseDTO.ListUserDtoRes
+	data := service.salesRepository.MISSuperAdmin(request)
+	metadataResponse.Currentpage = request.Offset
+	metadataResponse.TotalData = len(data)
 	encryptedData := serializeMisSuperAdmin(data)
 	response.HttpCode = 200
-	response.MetadataResponse = nil
+	response.MetadataResponse = metadataResponse
 	response.ResponseCode = "00"
 	response.ResponseDesc = "Success"
 	response.ResponseData = encryptedData

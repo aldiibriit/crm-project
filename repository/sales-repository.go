@@ -1,8 +1,10 @@
 package repository
 
 import (
+	"go-api/dto/request/salesRequestDTO"
 	"go-api/dto/response/salesResponseDTO"
 	"go-api/entity"
+	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -10,7 +12,7 @@ import (
 type SalesRepository interface {
 	InsertRelation(data entity.TblSales) error
 	FindByEmailDeveloper(emailDeveloper string) []salesResponseDTO.MISDeveloper
-	MISSuperAdmin() []salesResponseDTO.MISSuperAdmin
+	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) []salesResponseDTO.MISSuperAdmin
 }
 
 type salesConnection struct {
@@ -41,13 +43,14 @@ func (db *salesConnection) FindByEmailDeveloper(emailDeveloper string) []salesRe
 	return result
 }
 
-func (db *salesConnection) MISSuperAdmin() []salesResponseDTO.MISSuperAdmin {
+func (db *salesConnection) MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) []salesResponseDTO.MISSuperAdmin {
 	var data []salesResponseDTO.MISSuperAdmin
 	db.connection.Raw(`SELECT ts.sales_email ,ts.sales_name,(select json_extract(metadata,'$.name') from tbl_user tu2 where tu2.email = ts.developer_email)as metadata,tp.status,tp.jenis_properti,tp.tipe_properti
 	FROM tbl_project tp
 	JOIN tbl_sales ts on tp.email = ts.developer_email 
 	JOIN tbl_user tu on tu.email = ts.sales_email 
-	order by ts.sales_email 
+	WHERE ts.sales_email like '%` + request.Keyword + `%' or ts.sales_name like '%` + request.Keyword + `%' or metadata like '%` + request.Keyword + `%' or tp.status like '%` + request.Keyword + `%' or tp.jenis_properti like '%` + request.Keyword + `%' or tp.tipe_properti like '%` + request.Keyword + `%'
+	order by ts.sales_email limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
 	`).Find(&data)
 	return data
 }

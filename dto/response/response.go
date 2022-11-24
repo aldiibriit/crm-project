@@ -16,7 +16,7 @@ type MetadataResponse struct {
 type ListUserDtoRes struct {
 	Currentpage  int `json:"currentPage"`
 	TotalData    int `json:"totalData"`
-	TotalDataAll int `json:"totalDataAll"`
+	TotalDataAll int `json:"-"`
 }
 
 type MetadataSummeryResponse struct {
