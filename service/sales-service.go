@@ -43,10 +43,18 @@ func (service *salesService) MISDeveloper(request salesRequestDTO.AllRequest) re
 func (service *salesService) MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) responseDTO.Response {
 	var response responseDTO.Response
 	var metadataResponse responseDTO.ListUserDtoRes
+
+	if request.Offset > 0 {
+		request.Offset = request.Offset*request.Limit + 1
+	}
+
 	data := service.salesRepository.MISSuperAdmin(request)
+
 	metadataResponse.Currentpage = request.Offset
 	metadataResponse.TotalData = len(data)
+
 	encryptedData := serializeMisSuperAdmin(data)
+
 	response.HttpCode = 200
 	response.MetadataResponse = metadataResponse
 	response.ResponseCode = "00"
