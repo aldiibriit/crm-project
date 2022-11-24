@@ -9,7 +9,7 @@ import (
 
 type SalesRepository interface {
 	InsertRelation(data entity.TblSales) error
-	FindByEmailDeveloper(emailDeveloper string) []entity.TblSales
+	FindByEmailDeveloper(emailDeveloper string) []salesResponseDTO.MISDeveloper
 	MISSuperAdmin() []salesResponseDTO.MISSuperAdmin
 }
 
@@ -31,10 +31,10 @@ func (db *salesConnection) InsertRelation(data entity.TblSales) error {
 	return nil
 }
 
-func (db *salesConnection) FindByEmailDeveloper(emailDeveloper string) []entity.TblSales {
-	var result []entity.TblSales
+func (db *salesConnection) FindByEmailDeveloper(emailDeveloper string) []salesResponseDTO.MISDeveloper {
+	var result []salesResponseDTO.MISDeveloper
 	db.connection.Raw(`SELECT 
-	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name 
+	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name,tu.mobile_no as salesPhone
 	FROM tbl_sales ts
 	JOIN tbl_user tu ON tu.email = ts.sales_email
 	WHERE developer_email = ?`, emailDeveloper).Find(&result)

@@ -20,9 +20,9 @@ type LandingPropertiDtoRes struct {
 type DetailPropertiDtoRes struct {
 	DetailProperti    Properti        `json:"detailProperti" gorm:"embedded"`
 	MetadataDeveloper string          `json:"metadataDeveloper"`
-	OwnedBy           string          `json:"ownedBy"`
+	OwnedBy           string          `json:"-"`
 	Project           Project         `json:"project" gorm:"embedded"`
-	Cluster           Cluster         `json:"cluster" gorm:"embedded"`
+	Cluster           Cluster         `json:"-" gorm:"embedded"`
 	BrosurUrl         string          `json:"brosurUrl"`
 	ImagePropertiId   string          `json:"-" gorm:"column:imagePropertiId"`
 	ImageProjectId    string          `json:"-" gorm:"column:imageProjectId"`
@@ -31,22 +31,22 @@ type DetailPropertiDtoRes struct {
 }
 
 type Properti struct {
-	ID                    int                   `json:"-" gorm:"column:propertiId"`
-	IDString              string                `json:"id" `
-	GroupProperti         string                `json:"groupProperti" gorm:"column:group_properti"`
-	Email                 string                `json:"email"`
-	NamaProperti          string                `json:"namaProperti" gorm:"column:nama_properti"`
-	DeskripsiProperti     string                `json:"deskripsiProperti" gorm:"column:deskripsi_properti"`
-	HargaProperti         string                `json:"hargaProperti" gorm:"column:harga_properti"`
-	JumlahLantai          string                `json:"jmlLantai" gorm:"column:jml_lantai"`
-	JumlahKamarTidur      string                `json:"jmlKamarTidur" gorm:"column:jml_kmr_tidur"`
-	JumlahKamarMandi      string                `json:"jmlKamarMandi" gorm:"column:jml_kmr_mandi"`
-	ParkirMobilString     string                `json:"-" gorm:"parkirMobilString"`
-	ParkirMobilBool       bool                  `json:"parkirMobil" `
-	ProjectId             int                   `json:"-" gorm:"column:project_id"`
-	ProjectIdString       string                `json:"projectId" `
-	ClusterId             int                   `json:"-" gorm:"column:cluster_id"`
-	ClusterIdString       string                `json:"clusterId" `
+	ID int `json:"id" gorm:"column:propertiId"`
+	// IDString              string                `json:"id" `
+	GroupProperti     string `json:"groupProperti" gorm:"column:group_properti"`
+	Email             string `json:"email"`
+	NamaProperti      string `json:"namaProperti" gorm:"column:nama_properti"`
+	DeskripsiProperti string `json:"deskripsiProperti" gorm:"column:deskripsi_properti"`
+	HargaProperti     string `json:"hargaProperti" gorm:"column:harga_properti"`
+	JumlahLantai      string `json:"jmlLantai" gorm:"column:jml_lantai"`
+	JumlahKamarTidur  string `json:"jmlKamarTidur" gorm:"column:jml_kmr_tidur"`
+	JumlahKamarMandi  string `json:"jmlKamarMandi" gorm:"column:jml_kmr_mandi"`
+	ParkirMobilString string `json:"-" gorm:"parkirMobilString"`
+	ParkirMobilBool   bool   `json:"parkirMobil" `
+	ProjectId         int    `json:"projectId" gorm:"column:project_id"`
+	// ProjectIdString       string                `json:"projectId" `
+	ClusterId int `json:"clusterId" gorm:"column:cluster_id"`
+	// ClusterIdString       string                `json:"clusterId" `
 	WishlistCounterInt    int                   `json:"wishlistCounter"`
 	WishlistCounterNull   sql.NullString        `json:"-" gorm:"column:wishlist_counter"`
 	ViewedCounterInt      int                   `json:"viewedCounter"`
@@ -96,8 +96,8 @@ type SellingPropertiMethod struct {
 type MediaProperti struct {
 	ClusterId       int       `json:"clusterId" gorm:"column:cluster_id"`
 	ImagePropertiId string    `json:"imagePropertiId" gorm:"column:image_properti_id"`
-	YoutubeUrl      string    `json:"youtubeUrl" gorm:"column:youtube_url"`
-	Virtual360Url   string    `json:"virtual360Url" gorm:"column:virtual360url"`
+	YoutubeUrl      string    `json:"youtubeUrl" gorm:"column:youtubeUrlMediaProperti"`
+	Virtual360Url   string    `json:"virtual360Url" gorm:"column:virtual360urlMediaProperti"`
 	CreatedAt       time.Time `json:"createdAt" gorm:"column:createdAtMP"`
 	ModifiedAt      time.Time `json:"modifiedAt" gorm:"column:modifiedAtMP"`
 }
@@ -110,8 +110,8 @@ type ImageProperti struct {
 }
 
 type Project struct {
-	Id                int               `json:"-" gorm:"column:projectId"`
-	IdString          string            `json:"id" `
+	Id int `json:"id" gorm:"column:projectId"`
+	// IdString          string            `json:"id" `
 	Email             string            `json:"email" gorm:"column:emailProject"`
 	NamaProyek        string            `json:"namaProyek" gorm:"column:nama_proyek"`
 	KisaranHarga      string            `json:"kisaranHarga" gorm:"column:kisaran_harga"`
@@ -184,22 +184,22 @@ type AksesProperti struct {
 }
 
 type Cluster struct {
-	Id              int       `json:"-" gorm:"column:clusterId"`
-	IdString        string    `json:"id"`
-	ProjectId       int       `json:"-" gorm:"column:projectIdTc"`
-	ProjectIdString string    `json:"projectId" `
-	Name            string    `json:"name" gorm:"column:deskripsiCluster"`
-	Deskripsi       string    `json:"deskripsi" gorm:"column:deskripsiCluster"`
-	StockUnits      string    `json:"stockUnits" gorm:"column:stock_units"`
-	IsCluster       bool      `json:"isCluster" gorm:"column:isCluster"`
-	CreatedAt       time.Time `json:"createdAt" gorm:"column:createdAtTC"`
-	ModifiedAt      time.Time `json:"modifiedAt" gorm:"column:modifiedAtTC"`
-	Status          string    `json:"status" gorm:"column:statusCluster"`
+	Id int `json:"id" gorm:"column:clusterId"`
+	// IdString        string    `json:"id"`
+	ProjectId int `json:"projectId" gorm:"column:projectId"`
+	// ProjectIdString string    `json:"projectId" `
+	Name       string    `json:"name" gorm:"column:deskripsiCluster"`
+	Deskripsi  string    `json:"deskripsi" gorm:"column:deskripsiCluster"`
+	StockUnits string    `json:"stockUnits" gorm:"column:stock_units"`
+	IsCluster  bool      `json:"isCluster" gorm:"column:isCluster"`
+	CreatedAt  time.Time `json:"createdAt" gorm:"column:createdAtTC"`
+	ModifiedAt time.Time `json:"modifiedAt" gorm:"column:modifiedAtTC"`
+	Status     string    `json:"status" gorm:"column:statusCluster"`
 }
 
 type MediaProject struct {
 	YoutubeUrl    string    `json:"youtubeUrl" gorm:"column:youtubeUrlMediaProject"`
-	Virtual360Url string    `json:"virtual360Url" gorm:"virtual360UrlMediaProject"`
+	Virtual360Url string    `json:"virtual360Url" gorm:"column:virtual360UrlMediaProject"`
 	CreatedAt     time.Time `json:"createdAt" gorm:"createdAtMediaProject"`
 	ModifiedAt    time.Time `json:"modifiedAt" gorm:"modifiedAtMediaProject"`
 }

@@ -4,7 +4,6 @@ import (
 	"go-api/dto/request/salesRequestDTO"
 	responseDTO "go-api/dto/response"
 	"go-api/dto/response/salesResponseDTO"
-	"go-api/entity"
 	"go-api/helper"
 	"go-api/repository"
 	"strconv"
@@ -57,9 +56,9 @@ func (service *salesService) MISSuperAdmin() responseDTO.Response {
 	return response
 }
 
-func serializeMisDeveloper(request interface{}) []entity.TblSales {
-	data := request.([]entity.TblSales)
-	result := make([]entity.TblSales, len(data))
+func serializeMisDeveloper(request interface{}) []salesResponseDTO.MISDeveloper {
+	data := request.([]salesResponseDTO.MISDeveloper)
+	result := make([]salesResponseDTO.MISDeveloper, len(data))
 	for i, v := range data {
 		encryptedIdRes, _ := helper.RsaEncryptBEToFE([]byte(strconv.Itoa(v.ID)))
 		encryptedEmaiDeveloper, _ := helper.RsaEncryptBEToFE([]byte(v.EmailDeveloper))
@@ -67,6 +66,7 @@ func serializeMisDeveloper(request interface{}) []entity.TblSales {
 		encryptedRefferalCode, _ := helper.RsaEncryptBEToFE([]byte(v.RefferalCode))
 		encryptedRegisteredBy, _ := helper.RsaEncryptBEToFE([]byte(v.RegisteredBy))
 		encryptedSalesName, _ := helper.RsaEncryptBEToFE([]byte(v.SalesName))
+		encryptedSalesPhone, _ := helper.RsaEncryptBEToFE([]byte(v.SalesPhone))
 		encryptedCreatedAt, _ := helper.RsaEncryptBEToFE([]byte(v.CreatedAt.String()))
 		encryptedModifiedAt, _ := helper.RsaEncryptBEToFE([]byte(v.ModifiedAt.String()))
 
@@ -78,6 +78,7 @@ func serializeMisDeveloper(request interface{}) []entity.TblSales {
 		result[i].CreatedAtRes = encryptedCreatedAt
 		result[i].ModifiedAtRes = encryptedModifiedAt
 		result[i].SalesName = encryptedSalesName
+		result[i].SalesPhone = encryptedSalesPhone
 	}
 
 	return result
