@@ -10,7 +10,7 @@ import (
 )
 
 type SalesService interface {
-	MISDeveloper(request salesRequestDTO.AllRequest) responseDTO.Response
+	MISDeveloper(request salesRequestDTO.MISDeveloperRequestDTO) responseDTO.Response
 	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) responseDTO.Response
 }
 
@@ -24,10 +24,16 @@ func NewSalesService(salesRepo repository.SalesRepository) SalesService {
 	}
 }
 
-func (service *salesService) MISDeveloper(request salesRequestDTO.AllRequest) responseDTO.Response {
+func (service *salesService) MISDeveloper(request salesRequestDTO.MISDeveloperRequestDTO) responseDTO.Response {
 	var response responseDTO.Response
+	var metadataResponse responseDTO.ListUserDtoRes
 
-	data := service.salesRepository.FindByEmailDeveloper(request.EmailDeveloper)
+	metadataResponse.Currentpage = request.Offset
+	if request.Offset > 0 {
+		request.Offset = request.Offset * request.Limit
+	}
+	data, totalData := service.salesRepository.FindByEmailDeveloper(request)
+	metadataResponse.TotalData = totalData
 
 	encryptedData := serializeMisDeveloper(data)
 	response.HttpCode = 200
