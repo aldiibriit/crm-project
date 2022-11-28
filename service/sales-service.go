@@ -46,11 +46,11 @@ func (service *salesService) MISSuperAdmin(request salesRequestDTO.MISSuperAdmin
 
 	metadataResponse.Currentpage = request.Offset
 	if request.Offset > 0 {
-		request.Offset = request.Offset*request.Limit + 1
+		request.Offset = request.Offset * request.Limit
 	}
 
-	data := service.salesRepository.MISSuperAdmin(request)
-	metadataResponse.TotalData = len(data)
+	data, totalData := service.salesRepository.MISSuperAdmin(request)
+	metadataResponse.TotalData = totalData
 
 	encryptedData := serializeMisSuperAdmin(data)
 
