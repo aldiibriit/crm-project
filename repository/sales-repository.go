@@ -47,12 +47,12 @@ func (db *salesConnection) FindByEmailDeveloper(request salesRequestDTO.MISDevel
 	or developer_email = '` + request.EmailDeveloper + `' and ts.created_at like '%` + request.Keyword + `%'
 	or developer_email = '` + request.EmailDeveloper + `' and ts.modified_at like '%` + request.Keyword + `%'
 	or developer_email = '` + request.EmailDeveloper + `' and ts.sales_name like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and salesPhone like '%` + request.Keyword + `%'
-	limit ` + request.Limit + ` offset ` + request.Offset + `
+	or developer_email = '` + request.EmailDeveloper + `' and tu.mobile_no like '%` + request.Keyword + `%'
+	limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
 	`).Find(&result)
 
 	db.connection.Raw(`SELECT 
-	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name,tu.mobile_no as salesPhone
+	count(tu.id)
 	FROM tbl_sales ts
 	JOIN tbl_user tu ON tu.email = ts.sales_email
 	WHERE developer_email = '` + request.EmailDeveloper + `' and ts.developer_email like '%` + request.Keyword + `%'
@@ -61,8 +61,8 @@ func (db *salesConnection) FindByEmailDeveloper(request salesRequestDTO.MISDevel
 	or developer_email = '` + request.EmailDeveloper + `' and ts.created_at like '%` + request.Keyword + `%'
 	or developer_email = '` + request.EmailDeveloper + `' and ts.modified_at like '%` + request.Keyword + `%'
 	or developer_email = '` + request.EmailDeveloper + `' and ts.sales_name like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and salesPhone like '%` + request.Keyword + `%'
-	`).Find(&result)
+	or developer_email = '` + request.EmailDeveloper + `' and tu.mobile_no like '%` + request.Keyword + `%'
+	`).Find(&totalData)
 
 	return result, totalData
 }

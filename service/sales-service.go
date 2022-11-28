@@ -28,11 +28,9 @@ func (service *salesService) MISDeveloper(request salesRequestDTO.MISDeveloperRe
 	var response responseDTO.Response
 	var metadataResponse responseDTO.ListUserDtoRes
 
-	intOffset, _ := strconv.Atoi(request.Offset)
-	intLimit, _ := strconv.Atoi(request.Limit)
-	metadataResponse.Currentpage = intOffset
-	if intOffset > 0 {
-		request.Offset = strconv.Itoa(intOffset * intLimit)
+	metadataResponse.Currentpage = request.Offset
+	if request.Offset > 0 {
+		request.Offset = request.Offset * request.Limit
 	}
 	data, totalData := service.salesRepository.FindByEmailDeveloper(request)
 	metadataResponse.TotalData = totalData
