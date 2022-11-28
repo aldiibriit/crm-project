@@ -37,6 +37,8 @@ func (controller *salesController) MISDeveloper(ctx *gin.Context) {
 		response.ResponseDesc = errDTO.Error()
 		response.Summary = nil
 		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
 	}
 	decryptedRequest, err := deserializeMisDeveloperRequest(request)
 	if err != nil {
@@ -63,6 +65,8 @@ func (controller *salesController) MISSuperAdmin(ctx *gin.Context) {
 		response.ResponseDesc = errDTO.Error()
 		response.Summary = nil
 		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
 	}
 
 	response = controller.salesService.MISSuperAdmin(request)
