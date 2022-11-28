@@ -41,13 +41,13 @@ func (db *salesConnection) FindByEmailDeveloper(request salesRequestDTO.MISDevel
 	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name,tu.mobile_no as salesPhone
 	FROM tbl_sales ts
 	JOIN tbl_user tu ON tu.email = ts.sales_email
-	WHERE developer_email = ` + request.EmailDeveloper + ` and ts.developer_email like '%` + request.Keyword + `%'
-	or developer_email = ` + request.EmailDeveloper + ` and ts.refferal_code like '%` + request.Keyword + `%'
-	or developer_email = ` + request.EmailDeveloper + ` and ts.registered_by like '%` + request.Keyword + `%'
-	or developer_email = ` + request.EmailDeveloper + ` and ts.created_at like '%` + request.Keyword + `%'
-	or developer_email = ` + request.EmailDeveloper + ` and ts.modified_at like '%` + request.Keyword + `%'
-	or developer_email = ` + request.EmailDeveloper + ` and ts.sales_name like '%` + request.Keyword + `%'
-	or developer_email = ` + request.EmailDeveloper + ` and salesPhone like '%` + request.Keyword + `%'
+	WHERE developer_email = '` + request.EmailDeveloper + `' and ts.developer_email like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.refferal_code like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.registered_by like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.created_at like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.modified_at like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.sales_name like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and salesPhone like '%` + request.Keyword + `%'
 	limit ` + request.Limit + ` offset ` + request.Offset + `
 	`).Find(&result)
 
@@ -55,13 +55,13 @@ func (db *salesConnection) FindByEmailDeveloper(request salesRequestDTO.MISDevel
 	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name,tu.mobile_no as salesPhone
 	FROM tbl_sales ts
 	JOIN tbl_user tu ON tu.email = ts.sales_email
-	WHERE developer_email = ` + request.EmailDeveloper + ` and ts.developer_email like '%` + request.Keyword + `%'
-	or developer_email = ` + request.EmailDeveloper + ` and ts.refferal_code like '%` + request.Keyword + `%'
-	or developer_email = ` + request.EmailDeveloper + ` and ts.registered_by like '%` + request.Keyword + `%'
-	or developer_email = ` + request.EmailDeveloper + ` and ts.created_at like '%` + request.Keyword + `%'
-	or developer_email = ` + request.EmailDeveloper + ` and ts.modified_at like '%` + request.Keyword + `%'
-	or developer_email = ` + request.EmailDeveloper + ` and ts.sales_name like '%` + request.Keyword + `%'
-	or developer_email = ` + request.EmailDeveloper + ` and salesPhone like '%` + request.Keyword + `%'
+	WHERE developer_email = '` + request.EmailDeveloper + `' and ts.developer_email like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.refferal_code like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.registered_by like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.created_at like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.modified_at like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.sales_name like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and salesPhone like '%` + request.Keyword + `%'
 	`).Find(&result)
 
 	return result, totalData
