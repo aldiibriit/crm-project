@@ -27,7 +27,8 @@ func NewSalesController(salesServ service.SalesService) SalesController {
 
 func (controller *salesController) MISDeveloper(ctx *gin.Context) {
 	var response responseDTO.Response
-	var request salesRequestDTO.AllRequest
+	var request salesRequestDTO.MISDeveloperRequestDTO
+
 	errDTO := ctx.ShouldBind(&request)
 	if errDTO != nil {
 		response.HttpCode = 400
@@ -36,9 +37,8 @@ func (controller *salesController) MISDeveloper(ctx *gin.Context) {
 		response.ResponseDesc = errDTO.Error()
 		response.Summary = nil
 		response.ResponseData = nil
-		ctx.JSON(response.HttpCode, response)
 	}
-	decryptedRequest, err := deserializeAllMisDeveloperRequest(request)
+	decryptedRequest, err := deserializeMisDeveloperRequest(request)
 	if err != nil {
 		var response responseDTO.Response
 		response.HttpCode = 400
@@ -69,16 +69,16 @@ func (controller *salesController) MISSuperAdmin(ctx *gin.Context) {
 	ctx.JSON(response.HttpCode, response)
 }
 
-func deserializeAllMisDeveloperRequest(request interface{}) (salesRequestDTO.AllRequest, error) {
-	otpDTO := request.(salesRequestDTO.AllRequest)
+func deserializeMisDeveloperRequest(request interface{}) (salesRequestDTO.MISDeveloperRequestDTO, error) {
+	otpDTO := request.(salesRequestDTO.MISDeveloperRequestDTO)
 
 	cipheTextEmailDeveloper, _ := base64.StdEncoding.DecodeString(otpDTO.EmailDeveloper)
 	plainTextEmailDeveloper, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailDeveloper))
 	if err != nil {
-		return salesRequestDTO.AllRequest{}, err
+		return salesRequestDTO.MISDeveloperRequestDTO{}, err
 	}
 
-	var result salesRequestDTO.AllRequest
+	var result salesRequestDTO.MISDeveloperRequestDTO
 
 	result.EmailDeveloper = plainTextEmailDeveloper
 
