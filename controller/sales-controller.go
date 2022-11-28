@@ -81,6 +81,9 @@ func deserializeMisDeveloperRequest(request interface{}) (salesRequestDTO.MISDev
 	var result salesRequestDTO.MISDeveloperRequestDTO
 
 	result.EmailDeveloper = plainTextEmailDeveloper
+	result.Keyword = otpDTO.Keyword
+	result.Offset = otpDTO.Offset
+	result.Limit = otpDTO.Limit
 
 	return result, nil
 }
