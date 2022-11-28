@@ -12,7 +12,7 @@ import (
 type SalesRepository interface {
 	InsertRelation(data entity.TblSales) error
 	FindByEmailDeveloper(emailDeveloper string) []salesResponseDTO.MISDeveloper
-	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) []salesResponseDTO.MISSuperAdmin
+	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) ([]salesResponseDTO.MISSuperAdmin, int)
 }
 
 type salesConnection struct {
@@ -35,7 +35,7 @@ func (db *salesConnection) InsertRelation(data entity.TblSales) error {
 
 func (db *salesConnection) FindByEmailDeveloper(emailDeveloper string) []salesResponseDTO.MISDeveloper {
 	var result []salesResponseDTO.MISDeveloper
-	db.connection.Raw(`SELECT 
+	db.connection.Debug().Raw(`SELECT 
 	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name,tu.mobile_no as salesPhone
 	FROM tbl_sales ts
 	JOIN tbl_user tu ON tu.email = ts.sales_email
@@ -43,8 +43,9 @@ func (db *salesConnection) FindByEmailDeveloper(emailDeveloper string) []salesRe
 	return result
 }
 
-func (db *salesConnection) MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) []salesResponseDTO.MISSuperAdmin {
+func (db *salesConnection) MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) ([]salesResponseDTO.MISSuperAdmin, int) {
 	var data []salesResponseDTO.MISSuperAdmin
+	var totalData int
 	db.connection.Raw(`SELECT ts.sales_email ,ts.sales_name,(select json_extract(metadata,'$.name') from tbl_user tu2 where tu2.email = ts.developer_email)as metadata,tp.status,tp.jenis_properti,tp.tipe_properti
 	FROM tbl_project tp
 	JOIN tbl_sales ts on tp.email = ts.developer_email 
@@ -52,5 +53,14 @@ func (db *salesConnection) MISSuperAdmin(request salesRequestDTO.MISSuperAdminRe
 	WHERE ts.sales_email like '%` + request.Keyword + `%' or ts.sales_name like '%` + request.Keyword + `%' or metadata like '%` + request.Keyword + `%' or tp.status like '%` + request.Keyword + `%' or tp.jenis_properti like '%` + request.Keyword + `%' or tp.tipe_properti like '%` + request.Keyword + `%'
 	order by ts.sales_email limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
 	`).Find(&data)
-	return data
+
+	db.connection.Raw(`SELECT count(ts.sales_email)
+	FROM tbl_project tp
+	JOIN tbl_sales ts on tp.email = ts.developer_email 
+	JOIN tbl_user tu on tu.email = ts.sales_email 
+	WHERE ts.sales_email like '%` + request.Keyword + `%' or ts.sales_name like '%` + request.Keyword + `%' or metadata like '%` + request.Keyword + `%' or tp.status like '%` + request.Keyword + `%' or tp.jenis_properti like '%` + request.Keyword + `%' or tp.tipe_properti like '%` + request.Keyword + `%'
+	order by ts.sales_email limit ` + strconv.Itoa(request.Limit) + `
+	`).Find(&totalData)
+
+	return data, totalData
 }
