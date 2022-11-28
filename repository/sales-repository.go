@@ -13,6 +13,8 @@ type SalesRepository interface {
 	InsertRelation(data entity.TblSales) error
 	FindByEmailDeveloper(request salesRequestDTO.MISDeveloperRequestDTO) ([]salesResponseDTO.MISDeveloper, int)
 	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) ([]salesResponseDTO.MISSuperAdmin, int)
+	ListProject(sqlStr string) ([]salesResponseDTO.ListProject, int64)
+	RelationToImageProperti(trxId string) []salesResponseDTO.TblImageProperti
 }
 
 type salesConnection struct {
@@ -87,4 +89,18 @@ func (db *salesConnection) MISSuperAdmin(request salesRequestDTO.MISSuperAdminRe
 	`).Find(&totalData)
 
 	return data, totalData
+}
+
+func (db *salesConnection) ListProject(sqlStr string) ([]salesResponseDTO.ListProject, int64) {
+	var result []salesResponseDTO.ListProject
+	var length int64
+	db.connection.Raw(sqlStr).Find(&result)
+	db.connection.Raw(sqlStr).Find(&result).Count(&length)
+	return result, length
+}
+
+func (db *salesConnection) RelationToImageProperti(trxId string) []salesResponseDTO.TblImageProperti {
+	var imageProject []salesResponseDTO.TblImageProperti
+	db.connection.Raw(`SELECT * FROM tbl_image_properti WHERE trx_id = '` + trxId + `'`).Find(&imageProject)
+	return imageProject
 }

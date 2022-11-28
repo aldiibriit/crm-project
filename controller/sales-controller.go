@@ -13,6 +13,7 @@ import (
 type SalesController interface {
 	MISDeveloper(ctx *gin.Context)
 	MISSuperAdmin(ctx *gin.Context)
+	ListProject(ctx *gin.Context)
 }
 
 type salesController struct {
@@ -40,14 +41,16 @@ func (controller *salesController) MISDeveloper(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(response.HttpCode, response)
 		return
 	}
+
 	decryptedRequest, err := deserializeMisDeveloperRequest(request)
 	if err != nil {
-		var response responseDTO.Response
 		response.HttpCode = 400
 		response.ResponseCode = "99"
-		response.ResponseDesc = "Error in deserialize " + err.Error()
+		response.ResponseDesc = "Error in deserialize"
 		response.ResponseData = nil
 		response.Summary = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
 	}
 
 	response = controller.salesService.MISDeveloper(decryptedRequest)
@@ -73,6 +76,37 @@ func (controller *salesController) MISSuperAdmin(ctx *gin.Context) {
 	ctx.JSON(response.HttpCode, response)
 }
 
+func (controller *salesController) ListProject(ctx *gin.Context) {
+	var response responseDTO.Response
+	var request salesRequestDTO.ListProjectRequest
+	errDTO := ctx.ShouldBind(&request)
+	if errDTO != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+
+	decryptedRequest, err := deserializeListProjectBySales(request)
+	if err != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = "Deserialize error ! " + errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+
+	response = controller.salesService.ListProject(decryptedRequest)
+	ctx.JSON(response.HttpCode, response)
+}
+
 func deserializeMisDeveloperRequest(request interface{}) (salesRequestDTO.MISDeveloperRequestDTO, error) {
 	otpDTO := request.(salesRequestDTO.MISDeveloperRequestDTO)
 
@@ -88,6 +122,23 @@ func deserializeMisDeveloperRequest(request interface{}) (salesRequestDTO.MISDev
 	result.Keyword = otpDTO.Keyword
 	result.Offset = otpDTO.Offset
 	result.Limit = otpDTO.Limit
+
+	return result, nil
+}
+
+func deserializeListProjectBySales(request interface{}) (salesRequestDTO.ListProjectRequest, error) {
+	otpDTO := request.(salesRequestDTO.ListProjectRequest)
+
+	cipheTextEmailSales, _ := base64.StdEncoding.DecodeString(otpDTO.EmailSales)
+	plainTextEmailSales, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailSales))
+	if err != nil {
+		return salesRequestDTO.ListProjectRequest{}, err
+	}
+
+	var result salesRequestDTO.ListProjectRequest
+
+	result.EmailSales = plainTextEmailSales
+	result.PageStart = otpDTO.PageStart
 
 	return result, nil
 }

@@ -40,12 +40,12 @@ var (
 )
 
 // func main() {
-// 	// Password := "feryganteng@yopmail.com"
-// 	// encryptedPassword, _ := helper.RsaEncryptFEToBE([]byte(Password))
-// 	// fmt.Println("Password : ", encryptedPassword)
-// 	decodedNama, _ := base64.StdEncoding.DecodeString("fmDO1p4jofEp1vXNKJHJinv/UwLNT7JCrfMWFVMkWYiGhScWJdHLD6LwTkLQiYIJj13dQKAoiWwhL6XLvBzO38rkKmYy5LiGMtLezkAlmFL0YADqEsjY6xAzOZw8j58jnTsrN6ZSTaUjc9jJLVxOj3yHBKORtP1k2A7R2x46J22LqBhDsFBwijb/m5iCBCgOWyVMLHHhdqJlMTCo4cVduL6los6T1Elfmqew3ko8USPKfB+C9DSVzmtdBaJy+FyLnwf0cp9y57mgTcHjBatsCCX9/uYtcZAB3hRzML7d3jM4aVpTvJttPLE37cFq+Kl/gnbH55HSIDSp+GTdMA/u7IEvXWo7CBst1ciDfRxaCh/Rz/ax0PLSx1LxeBhyYiMPjOQ6Erj8ZZ4Gzf8APVJjsjqz4cdte5hFZ8q04Az6I760LyOHN6dgXRy7mE9GOl+gKWRN9pWRb4c+1T2ZX54D+gwITORF3rzDhOGcac9o75nYKFbcNI+uLepDDqYt8/2tnlKh2Qt77beq06+YbuygjIOmw54jkkpxgCiiwFdlg8tnkrudnO+UyXhQOF615i41XhdsCs7hl9aufcqGkzyVVuIsyP69bhYifweL1udUMrIEsHmxhAugIK94tH1kcdEgI2LFYRqSKA+uyWVV65r1B3aca2ds9SHPt/InmIuYnMM=")
-// 	plainNama, _ := helper.RsaDecryptFromBEInFE(decodedNama)
-// 	fmt.Println(plainNama)
+// 	Password := "mraldisptr30@gmail.com"
+// 	encryptedPassword, _ := helper.RsaEncryptFEToBE([]byte(Password))
+// 	fmt.Println("Password : ", encryptedPassword)
+// 	// decodedNama, _ := base64.StdEncoding.DecodeString("fmDO1p4jofEp1vXNKJHJinv/UwLNT7JCrfMWFVMkWYiGhScWJdHLD6LwTkLQiYIJj13dQKAoiWwhL6XLvBzO38rkKmYy5LiGMtLezkAlmFL0YADqEsjY6xAzOZw8j58jnTsrN6ZSTaUjc9jJLVxOj3yHBKORtP1k2A7R2x46J22LqBhDsFBwijb/m5iCBCgOWyVMLHHhdqJlMTCo4cVduL6los6T1Elfmqew3ko8USPKfB+C9DSVzmtdBaJy+FyLnwf0cp9y57mgTcHjBatsCCX9/uYtcZAB3hRzML7d3jM4aVpTvJttPLE37cFq+Kl/gnbH55HSIDSp+GTdMA/u7IEvXWo7CBst1ciDfRxaCh/Rz/ax0PLSx1LxeBhyYiMPjOQ6Erj8ZZ4Gzf8APVJjsjqz4cdte5hFZ8q04Az6I760LyOHN6dgXRy7mE9GOl+gKWRN9pWRb4c+1T2ZX54D+gwITORF3rzDhOGcac9o75nYKFbcNI+uLepDDqYt8/2tnlKh2Qt77beq06+YbuygjIOmw54jkkpxgCiiwFdlg8tnkrudnO+UyXhQOF615i41XhdsCs7hl9aufcqGkzyVVuIsyP69bhYifweL1udUMrIEsHmxhAugIK94tH1kcdEgI2LFYRqSKA+uyWVV65r1B3aca2ds9SHPt/InmIuYnMM=")
+// 	// plainNama, _ := helper.RsaDecryptFromBEInFE(decodedNama)
+// 	// fmt.Println(plainNama)
 // 	// id := uuid.New()
 // 	// fmt.Println(reflect.TypeOf(id))
 // 	// fmt.Println(reflect.TypeOf(id.String()))
@@ -76,6 +76,7 @@ func main() {
 	{
 		salesRoutes.POST("/atDeveloper", salesController.MISDeveloper)
 		salesRoutes.POST("/atSuperAdmin", salesController.MISSuperAdmin)
+		salesRoutes.POST("/listProject", salesController.ListProject)
 	}
 
 	userRoutes := r.Group("api/user", middleware.AuthorizeJWT(jwtService))
