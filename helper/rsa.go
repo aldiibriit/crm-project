@@ -137,7 +137,7 @@ func RsaDecryptFromFEInBE(ciphertext []byte) (string, error) {
 }
 
 func RsaDecryptFromFEInBEJava(ciphertext []byte) (string, error) {
-	privateKeyBEJava, err := ioutil.ReadFile("privateBEJava.pem")
+	privateKeyBEJava, err := ioutil.ReadFile("privateBeJava.pem")
 	if err != nil {
 		fmt.Println("error in read privateKeyBEJava")
 	}
