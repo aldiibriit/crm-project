@@ -48,7 +48,7 @@ func (db *salesConnection) FindByEmailDeveloper(request salesRequestDTO.MISDevel
 	or developer_email = ` + request.EmailDeveloper + ` and ts.modified_at like '%` + request.Keyword + `%'
 	or developer_email = ` + request.EmailDeveloper + ` and ts.sales_name like '%` + request.Keyword + `%'
 	or developer_email = ` + request.EmailDeveloper + ` and salesPhone like '%` + request.Keyword + `%'
-	limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
+	limit ` + request.Limit + ` offset ` + request.Offset + `
 	`).Find(&result)
 
 	db.connection.Raw(`SELECT 
