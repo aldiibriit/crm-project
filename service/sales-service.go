@@ -39,7 +39,7 @@ func (service *salesService) MISDeveloper(request salesRequestDTO.MISDeveloperRe
 
 	encryptedData := serializeMisDeveloper(data)
 	response.HttpCode = 200
-	response.MetadataResponse = nil
+	response.MetadataResponse = metadataResponse
 	response.ResponseCode = "00"
 	response.ResponseDesc = "Success"
 	response.ResponseData = encryptedData
