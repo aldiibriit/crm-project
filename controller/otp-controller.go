@@ -40,7 +40,7 @@ func (controller *otpController) ValidateOTP(ctx *gin.Context) {
 		var response responseDTO.Response
 		response.HttpCode = 400
 		response.ResponseCode = "99"
-		response.ResponseDesc = "Error in deserialize " + err.Error()
+		response.ResponseDesc = "Error in Deserialize "
 		response.ResponseData = nil
 		response.Summary = nil
 	}

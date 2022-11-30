@@ -124,12 +124,12 @@ func RsaDecryptFromFEInBE(ciphertext []byte) (string, error) {
 	if block == nil {
 		return "", errors.New("error in pem decode privateKeyBE")
 	}
-	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	priv, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err != nil {
 		return "", err
 	}
-	// privateKey := priv.(*rsa.PrivateKey)
-	plainData, err := rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
+	privateKey := priv.(*rsa.PrivateKey)
+	plainData, err := rsa.DecryptPKCS1v15(rand.Reader, privateKey, ciphertext)
 	if err != nil {
 		fmt.Println("error in decrypt data in BE", err.Error(), string(ciphertext))
 	}
@@ -190,12 +190,12 @@ func RsaDecryptFromBEInFE(ciphertext []byte) (string, error) {
 	if block == nil {
 		return "", errors.New("error in pem decode privateKeyFE")
 	}
-	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	priv, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err != nil {
 		return "", err
 	}
-	// privateKey := priv.(*rsa.PrivateKey)
-	plainData, err := rsa.DecryptPKCS1v15(rand.Reader, priv, ciphertext)
+	privateKey := priv.(*rsa.PrivateKey)
+	plainData, err := rsa.DecryptPKCS1v15(rand.Reader, privateKey, ciphertext)
 	if err != nil {
 		fmt.Println("error in decrypt data in FE")
 	}

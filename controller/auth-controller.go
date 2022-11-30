@@ -99,7 +99,7 @@ func (c *authController) RegisterSales(ctx *gin.Context) {
 		var response responseDTO.Response
 		response.HttpCode = 400
 		response.ResponseCode = "99"
-		response.ResponseDesc = "Error in deserialize " + err.Error()
+		response.ResponseDesc = "Error in Deserialize "
 		response.ResponseData = nil
 		response.Summary = nil
 	}
@@ -122,7 +122,7 @@ func (c *authController) ActivateUser(ctx *gin.Context) {
 		var response responseDTO.Response
 		response.HttpCode = 400
 		response.ResponseCode = "99"
-		response.ResponseDesc = "Error in deserialize " + err.Error()
+		response.ResponseDesc = "Error in Deserialize "
 		response.ResponseData = nil
 		response.Summary = nil
 	}
@@ -147,7 +147,7 @@ func (c *authController) CreateToken(ctx *gin.Context) {
 		var response responseDTO.Response
 		response.HttpCode = 400
 		response.ResponseCode = "99"
-		response.ResponseDesc = "Error in deserialize " + err.Error()
+		response.ResponseDesc = "Error in Deserialize "
 		response.ResponseData = nil
 		response.Summary = nil
 	}
@@ -181,7 +181,7 @@ func (c *authController) PasswordConfirmation(ctx *gin.Context) {
 		var response responseDTO.Response
 		response.HttpCode = 400
 		response.ResponseCode = "99"
-		response.ResponseDesc = "Error in deserialize " + err.Error()
+		response.ResponseDesc = "Error in Deserialize "
 		response.ResponseData = nil
 		response.Summary = nil
 	}

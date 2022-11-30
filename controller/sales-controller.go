@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/base64"
+	"fmt"
 	"go-api/dto/request/salesRequestDTO"
 	responseDTO "go-api/dto/response"
 	"go-api/helper"
@@ -96,7 +97,7 @@ func (controller *salesController) ListProject(ctx *gin.Context) {
 		response.HttpCode = 400
 		response.MetadataResponse = nil
 		response.ResponseCode = "99"
-		response.ResponseDesc = "Deserialize error ! " + errDTO.Error()
+		response.ResponseDesc = "Deserialize error ! "
 		response.Summary = nil
 		response.ResponseData = nil
 		ctx.AbortWithStatusJSON(response.HttpCode, response)
@@ -129,9 +130,13 @@ func deserializeMisDeveloperRequest(request interface{}) (salesRequestDTO.MISDev
 func deserializeListProjectBySales(request interface{}) (salesRequestDTO.ListProjectRequest, error) {
 	otpDTO := request.(salesRequestDTO.ListProjectRequest)
 
-	cipheTextEmailSales, _ := base64.StdEncoding.DecodeString(otpDTO.EmailSales)
+	cipheTextEmailSales, err := base64.StdEncoding.DecodeString(otpDTO.EmailSales)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	plainTextEmailSales, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailSales))
 	if err != nil {
+		fmt.Println(err.Error())
 		return salesRequestDTO.ListProjectRequest{}, err
 	}
 

@@ -21,6 +21,7 @@ var (
 	emailAttemptRepository repository.EmailAttemptRepository = repository.NewEmailAttemptRepository(db)
 	otpRepository          repository.OTPRepository          = repository.NewOTPRepository(db)
 	otpAttemptRepository   repository.OTPAttemptRepository   = repository.NewOTPAttemptRepository(db)
+	customerRepository     repository.CustomerRepository     = repository.NewCustomerRepository(db)
 	jwtService             service.JWTService                = service.NewJWTService(jwtHistRepository)
 	userService            service.UserService               = service.NewUserService(userRepository)
 	bookService            service.BookService               = service.NewBookService(bookRepository)
@@ -29,6 +30,7 @@ var (
 	otpService             service.OTPService                = service.NewOTPService(otpRepository, emailService, otpAttemptRepository)
 	authService            service.AuthService               = service.NewAuthService(userRepository, salesRepository, emailService, emailAttemptRepository, otpService)
 	emailService           service.EmailService              = service.NewEmailService(emailAttemptRepository)
+	kprService             service.KPRService                = service.NewKPRService(customerRepository)
 	salesService           service.SalesService              = service.NewSalesService(salesRepository)
 	testController         controller.TestController         = controller.NewTestController(emailService)
 	authController         controller.AuthController         = controller.NewAuthController(authService, jwtService)
@@ -37,11 +39,15 @@ var (
 	propertiController     controller.PropertiController     = controller.NewPropertiController(propertiService)
 	otpController          controller.OTPController          = controller.NEwOTPController(otpService)
 	salesController        controller.SalesController        = controller.NewSalesController(salesService)
+	kprController          controller.KPRController          = controller.NewKPRController(kprService)
 )
 
 // func main() {
 // 	Password := "mraldisptr30@gmail.com"
-// 	encryptedPassword, _ := helper.RsaEncryptFEToBE([]byte(Password))
+// 	encryptedPassword, err := helper.RsaEncryptFEToBE([]byte(Password))
+// 	if err != nil {
+// 		fmt.Println(err.Error())
+// 	}
 // 	fmt.Println("Password : ", encryptedPassword)
 // 	// decodedNama, _ := base64.StdEncoding.DecodeString("fmDO1p4jofEp1vXNKJHJinv/UwLNT7JCrfMWFVMkWYiGhScWJdHLD6LwTkLQiYIJj13dQKAoiWwhL6XLvBzO38rkKmYy5LiGMtLezkAlmFL0YADqEsjY6xAzOZw8j58jnTsrN6ZSTaUjc9jJLVxOj3yHBKORtP1k2A7R2x46J22LqBhDsFBwijb/m5iCBCgOWyVMLHHhdqJlMTCo4cVduL6los6T1Elfmqew3ko8USPKfB+C9DSVzmtdBaJy+FyLnwf0cp9y57mgTcHjBatsCCX9/uYtcZAB3hRzML7d3jM4aVpTvJttPLE37cFq+Kl/gnbH55HSIDSp+GTdMA/u7IEvXWo7CBst1ciDfRxaCh/Rz/ax0PLSx1LxeBhyYiMPjOQ6Erj8ZZ4Gzf8APVJjsjqz4cdte5hFZ8q04Az6I760LyOHN6dgXRy7mE9GOl+gKWRN9pWRb4c+1T2ZX54D+gwITORF3rzDhOGcac9o75nYKFbcNI+uLepDDqYt8/2tnlKh2Qt77beq06+YbuygjIOmw54jkkpxgCiiwFdlg8tnkrudnO+UyXhQOF615i41XhdsCs7hl9aufcqGkzyVVuIsyP69bhYifweL1udUMrIEsHmxhAugIK94tH1kcdEgI2LFYRqSKA+uyWVV65r1B3aca2ds9SHPt/InmIuYnMM=")
 // 	// plainNama, _ := helper.RsaDecryptFromBEInFE(decodedNama)
@@ -49,6 +55,8 @@ var (
 // 	// id := uuid.New()
 // 	// fmt.Println(reflect.TypeOf(id))
 // 	// fmt.Println(reflect.TypeOf(id.String()))
+// 	// 	helper.GenRsaKeyForBE(1024)
+// 	// 	helper.GenRsaKeyForFE(1024)
 // }
 
 func main() {
@@ -103,6 +111,11 @@ func main() {
 	testRoutes := r.Group("/test")
 	{
 		testRoutes.POST("", testController.TestEmail)
+	}
+
+	kprRoutes := r.Group("api/kpr")
+	{
+		kprRoutes.POST("/pengajuanKPR", kprController.PengajuanKPR)
 	}
 
 	r.Run(":7177")
