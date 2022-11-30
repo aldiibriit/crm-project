@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"go-api/dto/request/kprRequestDTO"
+	kprRequestDTO "go-api/dto/request/kprRequestDTO"
 	responseDTO "go-api/dto/response"
 	"go-api/service"
 
