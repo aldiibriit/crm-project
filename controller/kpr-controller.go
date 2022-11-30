@@ -1,7 +1,7 @@
 package controller
 
 import (
-	kprRequestDTO "go-api/dto/request/KPRRequestDTO"
+	"go-api/dto/request/KPRRequestDTO"
 	responseDTO "go-api/dto/response"
 	"go-api/service"
 
@@ -24,7 +24,7 @@ func NewKPRController(kprServ service.KPRService) KPRController {
 
 func (c *kprController) PengajuanKPR(ctx *gin.Context) {
 	var response responseDTO.Response
-	var request kprRequestDTO.PengajuanKPRRequest
+	var request KPRRequestDTO.PengajuanKPRRequest
 	errDTO := ctx.ShouldBind(&request)
 	if errDTO != nil {
 		response.HttpCode = 400

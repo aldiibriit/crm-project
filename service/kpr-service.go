@@ -1,7 +1,7 @@
 package service
 
 import (
-	"go-api/dto/request/kprRequestDTO"
+	"go-api/dto/request/KPRRequestDTO"
 	responseDTO "go-api/dto/response"
 	"go-api/entity"
 	"go-api/repository"
@@ -11,7 +11,7 @@ import (
 )
 
 type KPRService interface {
-	PengajuanKPR(request kprRequestDTO.PengajuanKPRRequest) responseDTO.Response
+	PengajuanKPR(request KPRRequestDTO.PengajuanKPRRequest) responseDTO.Response
 }
 
 type kprService struct {
@@ -24,7 +24,7 @@ func NewKPRService(customerRepo repository.CustomerRepository) KPRService {
 	}
 }
 
-func (service *kprService) PengajuanKPR(request kprRequestDTO.PengajuanKPRRequest) responseDTO.Response {
+func (service *kprService) PengajuanKPR(request KPRRequestDTO.PengajuanKPRRequest) responseDTO.Response {
 	var response responseDTO.Response
 
 	customer := entity.TblCustomer{}
