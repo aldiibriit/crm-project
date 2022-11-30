@@ -43,18 +43,18 @@ func (controller *salesController) MISDeveloper(ctx *gin.Context) {
 		return
 	}
 
-	decryptedRequest, err := deserializeMisDeveloperRequest(request)
-	if err != nil {
-		response.HttpCode = 400
-		response.ResponseCode = "99"
-		response.ResponseDesc = "Error in deserialize"
-		response.ResponseData = nil
-		response.Summary = nil
-		ctx.AbortWithStatusJSON(response.HttpCode, response)
-		return
-	}
+	// decryptedRequest, err := deserializeMisDeveloperRequest(request)
+	// if err != nil {
+	// 	response.HttpCode = 400
+	// 	response.ResponseCode = "99"
+	// 	response.ResponseDesc = "Error in deserialize"
+	// 	response.ResponseData = nil
+	// 	response.Summary = nil
+	// 	ctx.AbortWithStatusJSON(response.HttpCode, response)
+	// 	return
+	// }
 
-	response = controller.salesService.MISDeveloper(decryptedRequest)
+	response = controller.salesService.MISDeveloper(request)
 	ctx.JSON(response.HttpCode, response)
 }
 

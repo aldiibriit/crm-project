@@ -38,6 +38,8 @@ type ListProject struct {
 	ImageProjectId  string             `json:"-" gorm:"column:imageProjectId"`
 	ImageProperti   []TblImageProperti `json:"-" gorm:"foreignKey:TrxId;references:ImagePropertiId"`
 	ImageProject    []TblImageProperti `json:"imageProject" gorm:"foreignKey:TrxId;references:ImageProjectId"`
+	SalesID         string             `json:"salesID" gorm:"column:salesID"`
+	ReferralCode    string             `json:"referralCode" gorm:"column:referralCode"`
 }
 
 type DetailProperti struct {

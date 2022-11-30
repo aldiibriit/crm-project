@@ -143,7 +143,9 @@ func (service *salesService) ListProject(request salesRequestDTO.ListProjectRequ
 	tmp2.created_at as createdAtMediaProject,
 	tmp2.modified_at as modifiedAtMediaProject,
 	tp.created_at as createdAtTP,
-	tp.modified_at as modifiedAtTP
+	tp.modified_at as modifiedAtTP,
+	(select id from tbl_sales where sales_email = '` + request.EmailSales + `' limit 1)as salesID,
+	(select refferal_code from tbl_sales where sales_email = '` + request.EmailSales + `' limit 1)as referralCode
 	FROM tbl_project tp 
 	INNER JOIN tbl_alamat_properti ap ON tp.alamat_properti_id = ap.id
 	INNER JOIN tbl_fas_properti fp ON tp.fase_properti_id = fp.id
@@ -268,6 +270,7 @@ func serializeMisDeveloper(request interface{}) []salesResponseDTO.MISDeveloper 
 		result[i].ModifiedAtRes = encryptedModifiedAt
 		result[i].SalesName = encryptedSalesName
 		result[i].SalesPhone = encryptedSalesPhone
+		result[i].Status = v.Status
 	}
 
 	return result

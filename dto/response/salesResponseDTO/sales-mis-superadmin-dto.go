@@ -19,6 +19,7 @@ type MISDeveloper struct {
 	RegisteredBy   string    `gorm:"column:registered_by;size:255" json:"registeredBy"`
 	SalesName      string    `gorm:"column:sales_name;size:255" json:"salesName"`
 	SalesPhone     string    `json:"salesPhone" gorm:"column:salesPhone"`
+	Status         string    `json:"status" gorm:"column:status"`
 	CreatedAt      time.Time `json:"-"`
 	ModifiedAt     time.Time `json:"-"`
 	CreatedAtRes   string    `json:"createdAt" gorm:"-"`

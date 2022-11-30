@@ -40,7 +40,7 @@ func (db *salesConnection) FindByEmailDeveloper(request salesRequestDTO.MISDevel
 	var totalData int
 
 	db.connection.Raw(`SELECT 
-	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name,tu.mobile_no as salesPhone
+	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name,tu.mobile_no as salesPhone,tu.status
 	FROM tbl_sales ts
 	JOIN tbl_user tu ON tu.email = ts.sales_email
 	WHERE developer_email = '` + request.EmailDeveloper + `' and ts.developer_email like '%` + request.Keyword + `%'

@@ -29,6 +29,7 @@ func (service *kprService) PengajuanKPR(request KPRRequestDTO.PengajuanKPRReques
 
 	customer := entity.TblCustomer{}
 	customer.CreatedAt = time.Now()
+	customer.ModifiedAt = time.Now()
 	err := smapping.FillStruct(&customer, smapping.MapFields(&request))
 	if err != nil {
 		response.HttpCode = 200
