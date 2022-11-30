@@ -1,4 +1,4 @@
-package kprRequestDTO
+package KPRRequestDTO
 
 type PengajuanKPRRequest struct {
 	NIK            string `json:"nik" binding:"required"`
