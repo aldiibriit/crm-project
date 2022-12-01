@@ -90,10 +90,11 @@ func main() {
 		salesRoutes.POST("/deleteSalesByDeveloper", salesController.DeleteSalesByDeveloper)
 	}
 
-	userRoutes := r.Group("api/user", middleware.AuthorizeJWT(jwtService))
+	userRoutes := r.Group("api/user")
 	{
 		userRoutes.GET("/profile", userController.Profile)
 		userRoutes.PUT("/profile", userController.Update)
+		userRoutes.POST("/userDeveloperList", userController.GetDeveloper)
 	}
 
 	bookRoutes := r.Group("api/books", middleware.AuthorizeJWT(jwtService))

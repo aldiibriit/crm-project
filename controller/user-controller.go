@@ -17,6 +17,7 @@ import (
 type UserController interface {
 	Update(context *gin.Context)
 	Profile(context *gin.Context)
+	GetDeveloper(ctx *gin.Context)
 }
 
 type userController struct {
@@ -69,4 +70,9 @@ func (c *userController) Profile(context *gin.Context) {
 	res := helper.BuildResponse(true, "OK", user)
 	context.JSON(http.StatusOK, res)
 
+}
+
+func (c *userController) GetDeveloper(ctx *gin.Context) {
+	response := c.userService.GetDeveloper()
+	ctx.JSON(response.HttpCode, response)
 }

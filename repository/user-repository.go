@@ -3,6 +3,7 @@ package repository
 import (
 	"log"
 
+	"go-api/dto/response/userResponseDTO"
 	"go-api/entity"
 
 	"golang.org/x/crypto/bcrypt"
@@ -21,6 +22,7 @@ type UserRepository interface {
 	CheckUserExist(email string) bool
 	UpdateOrCreate(data entity.TblUser)
 	GetLatestId() entity.TblUser
+	GetDeveloper() []userResponseDTO.UserDeveloperResponse
 	ProfileUser(userID string) entity.User
 }
 
@@ -118,6 +120,12 @@ func (db *userConnection) UpdateOrCreate(data entity.TblUser) {
 func (db *userConnection) GetLatestId() entity.TblUser {
 	var data entity.TblUser
 	db.connection.Raw("SELECT id from tbl_user order by id desc limit 1").Take(&data)
+	return data
+}
+
+func (db *userConnection) GetDeveloper() []userResponseDTO.UserDeveloperResponse {
+	var data []userResponseDTO.UserDeveloperResponse
+	db.connection.Raw(`SELECT email,json_extract(metadata,'$.name')as name FROM tbl_user where type = 'developer' and status = 'active'`).Find(&data)
 	return data
 }
 
