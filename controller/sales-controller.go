@@ -14,6 +14,7 @@ import (
 type SalesController interface {
 	MISDeveloper(ctx *gin.Context)
 	MISSuperAdmin(ctx *gin.Context)
+	EditSalesByDeveloper(ctx *gin.Context)
 	ListProject(ctx *gin.Context)
 }
 
@@ -54,7 +55,7 @@ func (controller *salesController) MISDeveloper(ctx *gin.Context) {
 		return
 	}
 
-	response = controller.salesService.MISDeveloper(de)
+	response = controller.salesService.MISDeveloper(decryptedRequest)
 	ctx.JSON(response.HttpCode, response)
 }
 
@@ -105,6 +106,27 @@ func (controller *salesController) ListProject(ctx *gin.Context) {
 	}
 
 	response = controller.salesService.ListProject(decryptedRequest)
+	ctx.JSON(response.HttpCode, response)
+}
+
+func (controller *salesController) EditSalesByDeveloper(ctx *gin.Context) {
+	var response responseDTO.Response
+	var request salesRequestDTO.SalesEditRequestDTO
+
+	errDTO := ctx.ShouldBind(&request)
+	if errDTO != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+
+	response = controller.salesService.EditSalesByDeveloper(request)
+
 	ctx.JSON(response.HttpCode, response)
 }
 

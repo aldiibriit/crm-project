@@ -31,7 +31,7 @@ var (
 	authService            service.AuthService               = service.NewAuthService(userRepository, salesRepository, emailService, emailAttemptRepository, otpService)
 	emailService           service.EmailService              = service.NewEmailService(emailAttemptRepository)
 	kprService             service.KPRService                = service.NewKPRService(customerRepository)
-	salesService           service.SalesService              = service.NewSalesService(salesRepository)
+	salesService           service.SalesService              = service.NewSalesService(salesRepository, userRepository)
 	testController         controller.TestController         = controller.NewTestController(emailService)
 	authController         controller.AuthController         = controller.NewAuthController(authService, jwtService)
 	userController         controller.UserController         = controller.NewUserController(userService, jwtService)
@@ -85,6 +85,7 @@ func main() {
 		salesRoutes.POST("/atDeveloper", salesController.MISDeveloper)
 		salesRoutes.POST("/atSuperAdmin", salesController.MISSuperAdmin)
 		salesRoutes.POST("/listProject", salesController.ListProject)
+		salesRoutes.POST("/editSalesByDeveloper", salesController.EditSalesByDeveloper)
 	}
 
 	userRoutes := r.Group("api/user", middleware.AuthorizeJWT(jwtService))

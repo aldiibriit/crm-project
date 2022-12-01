@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"go-api/dto/request/salesRequestDTO"
 	"go-api/dto/response/salesResponseDTO"
 	"go-api/entity"
@@ -15,6 +16,7 @@ type SalesRepository interface {
 	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) ([]salesResponseDTO.MISSuperAdmin, int)
 	ListProject(sqlStr string) ([]salesResponseDTO.ListProject, int64)
 	RelationToImageProperti(trxId string) []salesResponseDTO.TblImageProperti
+	EditSalesByDeveloper(request salesRequestDTO.SalesEditRequestDTO) error
 }
 
 type salesConnection struct {
@@ -103,4 +105,27 @@ func (db *salesConnection) RelationToImageProperti(trxId string) []salesResponse
 	var imageProject []salesResponseDTO.TblImageProperti
 	db.connection.Raw(`SELECT * FROM tbl_image_properti WHERE trx_id = '` + trxId + `'`).Find(&imageProject)
 	return imageProject
+}
+
+func (db *salesConnection) EditSalesByDeveloper(request salesRequestDTO.SalesEditRequestDTO) error {
+	var currentEmail string
+
+	db.connection.Raw(`SELECT email from tbl_user where id = ` + request.ID + ``).Scan(&currentEmail)
+
+	fmt.Println(currentEmail)
+
+	tx := db.connection.Begin()
+	if err := tx.Model(&entity.TblUser{}).Where("id", request.ID).Updates(&entity.TblUser{Email: request.Email, MobileNo: request.SalesPhone}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Model(&entity.TblSales{}).Where("sales_email", currentEmail).Update("sales_email", request.Email).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+
+	return nil
 }

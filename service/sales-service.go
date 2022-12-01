@@ -15,15 +15,18 @@ type SalesService interface {
 	MISDeveloper(request salesRequestDTO.MISDeveloperRequestDTO) responseDTO.Response
 	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) responseDTO.Response
 	ListProject(request salesRequestDTO.ListProjectRequest) responseDTO.Response
+	EditSalesByDeveloper(request salesRequestDTO.SalesEditRequestDTO) responseDTO.Response
 }
 
 type salesService struct {
 	salesRepository repository.SalesRepository
+	userRepository  repository.UserRepository
 }
 
-func NewSalesService(salesRepo repository.SalesRepository) SalesService {
+func NewSalesService(salesRepo repository.SalesRepository, userRepo repository.UserRepository) SalesService {
 	return &salesService{
 		salesRepository: salesRepo,
+		userRepository:  userRepo,
 	}
 }
 
@@ -242,6 +245,42 @@ func (service *salesService) MISSuperAdmin(request salesRequestDTO.MISSuperAdmin
 	response.ResponseCode = "00"
 	response.ResponseDesc = "Success"
 	response.ResponseData = encryptedData
+	response.Summary = nil
+
+	return response
+}
+
+func (service *salesService) EditSalesByDeveloper(request salesRequestDTO.SalesEditRequestDTO) responseDTO.Response {
+	var response responseDTO.Response
+
+	user := service.userRepository.FindByEmail2(request.Email)
+
+	if len(user.Email) > 0 {
+		response.HttpCode = 500
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = "Email already exist"
+		response.Summary = nil
+		return response
+	}
+
+	err := service.salesRepository.EditSalesByDeveloper(request)
+	if err != nil {
+		response.HttpCode = 500
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = err.Error()
+		response.Summary = nil
+		return response
+	}
+
+	response.HttpCode = 200
+	response.MetadataResponse = nil
+	response.ResponseCode = "00"
+	response.ResponseData = request
+	response.ResponseDesc = "Success"
 	response.Summary = nil
 
 	return response
