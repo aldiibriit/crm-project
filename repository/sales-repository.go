@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"go-api/dto/request/salesRequestDTO"
 	"go-api/dto/response/salesResponseDTO"
 	"go-api/entity"
@@ -18,6 +17,7 @@ type SalesRepository interface {
 	RelationToImageProperti(trxId string) []salesResponseDTO.TblImageProperti
 	DetailSalesByDeveloper(request salesRequestDTO.DetailSalesRequest) salesResponseDTO.MISDeveloper
 	EditSalesByDeveloper(request salesRequestDTO.SalesEditRequestDTO) error
+	DeleteSalesByDeveloper(request salesRequestDTO.SalesDeleteRequestDTO) error
 }
 
 type salesConnection struct {
@@ -75,6 +75,27 @@ func (db *salesConnection) FindByEmailDeveloper(request salesRequestDTO.MISDevel
 func (db *salesConnection) MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) ([]salesResponseDTO.MISSuperAdmin, int) {
 	var data []salesResponseDTO.MISSuperAdmin
 	var totalData int
+
+	if request.Limit == 0 && request.Offset == 0 {
+		db.connection.Raw(`SELECT ts.sales_email ,ts.sales_name,(select json_extract(metadata,'$.name') from tbl_user tu2 where tu2.email = ts.developer_email)as metadata,tp.status,tp.jenis_properti,tp.tipe_properti
+	FROM tbl_project tp
+	JOIN tbl_sales ts on tp.email = ts.developer_email 
+	JOIN tbl_user tu on tu.email = ts.sales_email 
+	WHERE ts.sales_email like '%` + request.Keyword + `%' or ts.sales_name like '%` + request.Keyword + `%' or metadata like '%` + request.Keyword + `%' or tp.status like '%` + request.Keyword + `%' or tp.jenis_properti like '%` + request.Keyword + `%' or tp.tipe_properti like '%` + request.Keyword + `%'
+	order by ts.sales_email
+	`).Find(&data)
+
+		db.connection.Raw(`SELECT count(ts.sales_email)
+	FROM tbl_project tp
+	JOIN tbl_sales ts on tp.email = ts.developer_email 
+	JOIN tbl_user tu on tu.email = ts.sales_email 
+	WHERE ts.sales_email like '%` + request.Keyword + `%' or ts.sales_name like '%` + request.Keyword + `%' or metadata like '%` + request.Keyword + `%' or tp.status like '%` + request.Keyword + `%' or tp.jenis_properti like '%` + request.Keyword + `%' or tp.tipe_properti like '%` + request.Keyword + `%'
+	order by ts.sales_email
+	`).Find(&totalData)
+
+		return data, totalData
+	}
+
 	db.connection.Raw(`SELECT ts.sales_email ,ts.sales_name,(select json_extract(metadata,'$.name') from tbl_user tu2 where tu2.email = ts.developer_email)as metadata,tp.status,tp.jenis_properti,tp.tipe_properti
 	FROM tbl_project tp
 	JOIN tbl_sales ts on tp.email = ts.developer_email 
@@ -113,8 +134,6 @@ func (db *salesConnection) EditSalesByDeveloper(request salesRequestDTO.SalesEdi
 
 	db.connection.Raw(`SELECT email from tbl_user where id = ` + request.ID + ``).Scan(&currentEmail)
 
-	fmt.Println(currentEmail)
-
 	tx := db.connection.Begin()
 	if err := tx.Model(&entity.TblUser{}).Where("id", request.ID).Updates(&entity.TblUser{Email: request.Email, MobileNo: request.SalesPhone}).Error; err != nil {
 		tx.Rollback()
@@ -122,6 +141,18 @@ func (db *salesConnection) EditSalesByDeveloper(request salesRequestDTO.SalesEdi
 	}
 
 	if err := tx.Model(&entity.TblSales{}).Where("sales_email", currentEmail).Update("sales_email", request.Email).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+
+	return nil
+}
+
+func (db *salesConnection) DeleteSalesByDeveloper(request salesRequestDTO.SalesDeleteRequestDTO) error {
+	tx := db.connection.Begin()
+	if err := tx.Model(&entity.TblUser{}).Where("id", request.ID).Update("status", "Deleted").Error; err != nil {
 		tx.Rollback()
 		return err
 	}

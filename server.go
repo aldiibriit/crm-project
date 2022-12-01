@@ -43,7 +43,7 @@ var (
 )
 
 // func main() {
-// 	Password := "mraldisptr30@gmail.com"
+// 	Password := "3853"
 // 	encryptedPassword, err := helper.RsaEncryptFEToBE([]byte(Password))
 // 	if err != nil {
 // 		fmt.Println(err.Error())
@@ -87,6 +87,7 @@ func main() {
 		salesRoutes.POST("/listProject", salesController.ListProject)
 		salesRoutes.POST("/editSalesByDeveloper", salesController.EditSalesByDeveloper)
 		salesRoutes.POST("/detailSalesAtDeveloper", salesController.DetailSalesByDeveloper)
+		salesRoutes.POST("/deleteSalesByDeveloper", salesController.DeleteSalesByDeveloper)
 	}
 
 	userRoutes := r.Group("api/user", middleware.AuthorizeJWT(jwtService))

@@ -16,6 +16,7 @@ type SalesController interface {
 	MISSuperAdmin(ctx *gin.Context)
 	DetailSalesByDeveloper(ctx *gin.Context)
 	EditSalesByDeveloper(ctx *gin.Context)
+	DeleteSalesByDeveloper(ctx *gin.Context)
 	ListProject(ctx *gin.Context)
 }
 
@@ -126,7 +127,51 @@ func (controller *salesController) EditSalesByDeveloper(ctx *gin.Context) {
 		return
 	}
 
-	response = controller.salesService.EditSalesByDeveloper(request)
+	decryptedRequest, err := deserializeEditSalesByDeveloper(request)
+	if err != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+	response = controller.salesService.EditSalesByDeveloper(decryptedRequest)
+
+	ctx.JSON(response.HttpCode, response)
+}
+
+func (controller *salesController) DeleteSalesByDeveloper(ctx *gin.Context) {
+	var response responseDTO.Response
+	var request salesRequestDTO.SalesDeleteRequestDTO
+
+	errDTO := ctx.ShouldBind(&request)
+	if errDTO != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+
+	decryptedRequest, err := deserializeDeleteSales(request)
+	if err != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+
+	response = controller.salesService.DeleteSalesByDeveloper(decryptedRequest)
 
 	ctx.JSON(response.HttpCode, response)
 }
@@ -147,7 +192,19 @@ func (controller *salesController) DetailSalesByDeveloper(ctx *gin.Context) {
 		return
 	}
 
-	response = controller.salesService.DetailSalesByDeveloper(request)
+	decryptedRequest, err := deserializeDetailSales(request)
+	if err != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+
+	response = controller.salesService.DetailSalesByDeveloper(decryptedRequest)
 
 	ctx.JSON(response.HttpCode, response)
 }
@@ -188,6 +245,100 @@ func deserializeListProjectBySales(request interface{}) (salesRequestDTO.ListPro
 
 	result.EmailSales = plainTextEmailSales
 	result.PageStart = otpDTO.PageStart
+
+	return result, nil
+}
+
+func deserializeEditSalesByDeveloper(request interface{}) (salesRequestDTO.SalesEditRequestDTO, error) {
+	otpDTO := request.(salesRequestDTO.SalesEditRequestDTO)
+
+	cipheTextEmail, err := base64.StdEncoding.DecodeString(otpDTO.Email)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	cipheTextID, err := base64.StdEncoding.DecodeString(otpDTO.ID)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	cipheTextSalesName, err := base64.StdEncoding.DecodeString(otpDTO.SalesName)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	cipheTextSalesPhone, err := base64.StdEncoding.DecodeString(otpDTO.SalesPhone)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	plainTextEmail, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.SalesEditRequestDTO{}, err
+	}
+
+	plainTextID, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextID))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.SalesEditRequestDTO{}, err
+	}
+
+	plainTextSalesName, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextSalesName))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.SalesEditRequestDTO{}, err
+	}
+
+	plainTextSalesPhone, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextSalesPhone))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.SalesEditRequestDTO{}, err
+	}
+
+	var result salesRequestDTO.SalesEditRequestDTO
+
+	result.Email = plainTextEmail
+	result.ID = plainTextID
+	result.SalesName = plainTextSalesName
+	result.SalesPhone = plainTextSalesPhone
+
+	return result, nil
+}
+
+func deserializeDetailSales(request interface{}) (salesRequestDTO.DetailSalesRequest, error) {
+	otpDTO := request.(salesRequestDTO.DetailSalesRequest)
+
+	cipheTextID, err := base64.StdEncoding.DecodeString(otpDTO.ID)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	plainTextID, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextID))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.DetailSalesRequest{}, err
+	}
+
+	var result salesRequestDTO.DetailSalesRequest
+
+	result.ID = plainTextID
+
+	return result, nil
+}
+
+func deserializeDeleteSales(request interface{}) (salesRequestDTO.SalesDeleteRequestDTO, error) {
+	otpDTO := request.(salesRequestDTO.SalesDeleteRequestDTO)
+
+	cipheTextID, err := base64.StdEncoding.DecodeString(otpDTO.ID)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	plainTextID, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextID))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.SalesDeleteRequestDTO{}, err
+	}
+
+	var result salesRequestDTO.SalesDeleteRequestDTO
+
+	result.ID = plainTextID
 
 	return result, nil
 }

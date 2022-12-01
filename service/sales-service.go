@@ -16,6 +16,7 @@ type SalesService interface {
 	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) responseDTO.Response
 	ListProject(request salesRequestDTO.ListProjectRequest) responseDTO.Response
 	EditSalesByDeveloper(request salesRequestDTO.SalesEditRequestDTO) responseDTO.Response
+	DeleteSalesByDeveloper(request salesRequestDTO.SalesDeleteRequestDTO) responseDTO.Response
 	DetailSalesByDeveloper(request salesRequestDTO.DetailSalesRequest) responseDTO.Response
 }
 
@@ -277,10 +278,12 @@ func (service *salesService) EditSalesByDeveloper(request salesRequestDTO.SalesE
 		return response
 	}
 
+	encryptedData := serializeUpdatedSales(request)
+
 	response.HttpCode = 200
 	response.MetadataResponse = nil
 	response.ResponseCode = "00"
-	response.ResponseData = request
+	response.ResponseData = encryptedData
 	response.ResponseDesc = "Success"
 	response.Summary = nil
 
@@ -301,10 +304,36 @@ func (service *salesService) DetailSalesByDeveloper(request salesRequestDTO.Deta
 		return response
 	}
 
+	encryptedData := serializeDetailSales(data)
+
 	response.HttpCode = 200
 	response.MetadataResponse = nil
 	response.ResponseCode = "00"
-	response.ResponseData = data
+	response.ResponseData = encryptedData
+	response.ResponseDesc = "Success"
+	response.Summary = nil
+
+	return response
+}
+
+func (service *salesService) DeleteSalesByDeveloper(request salesRequestDTO.SalesDeleteRequestDTO) responseDTO.Response {
+	var response responseDTO.Response
+
+	err := service.salesRepository.DeleteSalesByDeveloper(request)
+	if err != nil {
+		response.HttpCode = 500
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = err.Error()
+		response.Summary = nil
+		return response
+	}
+
+	response.HttpCode = 200
+	response.MetadataResponse = nil
+	response.ResponseCode = "00"
+	response.ResponseData = nil
 	response.ResponseDesc = "Success"
 	response.Summary = nil
 
@@ -336,6 +365,51 @@ func serializeMisDeveloper(request interface{}) []salesResponseDTO.MISDeveloper 
 		result[i].SalesPhone = encryptedSalesPhone
 		result[i].Status = v.Status
 	}
+
+	return result
+}
+
+func serializeUpdatedSales(request interface{}) salesRequestDTO.SalesEditRequestDTO {
+	data := request.(salesRequestDTO.SalesEditRequestDTO)
+	var result salesRequestDTO.SalesEditRequestDTO
+
+	encryptedEmail, _ := helper.RsaEncryptBEToFE([]byte(data.Email))
+	encryptedID, _ := helper.RsaEncryptBEToFE([]byte(data.ID))
+	encryptedSalesPhone, _ := helper.RsaEncryptBEToFE([]byte(data.SalesPhone))
+	encryptedSalesName, _ := helper.RsaEncryptBEToFE([]byte(data.SalesName))
+
+	result.Email = encryptedEmail
+	result.ID = encryptedID
+	result.SalesName = encryptedSalesName
+	result.SalesPhone = encryptedSalesPhone
+
+	return result
+}
+
+func serializeDetailSales(request interface{}) salesResponseDTO.MISDeveloper {
+	data := request.(salesResponseDTO.MISDeveloper)
+	var result salesResponseDTO.MISDeveloper
+
+	encryptedIdRes, _ := helper.RsaEncryptBEToFE([]byte(strconv.Itoa(data.ID)))
+	encryptedEmaiDeveloper, _ := helper.RsaEncryptBEToFE([]byte(data.EmailDeveloper))
+	encryptedEmaiSales, _ := helper.RsaEncryptBEToFE([]byte(data.EmailSales))
+	encryptedRefferalCode, _ := helper.RsaEncryptBEToFE([]byte(data.RefferalCode))
+	encryptedRegisteredBy, _ := helper.RsaEncryptBEToFE([]byte(data.RegisteredBy))
+	encryptedSalesName, _ := helper.RsaEncryptBEToFE([]byte(data.SalesName))
+	encryptedSalesPhone, _ := helper.RsaEncryptBEToFE([]byte(data.SalesPhone))
+	encryptedCreatedAt, _ := helper.RsaEncryptBEToFE([]byte(data.CreatedAt.String()))
+	encryptedModifiedAt, _ := helper.RsaEncryptBEToFE([]byte(data.ModifiedAt.String()))
+
+	result.IDResponse = encryptedIdRes
+	result.EmailSales = encryptedEmaiSales
+	result.EmailDeveloper = encryptedEmaiDeveloper
+	result.RefferalCode = encryptedRefferalCode
+	result.RegisteredBy = encryptedRegisteredBy
+	result.CreatedAtRes = encryptedCreatedAt
+	result.ModifiedAtRes = encryptedModifiedAt
+	result.SalesName = encryptedSalesName
+	result.SalesPhone = encryptedSalesPhone
+	result.Status = data.Status
 
 	return result
 }
