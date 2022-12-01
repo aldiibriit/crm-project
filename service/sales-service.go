@@ -16,6 +16,7 @@ type SalesService interface {
 	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) responseDTO.Response
 	ListProject(request salesRequestDTO.ListProjectRequest) responseDTO.Response
 	EditSalesByDeveloper(request salesRequestDTO.SalesEditRequestDTO) responseDTO.Response
+	DetailSalesByDeveloper(request salesRequestDTO.DetailSalesRequest) responseDTO.Response
 }
 
 type salesService struct {
@@ -280,6 +281,30 @@ func (service *salesService) EditSalesByDeveloper(request salesRequestDTO.SalesE
 	response.MetadataResponse = nil
 	response.ResponseCode = "00"
 	response.ResponseData = request
+	response.ResponseDesc = "Success"
+	response.Summary = nil
+
+	return response
+}
+
+func (service *salesService) DetailSalesByDeveloper(request salesRequestDTO.DetailSalesRequest) responseDTO.Response {
+	var response responseDTO.Response
+
+	data := service.salesRepository.DetailSalesByDeveloper(request)
+	if data.EmailDeveloper == "" && data.EmailSales == "" {
+		response.HttpCode = 404
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = "Data not found"
+		response.Summary = nil
+		return response
+	}
+
+	response.HttpCode = 200
+	response.MetadataResponse = nil
+	response.ResponseCode = "00"
+	response.ResponseData = data
 	response.ResponseDesc = "Success"
 	response.Summary = nil
 

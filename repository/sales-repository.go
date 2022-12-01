@@ -16,6 +16,7 @@ type SalesRepository interface {
 	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) ([]salesResponseDTO.MISSuperAdmin, int)
 	ListProject(sqlStr string) ([]salesResponseDTO.ListProject, int64)
 	RelationToImageProperti(trxId string) []salesResponseDTO.TblImageProperti
+	DetailSalesByDeveloper(request salesRequestDTO.DetailSalesRequest) salesResponseDTO.MISDeveloper
 	EditSalesByDeveloper(request salesRequestDTO.SalesEditRequestDTO) error
 }
 
@@ -128,4 +129,14 @@ func (db *salesConnection) EditSalesByDeveloper(request salesRequestDTO.SalesEdi
 	tx.Commit()
 
 	return nil
+}
+
+func (db *salesConnection) DetailSalesByDeveloper(request salesRequestDTO.DetailSalesRequest) salesResponseDTO.MISDeveloper {
+	var result salesResponseDTO.MISDeveloper
+	db.connection.Raw(`SELECT 
+	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name,tu.mobile_no as salesPhone,tu.status
+	FROM tbl_sales ts
+	JOIN tbl_user tu ON tu.email = ts.sales_email
+	WHERE tu.id = ` + request.ID + ``).First(&result)
+	return result
 }

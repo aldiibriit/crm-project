@@ -86,6 +86,7 @@ func main() {
 		salesRoutes.POST("/atSuperAdmin", salesController.MISSuperAdmin)
 		salesRoutes.POST("/listProject", salesController.ListProject)
 		salesRoutes.POST("/editSalesByDeveloper", salesController.EditSalesByDeveloper)
+		salesRoutes.POST("/detailSalesAtDeveloper", salesController.DetailSalesByDeveloper)
 	}
 
 	userRoutes := r.Group("api/user", middleware.AuthorizeJWT(jwtService))
