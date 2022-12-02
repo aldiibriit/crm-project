@@ -212,6 +212,7 @@ type Cluster struct {
 type TblImageProperti struct {
 	ImageName  string    `json:"imageName" gorm:"column:image_name"`
 	TrxId      string    `json:"trxId" gorm:"column:trx_id"`
+	SharedUrl  string    `json:"sharedUrl" gorm:"column:shared_url"`
 	CreatedAt  time.Time `json:"createdAt" gorm:"column:created_at"`
 	ModifiedAt time.Time `json:"modifiedAt" gorm:"column:modified_at"`
 }

@@ -214,8 +214,11 @@ func (service *salesService) ListProject(request salesRequestDTO.ListProjectRequ
 
 		for y := 0; y < len(v.ImageProperti); y++ {
 			originPropertiTrxId := v.ImageProperti[y].TrxId
+			originPropertiSharedUrl := v.ImageProperti[y].SharedUrl
 			encryptedPropertiTrxId, _ := helper.RsaEncryptBEToFE([]byte(originPropertiTrxId))
+			encryptedPropertiSharedUrl, _ := helper.RsaEncryptBEToFE([]byte(originPropertiSharedUrl))
 			data[i].ImageProperti[y].TrxId = encryptedPropertiTrxId
+			data[i].ImageProperti[y].SharedUrl = encryptedPropertiSharedUrl
 		}
 	}
 
