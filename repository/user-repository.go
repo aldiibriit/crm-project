@@ -3,6 +3,7 @@ package repository
 import (
 	"log"
 
+	"go-api/dto/request/userRequestDTO"
 	"go-api/dto/response/userResponseDTO"
 	"go-api/entity"
 
@@ -22,7 +23,7 @@ type UserRepository interface {
 	CheckUserExist(email string) bool
 	UpdateOrCreate(data entity.TblUser)
 	GetLatestId() entity.TblUser
-	GetDeveloper() []userResponseDTO.UserDeveloperResponse
+	GetDeveloper(request userRequestDTO.ListUserDeveloperRequestDTO) []userResponseDTO.UserDeveloperResponse
 	ProfileUser(userID string) entity.User
 }
 
@@ -123,9 +124,9 @@ func (db *userConnection) GetLatestId() entity.TblUser {
 	return data
 }
 
-func (db *userConnection) GetDeveloper() []userResponseDTO.UserDeveloperResponse {
+func (db *userConnection) GetDeveloper(request userRequestDTO.ListUserDeveloperRequestDTO) []userResponseDTO.UserDeveloperResponse {
 	var data []userResponseDTO.UserDeveloperResponse
-	db.connection.Raw(`SELECT email,json_extract(metadata,'$.name')as name FROM tbl_user where type = 'developer' and status = 'active'`).Find(&data)
+	db.connection.Raw(`SELECT email,json_extract(metadata,'$.name')as name FROM tbl_user where type = 'developer' and status = 'active' and email like '%` + request.Keyword + `%' or json_extract(metadata,'$.name') like '%` + request.Keyword + `%' and type = 'developer' and status = 'active'`).Find(&data)
 	return data
 }
 

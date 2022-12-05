@@ -6,6 +6,8 @@ import (
 	"strconv"
 
 	"go-api/dto"
+	"go-api/dto/request/userRequestDTO"
+	responseDTO "go-api/dto/response"
 	"go-api/helper"
 	"go-api/service"
 
@@ -73,6 +75,21 @@ func (c *userController) Profile(context *gin.Context) {
 }
 
 func (c *userController) GetDeveloper(ctx *gin.Context) {
-	response := c.userService.GetDeveloper()
+	var request userRequestDTO.ListUserDeveloperRequestDTO
+	var response responseDTO.Response
+	errDTO := ctx.ShouldBind(&request)
+	if errDTO != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+
+	response = c.userService.GetDeveloper(request)
+
 	ctx.JSON(response.HttpCode, response)
 }

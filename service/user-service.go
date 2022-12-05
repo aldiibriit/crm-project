@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"go-api/dto"
+	"go-api/dto/request/userRequestDTO"
 	responseDTO "go-api/dto/response"
 	"go-api/entity"
 	"go-api/repository"
@@ -14,7 +15,7 @@ import (
 type UserService interface {
 	Update(user dto.UserUpdateDTO) entity.User
 	Profile(userID string) entity.User
-	GetDeveloper() responseDTO.Response
+	GetDeveloper(request userRequestDTO.ListUserDeveloperRequestDTO) responseDTO.Response
 }
 
 type userService struct {
@@ -42,9 +43,9 @@ func (service *userService) Profile(userID string) entity.User {
 	return service.userRepository.ProfileUser(userID)
 }
 
-func (service *userService) GetDeveloper() responseDTO.Response {
+func (service *userService) GetDeveloper(request userRequestDTO.ListUserDeveloperRequestDTO) responseDTO.Response {
 	var response responseDTO.Response
-	data := service.userRepository.GetDeveloper()
+	data := service.userRepository.GetDeveloper(request)
 	response.HttpCode = 200
 	response.MetadataResponse = nil
 	response.ResponseCode = "Success"
