@@ -85,7 +85,7 @@ func main() {
 		salesRoutes.POST("/atDeveloper", salesController.MISDeveloper)
 		salesRoutes.POST("/atSuperAdmin", salesController.MISSuperAdmin)
 		salesRoutes.POST("/listProject", salesController.ListProject)
-		salesRoutes.POST("/editSalesByDeveloper", salesController.EditSalesByDeveloper)
+		salesRoutes.PUT("/editSalesByDeveloper", salesController.EditSalesByDeveloper)
 		salesRoutes.POST("/detailSalesAtDeveloper", salesController.DetailSalesByDeveloper)
 		salesRoutes.POST("/deleteSalesByDeveloper", salesController.DeleteSalesByDeveloper)
 	}
