@@ -36,11 +36,69 @@ func (service *salesService) MISDeveloper(request salesRequestDTO.MISDeveloperRe
 	var response responseDTO.Response
 	var metadataResponse responseDTO.ListUserDtoRes
 
+	sqlStr1 := `SELECT 
+	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name,tu.mobile_no as salesPhone,tu.status
+	FROM tbl_sales ts
+	JOIN tbl_user tu ON tu.email = ts.sales_email
+	WHERE developer_email = '` + request.EmailDeveloper + `' and ts.developer_email like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.refferal_code like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.registered_by like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.created_at like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.modified_at like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.sales_name like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and tu.mobile_no like '%` + request.Keyword + `%'
+	limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
+	`
+	sqlStrCountAll1 := `SELECT 
+	count(tu.id)
+	FROM tbl_sales ts
+	JOIN tbl_user tu ON tu.email = ts.sales_email
+	WHERE developer_email = '` + request.EmailDeveloper + `' and ts.developer_email like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.refferal_code like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.registered_by like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.created_at like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.modified_at like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and ts.sales_name like '%` + request.Keyword + `%'
+	or developer_email = '` + request.EmailDeveloper + `' and tu.mobile_no like '%` + request.Keyword + `%'
+	`
+
+	if request.StartDate != "" && request.EndDate != "" {
+		sqlStr1 = `SELECT 
+	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name,tu.mobile_no as salesPhone,tu.status
+	FROM tbl_sales ts
+	JOIN tbl_user tu ON tu.email = ts.sales_email
+	WHERE developer_email = '` + request.EmailDeveloper + `' and ts.created_at between '` + request.StartDate + `' and '` + request.EndDate + `'
+	limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
+	`
+
+		sqlStrCountAll1 = `SELECT 
+	count(tu.id)
+	FROM tbl_sales ts
+	JOIN tbl_user tu ON tu.email = ts.sales_email
+	WHERE developer_email = '` + request.EmailDeveloper + `' and ts.created_at between '` + request.StartDate + `' and '` + request.EndDate + `'
+	`
+	} else if request.EndDate == "" {
+		sqlStr1 = `SELECT 
+	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name,tu.mobile_no as salesPhone,tu.status
+	FROM tbl_sales ts
+	JOIN tbl_user tu ON tu.email = ts.sales_email
+	WHERE developer_email = '` + request.EmailDeveloper + `' and date(ts.created_at) >= '` + request.StartDate + `'
+	limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
+	`
+
+		sqlStrCountAll1 = `SELECT 
+	count(tu.id)
+	FROM tbl_sales ts
+	JOIN tbl_user tu ON tu.email = ts.sales_email
+	WHERE developer_email = '` + request.EmailDeveloper + `' and date(ts.created_at) >= '` + request.StartDate + `'
+	`
+	}
+
 	metadataResponse.Currentpage = request.Offset
 	if request.Offset > 0 {
 		request.Offset = request.Offset * request.Limit
 	}
-	data, totalData := service.salesRepository.FindByEmailDeveloper(request)
+	data, totalData := service.salesRepository.FindByEmailDeveloper(sqlStr1, sqlStrCountAll1, request)
 	metadataResponse.TotalData = totalData
 
 	encryptedData := serializeMisDeveloper(data)
@@ -351,16 +409,16 @@ func serializeMisDeveloper(request interface{}) []salesResponseDTO.MISDeveloper 
 		encryptedRegisteredBy, _ := helper.RsaEncryptBEToFE([]byte(v.RegisteredBy))
 		encryptedSalesName, _ := helper.RsaEncryptBEToFE([]byte(v.SalesName))
 		encryptedSalesPhone, _ := helper.RsaEncryptBEToFE([]byte(v.SalesPhone))
-		encryptedCreatedAt, _ := helper.RsaEncryptBEToFE([]byte(v.CreatedAt.String()))
-		encryptedModifiedAt, _ := helper.RsaEncryptBEToFE([]byte(v.ModifiedAt.String()))
+		// encryptedCreatedAt, _ := helper.RsaEncryptBEToFE([]byte(v.CreatedAt.String()))
+		// encryptedModifiedAt, _ := helper.RsaEncryptBEToFE([]byte(v.ModifiedAt.String()))
 
 		result[i].IDResponse = encryptedIdRes
 		result[i].EmailSales = encryptedEmaiSales
 		result[i].EmailDeveloper = encryptedEmaiDeveloper
 		result[i].RefferalCode = encryptedRefferalCode
 		result[i].RegisteredBy = encryptedRegisteredBy
-		result[i].CreatedAtRes = encryptedCreatedAt
-		result[i].ModifiedAtRes = encryptedModifiedAt
+		result[i].CreatedAtRes = v.CreatedAt.String()
+		result[i].ModifiedAtRes = v.ModifiedAt.String()
 		result[i].SalesName = encryptedSalesName
 		result[i].SalesPhone = encryptedSalesPhone
 		result[i].Status = v.Status

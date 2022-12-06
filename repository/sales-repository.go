@@ -11,7 +11,7 @@ import (
 
 type SalesRepository interface {
 	InsertRelation(data entity.TblSales) error
-	FindByEmailDeveloper(request salesRequestDTO.MISDeveloperRequestDTO) ([]salesResponseDTO.MISDeveloper, int)
+	FindByEmailDeveloper(sqlStr string, sqlStrCount string, request salesRequestDTO.MISDeveloperRequestDTO) ([]salesResponseDTO.MISDeveloper, int)
 	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) ([]salesResponseDTO.MISSuperAdmin, int)
 	ListProject(sqlStr string) ([]salesResponseDTO.ListProject, int64)
 	RelationToImageProperti(trxId string) []salesResponseDTO.TblImageProperti
@@ -38,36 +38,13 @@ func (db *salesConnection) InsertRelation(data entity.TblSales) error {
 	return nil
 }
 
-func (db *salesConnection) FindByEmailDeveloper(request salesRequestDTO.MISDeveloperRequestDTO) ([]salesResponseDTO.MISDeveloper, int) {
+func (db *salesConnection) FindByEmailDeveloper(sqlStr string, sqlStrCount string, request salesRequestDTO.MISDeveloperRequestDTO) ([]salesResponseDTO.MISDeveloper, int) {
 	var result []salesResponseDTO.MISDeveloper
 	var totalData int
 
-	db.connection.Raw(`SELECT 
-	tu.id,ts.developer_email,ts.sales_email,ts.refferal_code,ts.registered_by,ts.created_at,ts.modified_at,ts.sales_name,tu.mobile_no as salesPhone,tu.status
-	FROM tbl_sales ts
-	JOIN tbl_user tu ON tu.email = ts.sales_email
-	WHERE developer_email = '` + request.EmailDeveloper + `' and ts.developer_email like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and ts.refferal_code like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and ts.registered_by like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and ts.created_at like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and ts.modified_at like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and ts.sales_name like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and tu.mobile_no like '%` + request.Keyword + `%'
-	limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
-	`).Find(&result)
+	db.connection.Raw(sqlStr).Find(&result)
 
-	db.connection.Raw(`SELECT 
-	count(tu.id)
-	FROM tbl_sales ts
-	JOIN tbl_user tu ON tu.email = ts.sales_email
-	WHERE developer_email = '` + request.EmailDeveloper + `' and ts.developer_email like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and ts.refferal_code like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and ts.registered_by like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and ts.created_at like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and ts.modified_at like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and ts.sales_name like '%` + request.Keyword + `%'
-	or developer_email = '` + request.EmailDeveloper + `' and tu.mobile_no like '%` + request.Keyword + `%'
-	`).Find(&totalData)
+	db.connection.Raw(sqlStrCount).Find(&totalData)
 
 	return result, totalData
 }

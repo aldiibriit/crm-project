@@ -224,6 +224,8 @@ func deserializeMisDeveloperRequest(request interface{}) (salesRequestDTO.MISDev
 	result.Keyword = otpDTO.Keyword
 	result.Offset = otpDTO.Offset
 	result.Limit = otpDTO.Limit
+	result.StartDate = otpDTO.StartDate
+	result.EndDate = otpDTO.EndDate
 
 	return result, nil
 }
