@@ -297,7 +297,59 @@ func (service *salesService) MISSuperAdmin(request salesRequestDTO.MISSuperAdmin
 		request.Offset = request.Offset * request.Limit
 	}
 
-	data, totalData := service.salesRepository.MISSuperAdmin(request)
+	var sqlStr1, sqlStrCountAll1 string
+
+	if request.StartDate != "" && request.EndDate != "" {
+		sqlStr1 = `SELECT ts.sales_email ,ts.sales_name,(select json_extract(metadata,'$.name') from tbl_user tu2 where tu2.email = ts.developer_email)as metadata,tp.status,tp.jenis_properti,tp.tipe_properti,ts.created_at,ts.modified_at
+		FROM tbl_project tp
+		JOIN tbl_sales ts on tp.email = ts.developer_email 
+		JOIN tbl_user tu on tu.email = ts.sales_email 
+		WHERE ts.created_at between '` + request.StartDate + `' and '` + request.EndDate + `'
+		order by ts.sales_email limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
+		`
+
+		sqlStrCountAll1 = `SELECT count(ts.sales_email)
+		FROM tbl_project tp
+		JOIN tbl_sales ts on tp.email = ts.developer_email 
+		JOIN tbl_user tu on tu.email = ts.sales_email 
+		WHERE ts.created_at between '` + request.StartDate + `' and '` + request.EndDate + `'
+		order by ts.sales_email
+		`
+	} else if request.EndDate == "" && request.StartDate != "" {
+		sqlStr1 = `SELECT ts.sales_email ,ts.sales_name,(select json_extract(metadata,'$.name') from tbl_user tu2 where tu2.email = ts.developer_email)as metadata,tp.status,tp.jenis_properti,tp.tipe_properti,ts.created_at,ts.modified_at
+		FROM tbl_project tp
+		JOIN tbl_sales ts on tp.email = ts.developer_email 
+		JOIN tbl_user tu on tu.email = ts.sales_email 
+		WHERE date(ts.created_at) >= '` + request.StartDate + `'
+		order by ts.sales_email limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
+		`
+
+		sqlStrCountAll1 = `SELECT count(ts.sales_email)
+		FROM tbl_project tp
+		JOIN tbl_sales ts on tp.email = ts.developer_email 
+		JOIN tbl_user tu on tu.email = ts.sales_email 
+		WHERE date(ts.created_at) >= '` + request.StartDate + `'
+		order by ts.sales_email
+		`
+	} else {
+		sqlStr1 = `SELECT ts.sales_email ,ts.sales_name,(select json_extract(metadata,'$.name') from tbl_user tu2 where tu2.email = ts.developer_email)as metadata,tp.status,tp.jenis_properti,tp.tipe_properti,ts.created_at,ts.modified_at
+		FROM tbl_project tp
+		JOIN tbl_sales ts on tp.email = ts.developer_email 
+		JOIN tbl_user tu on tu.email = ts.sales_email 
+		WHERE ts.sales_email like '%` + request.Keyword + `%' or ts.sales_name like '%` + request.Keyword + `%' or metadata like '%` + request.Keyword + `%' or tp.status like '%` + request.Keyword + `%' or tp.jenis_properti like '%` + request.Keyword + `%' or tp.tipe_properti like '%` + request.Keyword + `%'
+		order by ts.sales_email limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
+		`
+
+		sqlStrCountAll1 = `SELECT count(ts.sales_email)
+		FROM tbl_project tp
+		JOIN tbl_sales ts on tp.email = ts.developer_email 
+		JOIN tbl_user tu on tu.email = ts.sales_email 
+		WHERE ts.sales_email like '%` + request.Keyword + `%' or ts.sales_name like '%` + request.Keyword + `%' or metadata like '%` + request.Keyword + `%' or tp.status like '%` + request.Keyword + `%' or tp.jenis_properti like '%` + request.Keyword + `%' or tp.tipe_properti like '%` + request.Keyword + `%'
+		order by ts.sales_email 
+		`
+	}
+
+	data, totalData := service.salesRepository.MISSuperAdmin(sqlStr1, sqlStrCountAll1, request)
 	metadataResponse.TotalData = totalData
 
 	encryptedData := serializeMisSuperAdmin(data)
@@ -489,6 +541,8 @@ func serializeMisSuperAdmin(request interface{}) []salesResponseDTO.MISSuperAdmi
 		result[i].Status = encryptedStatus
 		result[i].JenisProperti = encryptedJenisProperti
 		result[i].TipeProperti = encryptedTipeProperti
+		result[i].CreatedAtRes = v.CreatedAt.String()
+		result[i].ModifiedAtRes = v.ModifiedAt.String()
 	}
 
 	return result

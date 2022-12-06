@@ -4,7 +4,6 @@ import (
 	"go-api/dto/request/salesRequestDTO"
 	"go-api/dto/response/salesResponseDTO"
 	"go-api/entity"
-	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -12,7 +11,7 @@ import (
 type SalesRepository interface {
 	InsertRelation(data entity.TblSales) error
 	FindByEmailDeveloper(sqlStr string, sqlStrCount string, request salesRequestDTO.MISDeveloperRequestDTO) ([]salesResponseDTO.MISDeveloper, int)
-	MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) ([]salesResponseDTO.MISSuperAdmin, int)
+	MISSuperAdmin(sqlStr string, sqlStrCount string, request salesRequestDTO.MISSuperAdminRequestDTO) ([]salesResponseDTO.MISSuperAdmin, int)
 	ListProject(sqlStr string) ([]salesResponseDTO.ListProject, int64)
 	RelationToImageProperti(trxId string) []salesResponseDTO.TblImageProperti
 	DetailSalesByDeveloper(request salesRequestDTO.DetailSalesRequest) salesResponseDTO.MISDeveloper
@@ -49,45 +48,13 @@ func (db *salesConnection) FindByEmailDeveloper(sqlStr string, sqlStrCount strin
 	return result, totalData
 }
 
-func (db *salesConnection) MISSuperAdmin(request salesRequestDTO.MISSuperAdminRequestDTO) ([]salesResponseDTO.MISSuperAdmin, int) {
+func (db *salesConnection) MISSuperAdmin(sqlStr string, sqlStrCount string, request salesRequestDTO.MISSuperAdminRequestDTO) ([]salesResponseDTO.MISSuperAdmin, int) {
 	var data []salesResponseDTO.MISSuperAdmin
 	var totalData int
 
-	if request.Limit == 0 && request.Offset == 0 {
-		db.connection.Raw(`SELECT ts.sales_email ,ts.sales_name,(select json_extract(metadata,'$.name') from tbl_user tu2 where tu2.email = ts.developer_email)as metadata,tp.status,tp.jenis_properti,tp.tipe_properti
-	FROM tbl_project tp
-	JOIN tbl_sales ts on tp.email = ts.developer_email 
-	JOIN tbl_user tu on tu.email = ts.sales_email 
-	WHERE ts.sales_email like '%` + request.Keyword + `%' or ts.sales_name like '%` + request.Keyword + `%' or metadata like '%` + request.Keyword + `%' or tp.status like '%` + request.Keyword + `%' or tp.jenis_properti like '%` + request.Keyword + `%' or tp.tipe_properti like '%` + request.Keyword + `%'
-	order by ts.sales_email
-	`).Find(&data)
+	db.connection.Raw(sqlStr).Find(&data)
 
-		db.connection.Raw(`SELECT count(ts.sales_email)
-	FROM tbl_project tp
-	JOIN tbl_sales ts on tp.email = ts.developer_email 
-	JOIN tbl_user tu on tu.email = ts.sales_email 
-	WHERE ts.sales_email like '%` + request.Keyword + `%' or ts.sales_name like '%` + request.Keyword + `%' or metadata like '%` + request.Keyword + `%' or tp.status like '%` + request.Keyword + `%' or tp.jenis_properti like '%` + request.Keyword + `%' or tp.tipe_properti like '%` + request.Keyword + `%'
-	order by ts.sales_email
-	`).Find(&totalData)
-
-		return data, totalData
-	}
-
-	db.connection.Raw(`SELECT ts.sales_email ,ts.sales_name,(select json_extract(metadata,'$.name') from tbl_user tu2 where tu2.email = ts.developer_email)as metadata,tp.status,tp.jenis_properti,tp.tipe_properti
-	FROM tbl_project tp
-	JOIN tbl_sales ts on tp.email = ts.developer_email 
-	JOIN tbl_user tu on tu.email = ts.sales_email 
-	WHERE ts.sales_email like '%` + request.Keyword + `%' or ts.sales_name like '%` + request.Keyword + `%' or metadata like '%` + request.Keyword + `%' or tp.status like '%` + request.Keyword + `%' or tp.jenis_properti like '%` + request.Keyword + `%' or tp.tipe_properti like '%` + request.Keyword + `%'
-	order by ts.sales_email limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
-	`).Find(&data)
-
-	db.connection.Raw(`SELECT count(ts.sales_email)
-	FROM tbl_project tp
-	JOIN tbl_sales ts on tp.email = ts.developer_email 
-	JOIN tbl_user tu on tu.email = ts.sales_email 
-	WHERE ts.sales_email like '%` + request.Keyword + `%' or ts.sales_name like '%` + request.Keyword + `%' or metadata like '%` + request.Keyword + `%' or tp.status like '%` + request.Keyword + `%' or tp.jenis_properti like '%` + request.Keyword + `%' or tp.tipe_properti like '%` + request.Keyword + `%'
-	order by ts.sales_email limit ` + strconv.Itoa(request.Limit) + `
-	`).Find(&totalData)
+	db.connection.Raw(sqlStrCount).Find(&totalData)
 
 	return data, totalData
 }

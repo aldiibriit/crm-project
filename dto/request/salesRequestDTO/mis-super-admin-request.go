@@ -1,9 +1,11 @@
 package salesRequestDTO
 
 type MISSuperAdminRequestDTO struct {
-	Keyword string `json:"keyword"`
-	Limit   int    `json:"limit" `
-	Offset  int    `json:"offset"`
+	Keyword   string `json:"keyword"`
+	Limit     int    `json:"limit" `
+	Offset    int    `json:"offset"`
+	StartDate string `json:"startDate"`
+	EndDate   string `json:"endDate"`
 }
 
 type MISDeveloperRequestDTO struct {
