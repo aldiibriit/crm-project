@@ -2,6 +2,7 @@ package repository
 
 import (
 	"log"
+	"strconv"
 
 	"go-api/dto/request/userRequestDTO"
 	"go-api/dto/response/userResponseDTO"
@@ -24,6 +25,7 @@ type UserRepository interface {
 	UpdateOrCreate(data entity.TblUser)
 	GetLatestId() entity.TblUser
 	GetDeveloper(request userRequestDTO.ListUserDeveloperRequestDTO) []userResponseDTO.UserDeveloperResponse
+	GetUserReferral(request userRequestDTO.ListUserReferralRequestDTO) []userResponseDTO.UserReferralResponse
 	ProfileUser(userID string) entity.User
 }
 
@@ -127,6 +129,15 @@ func (db *userConnection) GetLatestId() entity.TblUser {
 func (db *userConnection) GetDeveloper(request userRequestDTO.ListUserDeveloperRequestDTO) []userResponseDTO.UserDeveloperResponse {
 	var data []userResponseDTO.UserDeveloperResponse
 	db.connection.Raw(`SELECT email,json_extract(metadata,'$.name')as name FROM tbl_user where type = 'developer' and status = 'active' and email like '%` + request.Keyword + `%' or json_extract(metadata,'$.name') like '%` + request.Keyword + `%' and type = 'developer' and status = 'active'`).Find(&data)
+	return data
+}
+
+func (db *userConnection) GetUserReferral(request userRequestDTO.ListUserReferralRequestDTO) []userResponseDTO.UserReferralResponse {
+	var data []userResponseDTO.UserReferralResponse
+	db.connection.Raw(`SELECT name,mobile_no,properti_id from tbl_sales ts 
+	join tbl_customer tc on tc.sales_id = ts.id
+	join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
+	where ts.sales_email like '%` + request.SalesEmail + `%' limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + ``).Find(&data)
 	return data
 }
 

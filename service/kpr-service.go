@@ -16,11 +16,13 @@ type KPRService interface {
 
 type kprService struct {
 	customerRepository repository.CustomerRepository
+	kprRepository      repository.KPRRepository
 }
 
-func NewKPRService(customerRepo repository.CustomerRepository) KPRService {
+func NewKPRService(customerRepo repository.CustomerRepository, kprRepo repository.KPRRepository) KPRService {
 	return &kprService{
 		customerRepository: customerRepo,
+		kprRepository:      kprRepo,
 	}
 }
 
@@ -28,8 +30,11 @@ func (service *kprService) PengajuanKPR(request KPRRequestDTO.PengajuanKPRReques
 	var response responseDTO.Response
 
 	customer := entity.TblCustomer{}
+	pengajuanKPR := entity.TblPengajuanKprBySales{}
 	customer.CreatedAt = time.Now()
 	customer.ModifiedAt = time.Now()
+	pengajuanKPR.CreatedAt = time.Now()
+	pengajuanKPR.ModifiedAt = time.Now()
 	err := smapping.FillStruct(&customer, smapping.MapFields(&request))
 	if err != nil {
 		response.HttpCode = 200
@@ -42,7 +47,21 @@ func (service *kprService) PengajuanKPR(request KPRRequestDTO.PengajuanKPRReques
 		return response
 	}
 
+	err = smapping.FillStruct(&pengajuanKPR, smapping.MapFields(&request))
+	if err != nil {
+		response.HttpCode = 200
+		response.MetadataResponse = nil
+		response.ResponseCode = "00"
+		response.ResponseData = nil
+		response.ResponseDesc = "failed map " + err.Error()
+		response.Summary = nil
+
+		return response
+	}
+
 	data := service.customerRepository.Insert(customer)
+	service.kprRepository.Insert(pengajuanKPR)
+
 	response.HttpCode = 200
 	response.MetadataResponse = nil
 	response.ResponseCode = "00"

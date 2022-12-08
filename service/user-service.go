@@ -16,6 +16,7 @@ type UserService interface {
 	Update(user dto.UserUpdateDTO) entity.User
 	Profile(userID string) entity.User
 	GetDeveloper(request userRequestDTO.ListUserDeveloperRequestDTO) responseDTO.Response
+	ListUserReferral(request userRequestDTO.ListUserReferralRequestDTO) responseDTO.Response
 }
 
 type userService struct {
@@ -51,5 +52,24 @@ func (service *userService) GetDeveloper(request userRequestDTO.ListUserDevelope
 	response.ResponseCode = "Success"
 	response.ResponseData = data
 	response.Summary = nil
+	return response
+}
+
+func (service *userService) ListUserReferral(request userRequestDTO.ListUserReferralRequestDTO) responseDTO.Response {
+	var response responseDTO.Response
+	var metadataResponse responseDTO.ListUserDtoRes
+
+	metadataResponse.Currentpage = request.Offset
+	if request.Offset > 0 {
+		request.Offset = request.Offset * request.Limit
+	}
+
+	data := service.userRepository.GetUserReferral(request)
+	response.HttpCode = 200
+	response.MetadataResponse = metadataResponse
+	response.ResponseCode = "success"
+	response.ResponseData = data
+	response.Summary = nil
+
 	return response
 }

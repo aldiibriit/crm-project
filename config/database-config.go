@@ -32,7 +32,7 @@ func SetupDatabaseConnection() *gorm.DB {
 		panic("Failed to create a connection to database")
 	}
 	//nanti kita isi modelnya di sini
-	// db.AutoMigrate(&entity.TblCustomer{})
+	// db.AutoMigrate(&entity.TblPengajuanKprBySales{})
 	return db
 }
 

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -20,6 +21,7 @@ type UserController interface {
 	Update(context *gin.Context)
 	Profile(context *gin.Context)
 	GetDeveloper(ctx *gin.Context)
+	GetUserReferral(ctx *gin.Context)
 }
 
 type userController struct {
@@ -92,4 +94,63 @@ func (c *userController) GetDeveloper(ctx *gin.Context) {
 	response = c.userService.GetDeveloper(request)
 
 	ctx.JSON(response.HttpCode, response)
+}
+
+func (c *userController) GetUserReferral(ctx *gin.Context) {
+	var request userRequestDTO.ListUserReferralRequestDTO
+	var response responseDTO.Response
+
+	errDTO := ctx.ShouldBind(&request)
+	if errDTO != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+
+	if request.SalesEmail != "" {
+		decryptedData, err := deserializeGetUserReferralRequest(request)
+		if err != nil {
+			response.HttpCode = 400
+			response.MetadataResponse = nil
+			response.ResponseCode = "99"
+			response.ResponseData = nil
+			response.ResponseDesc = err.Error()
+			response.Summary = nil
+			ctx.AbortWithStatusJSON(response.HttpCode, response)
+			return
+		}
+
+		response = c.userService.ListUserReferral(decryptedData)
+		ctx.JSON(response.HttpCode, response)
+		return
+	}
+	response = c.userService.ListUserReferral(request)
+	ctx.JSON(response.HttpCode, response)
+}
+
+func deserializeGetUserReferralRequest(request interface{}) (userRequestDTO.ListUserReferralRequestDTO, error) {
+	otpDTO := request.(userRequestDTO.ListUserReferralRequestDTO)
+
+	cipheTextSalesEmail, err := base64.StdEncoding.DecodeString(otpDTO.SalesEmail)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	plainTextSalesEmail, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextSalesEmail))
+	if err != nil {
+		fmt.Println(err.Error())
+		return userRequestDTO.ListUserReferralRequestDTO{}, err
+	}
+
+	var result userRequestDTO.ListUserReferralRequestDTO
+
+	result.SalesEmail = plainTextSalesEmail
+	result.Limit = otpDTO.Limit
+	result.Offset = otpDTO.Offset
+
+	return result, nil
 }
