@@ -131,7 +131,7 @@ func (service *authService) CreateUserSales(request dto.RegisterSalesDTO) respon
 	}
 
 	urlEncrypted, _ := helper.RsaEncryptFEToBE([]byte(request.EmailSales))
-	urlEncoded := "http://172.18.2.94/user/activate/" + url.QueryEscape(urlEncrypted)
+	urlEncoded := "http://172.18.2.94/sales/activate" + url.QueryEscape(urlEncrypted)
 	emailRequest := emailRequestDTO.EmailRequestDTO{
 		ToAddres:   request.EmailSales,
 		UrlEncoded: urlEncoded,

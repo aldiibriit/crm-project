@@ -27,14 +27,14 @@ type PengajuanKPRRequest struct {
 	HargaProperti          string  `json:"hargaProperti" `
 	JumlahPinjaman         string  `json:"jumlahPinjaman" `
 	Note                   string  `json:"note" `
-	RefNoPengajuanBrispot  string  `json:"refNoPengajuanBrispot" `
-	Status                 string  `json:"status" `
-	StatusCodeBrispot      string  `json:"statusCodeBrispot" `
-	StatusDescBrispot      string  `json:"statusDescBrispot" `
-	TenorFixedRate         int     `json:"tenorFixedRate"`
-	UangMuka               string  `json:"uangMuka" `
-	UkerCode               string  `json:"ukerCode" `
-	UkerName               string  `json:"ukerName" `
-	PropertiId             int     `json:"propertiID"`
-	CustomerID             int     `json:"customerID" gorm:"column:customer_id"`
+	// RefNoPengajuanBrispot  string  `json:"refNoPengajuanBrispot" `
+	// Status                 string  `json:"status" `
+	// StatusCodeBrispot      string  `json:"statusCodeBrispot" `
+	// StatusDescBrispot      string  `json:"statusDescBrispot" `
+	TenorFixedRate int    `json:"tenorFixedRate"`
+	UangMuka       string `json:"uangMuka" `
+	UkerCode       string `json:"ukerCode" `
+	UkerName       string `json:"ukerName" `
+	PropertiId     int    `json:"propertiID"`
+	CustomerID     int    `json:"customerID" gorm:"column:customer_id"`
 }
