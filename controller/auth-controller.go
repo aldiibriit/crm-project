@@ -25,6 +25,7 @@ type AuthController interface {
 	CreateToken(ctx *gin.Context)
 	ActivateUser(ctx *gin.Context)
 	PasswordConfirmation(ctx *gin.Context)
+	PassthroughLogin(ctx *gin.Context)
 }
 
 type authController struct {
@@ -106,6 +107,24 @@ func (c *authController) RegisterSales(ctx *gin.Context) {
 
 	createdUser := c.authService.CreateUserSales(decryptedRequest)
 	ctx.JSON(createdUser.HttpCode, createdUser)
+}
+
+func (c *authController) PassthroughLogin(ctx *gin.Context) {
+	var response responseDTO.Response
+	var passthroughLoginRequest authRequestDTO.PassthroughLoginRequest
+	errDTO := ctx.ShouldBind(&passthroughLoginRequest)
+	if errDTO != nil {
+		response := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response, headerValue := c.authService.PassthroughLogin(passthroughLoginRequest)
+	if response.HttpCode == 200 {
+		ctx.Header("Set-Cookie", headerValue)
+		ctx.Header("D", "H+I10eCEmVS8UgW76KDv/K4JVlVGv4b4gY3AYuOjVHGUUKvJz5DBZ7MG0SYewIFyyDs/hhql4203rwYgFqhWky6gzKaSy4Lc978O5rTd2xelTj4HH3WUZCFXhEqhI/5ba59Yt1ZpkhBgThBwzWGdy/sEHkQuWF/O04VP6jJa5HgFdYyrgrtUM1Dfzfw6K++jj5cOAyhXskelq3qw/yQ+rjx19VkYflBBIPj0lUS9GxHPJBaJAnsNKlFW9YCZu1km0Z0e9gRf2e1/+CDlBuprgwNzFKjMY09oFYuXYJAt0eKElP/g5uGeVUV1wagnM/HKmBEy6kxO6hRpYstFp7FPcg==")
+	}
+	ctx.JSON(response.HttpCode, response)
 }
 
 func (c *authController) ActivateUser(ctx *gin.Context) {

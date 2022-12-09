@@ -2,10 +2,14 @@ package service
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"go-api/dto"
@@ -17,6 +21,7 @@ import (
 	"go-api/helper"
 	"go-api/repository"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/mashingan/smapping"
 	"golang.org/x/crypto/bcrypt"
@@ -30,6 +35,7 @@ type AuthService interface {
 	CreateUserSales(user dto.RegisterSalesDTO) responseDTO.Response
 	ActivateUser(request authRequestDTO.ActivateRequestDTO) responseDTO.Response
 	PasswordConfirmation(request dto.PasswordConfirmationDTO) responseDTO.Response
+	PassthroughLogin(request authRequestDTO.PassthroughLoginRequest) (responseDTO.Response, string)
 	IsDuplicateEmail(email string) bool
 }
 
@@ -39,16 +45,18 @@ type authService struct {
 	emailAttemptRepository repository.EmailAttemptRepository
 	emailService           EmailService
 	otpService             OTPService
+	jwtService             JWTService
 }
 
 // NewAuthService creates a new instance of AuthService
-func NewAuthService(userRep repository.UserRepository, salesRepo repository.SalesRepository, emailServ EmailService, emailAttemptRepo repository.EmailAttemptRepository, otpServ OTPService) AuthService {
+func NewAuthService(userRep repository.UserRepository, salesRepo repository.SalesRepository, emailServ EmailService, emailAttemptRepo repository.EmailAttemptRepository, otpServ OTPService, jwtServ JWTService) AuthService {
 	return &authService{
 		userRepository:         userRep,
 		salesRepository:        salesRepo,
 		emailService:           emailServ,
 		emailAttemptRepository: emailAttemptRepo,
 		otpService:             otpServ,
+		jwtService:             jwtServ,
 	}
 }
 
@@ -270,6 +278,94 @@ func (service *authService) FindByEmail(email string) entity.User {
 	return service.userRepository.FindByEmail(email)
 }
 
+func (service *authService) PassthroughLogin(request authRequestDTO.PassthroughLoginRequest) (responseDTO.Response, string) {
+	var response responseDTO.Response
+	var responseCreateTokenMap map[string]interface{}
+	var responseLoginMap map[string]interface{}
+
+	urlCreateToken := "https://api.homespot.id/mes/api/v1/auth/createToken"
+	urlLogin := "https://api.homespot.id/mes/api/v1/user/login"
+	method := "POST"
+
+	payloadCreateToken := strings.NewReader(`{` + "" + `"email" : "` + request.Email + `",` + "" + `
+    "applicationName" : "HOMESPOT"` + "" + `}`)
+
+	payloadLogin := strings.NewReader(`{` + "" + `"email" : "` + request.Email + `",` + "" + `"password" : "` + request.Password + `"` + "" + `}`)
+
+	responseAPICreateToken := callAPICreateToken(method, urlCreateToken, payloadCreateToken)
+	json.Unmarshal([]byte(responseAPICreateToken), &responseCreateTokenMap)
+	if responseCreateTokenMap["responseCode"] != "00" {
+		response.HttpCode = 422
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = "Error in call API Create Token"
+		response.Summary = nil
+		return response, ""
+	}
+
+	encryptedTokenFromBE := responseCreateTokenMap["responseData"].([]interface{})[0]
+	strEncryptToken := fmt.Sprintf("%v", encryptedTokenFromBE)
+
+	decodedToken, err := base64.StdEncoding.DecodeString(strEncryptToken)
+	if err != nil {
+		response.HttpCode = 422
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = err.Error()
+		response.Summary = nil
+		return response, ""
+	}
+	decryptedToken, err := helper.RsaDecryptFromBEInFE(decodedToken)
+	if err != nil {
+		response.HttpCode = 422
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = err.Error()
+		response.Summary = nil
+		return response, ""
+	}
+
+	fixToken, err := helper.RsaEncryptFEToBE([]byte(decryptedToken))
+	if err != nil {
+		response.HttpCode = 422
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = err.Error()
+		response.Summary = nil
+		return response, ""
+	}
+
+	expiredAt := extractToken(decryptedToken)
+
+	bearerToken := "Bearer " + fixToken
+
+	responseLogin := CallAPILogin(method, urlLogin, payloadLogin, bearerToken)
+	json.Unmarshal([]byte(responseLogin), &responseLoginMap)
+	if responseLoginMap["responseCode"] != "00" {
+		response.HttpCode = 422
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = "Error in call API Login"
+		response.Summary = nil
+		return response, ""
+	}
+
+	response.HttpCode = 200
+	response.MetadataResponse = nil
+	response.ResponseCode = "00"
+	response.ResponseData = nil
+	response.ResponseDesc = "Success"
+	response.Summary = nil
+	setCookieValue := `jwt=` + decryptedToken + `;Path=/;Expires=` + expiredAt + `;HttpOnly;Samesite=Lax;Domain=.homespot.id`
+
+	return response, setCookieValue
+}
+
 func (service *authService) PasswordConfirmation(request dto.PasswordConfirmationDTO) responseDTO.Response {
 	var response responseDTO.Response
 	user := service.userRepository.FindByEmail2(request.Email)
@@ -347,4 +443,76 @@ func serializeActivatedUser(request interface{}) authResponseDTO.UserIndetityDto
 
 	result.Username = encryptedUsername
 	return result
+}
+
+func callAPICreateToken(method string, url string, payload *strings.Reader) string {
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, payload)
+
+	if err != nil {
+		return err.Error()
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := client.Do(req)
+	if err != nil {
+		return err.Error()
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err.Error()
+	}
+	return string(body)
+}
+
+func CallAPILogin(method string, url string, payload *strings.Reader, bearerToken string) string {
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, payload)
+
+	if err != nil {
+		fmt.Println(err)
+		return err.Error()
+	}
+	req.Header.Add("Authorization", bearerToken)
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return err.Error()
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return err.Error()
+	}
+	return string(body)
+}
+
+func extractToken(tokenString string) string {
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		fmt.Println("Can't convert token's claims to standard claims")
+	}
+
+	var tm time.Time
+	switch iat := claims["iat"].(type) {
+	case float64:
+		tm = time.Unix(int64(iat), 0)
+	case json.Number:
+		v, _ := iat.Int64()
+		tm = time.Unix(v, 0)
+	}
+
+	return tm.Format(time.RFC1123)
 }

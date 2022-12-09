@@ -31,7 +31,7 @@ var (
 	baseService     service.BaseService     = service.NewBaseService(jwtHistRepository, jwtService)
 	propertiService service.PropertiService = service.NewPropertiService(propertiRepository, userRepository, baseService)
 	otpService      service.OTPService      = service.NewOTPService(otpRepository, emailService, otpAttemptRepository)
-	authService     service.AuthService     = service.NewAuthService(userRepository, salesRepository, emailService, emailAttemptRepository, otpService)
+	authService     service.AuthService     = service.NewAuthService(userRepository, salesRepository, emailService, emailAttemptRepository, otpService, jwtService)
 	emailService    service.EmailService    = service.NewEmailService(emailAttemptRepository)
 	kprService      service.KPRService      = service.NewKPRService(customerRepository, kprRepository)
 	salesService    service.SalesService    = service.NewSalesService(salesRepository, userRepository)
@@ -47,16 +47,16 @@ var (
 )
 
 // func main() {
-// 	helper.SignatureBRIVA()
-// 	// Password := "3853"
-// 	// encryptedPassword, err := helper.RsaEncryptFEToBE([]byte(Password))
-// 	// if err != nil {
-// 	// 	fmt.Println(err.Error())
-// 	// }
-// 	// fmt.Println("Password : ", encryptedPassword)
-// 	// decodedNama, _ := base64.StdEncoding.DecodeString("fmDO1p4jofEp1vXNKJHJinv/UwLNT7JCrfMWFVMkWYiGhScWJdHLD6LwTkLQiYIJj13dQKAoiWwhL6XLvBzO38rkKmYy5LiGMtLezkAlmFL0YADqEsjY6xAzOZw8j58jnTsrN6ZSTaUjc9jJLVxOj3yHBKORtP1k2A7R2x46J22LqBhDsFBwijb/m5iCBCgOWyVMLHHhdqJlMTCo4cVduL6los6T1Elfmqew3ko8USPKfB+C9DSVzmtdBaJy+FyLnwf0cp9y57mgTcHjBatsCCX9/uYtcZAB3hRzML7d3jM4aVpTvJttPLE37cFq+Kl/gnbH55HSIDSp+GTdMA/u7IEvXWo7CBst1ciDfRxaCh/Rz/ax0PLSx1LxeBhyYiMPjOQ6Erj8ZZ4Gzf8APVJjsjqz4cdte5hFZ8q04Az6I760LyOHN6dgXRy7mE9GOl+gKWRN9pWRb4c+1T2ZX54D+gwITORF3rzDhOGcac9o75nYKFbcNI+uLepDDqYt8/2tnlKh2Qt77beq06+YbuygjIOmw54jkkpxgCiiwFdlg8tnkrudnO+UyXhQOF615i41XhdsCs7hl9aufcqGkzyVVuIsyP69bhYifweL1udUMrIEsHmxhAugIK94tH1kcdEgI2LFYRqSKA+uyWVV65r1B3aca2ds9SHPt/InmIuYnMM=")
+// 	// helper.SignatureBRIVA()
+// 	// decodedNama, _ := base64.StdEncoding.DecodeString("YfWaK9aA0mybw/heC6zYRLKlhzVngablTXNJBSHSp4yB1Pg8GcO1dmLdd0ok4Yojsz9XO7pBLpRIROjSbpyi8YvkfdiVLpbpl2sNkemoOmYVO1q62aV6u6mboJ516vkvDeE09z4LgYzAXJf0SL99EuKQDL1++qzDBbr9ubmDmgAX/C3UffgBH4yqijZfG5hGpj/UkRPcBE04g3WwtYpyDXalDQYog7gxnOmUw5h4TfJnTjCZsaNHWsAavKcE9+zbyRzMXhxcvNF6H4S8lvFAE24i3dEYzCJXVFTRSrkvPS6VrT96d0QMayJTf37LzdJRrfJzI9YojeJGw0xxnuPk5Q==")
 // 	// plainNama, _ := helper.RsaDecryptFromBEInFE(decodedNama)
 // 	// fmt.Println(plainNama)
+// 	Password := "J@G04NBR1!T"
+// 	encryptedPassword, err := helper.RsaEncryptFEToBE([]byte(Password))
+// 	if err != nil {
+// 		fmt.Println(err.Error())
+// 	}
+// 	fmt.Println("Password : ", encryptedPassword)
 // 	// id := uuid.New()
 // 	// fmt.Println(reflect.TypeOf(id))
 // 	// fmt.Println(reflect.TypeOf(id.String()))
@@ -78,6 +78,7 @@ func main() {
 		authRoutes.POST("/registerUserSales", authController.RegisterSales)
 		authRoutes.POST("/activateUser", authController.ActivateUser)
 		authRoutes.POST("/passwordConfirmation", authController.PasswordConfirmation)
+		authRoutes.POST("/passthroughLogin", authController.PassthroughLogin)
 	}
 
 	otpRoutes := r.Group("api/otp")
