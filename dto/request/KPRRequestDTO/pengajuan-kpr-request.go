@@ -3,12 +3,13 @@ package KPRRequestDTO
 type PengajuanKPRRequest struct {
 	NIK                    string  `json:"nik"`
 	SalesID                int     `json:"salesID"`
-	Name                   string  `json:"name"`
+	Name                   string  `json:"name" binding:"required"`
+	ReferralCode           string  `json:"referralCode" binding:"required"`
 	TanggalLahir           string  `json:"tanggalLahir"`
 	TempatLahir            string  `json:"tempatLahir"`
 	MaritalStatus          string  `json:"maritalStatus"`
 	JenisKelamin           string  `json:"jenisKelamin"`
-	MobileNo               string  `json:"mobileNo"`
+	MobileNo               string  `json:"mobileNo" binding:"required"`
 	AlamatKTP              string  `json:"alamatKTP"`
 	AlamatDomisili         string  `json:"alamatDomisili"`
 	KancaTerdekat          string  `json:"kancaTerdekat"`

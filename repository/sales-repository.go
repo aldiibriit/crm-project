@@ -17,6 +17,7 @@ type SalesRepository interface {
 	DetailSalesByDeveloper(request salesRequestDTO.DetailSalesRequest) salesResponseDTO.MISDeveloper
 	EditSalesByDeveloper(request salesRequestDTO.SalesEditRequestDTO) error
 	DeleteSalesByDeveloper(request salesRequestDTO.SalesDeleteRequestDTO) error
+	GetIDByRefCode(refCode string) int
 }
 
 type salesConnection struct {
@@ -114,4 +115,10 @@ func (db *salesConnection) DetailSalesByDeveloper(request salesRequestDTO.Detail
 	JOIN tbl_user tu ON tu.email = ts.sales_email
 	WHERE tu.id = ` + request.ID + ``).First(&result)
 	return result
+}
+
+func (db *salesConnection) GetIDByRefCode(refCode string) int {
+	var id int
+	db.connection.Raw(`SELECT id from tbl_sales where refferal_code = '` + refCode + `'`).Scan(&id)
+	return id
 }

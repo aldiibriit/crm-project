@@ -17,12 +17,14 @@ type KPRService interface {
 type kprService struct {
 	customerRepository repository.CustomerRepository
 	kprRepository      repository.KPRRepository
+	salesRepository    repository.SalesRepository
 }
 
-func NewKPRService(customerRepo repository.CustomerRepository, kprRepo repository.KPRRepository) KPRService {
+func NewKPRService(customerRepo repository.CustomerRepository, kprRepo repository.KPRRepository, salesRepo repository.SalesRepository) KPRService {
 	return &kprService{
 		customerRepository: customerRepo,
 		kprRepository:      kprRepo,
+		salesRepository:    salesRepo,
 	}
 }
 
@@ -35,6 +37,10 @@ func (service *kprService) PengajuanKPR(request KPRRequestDTO.PengajuanKPRReques
 	customer.ModifiedAt = time.Now()
 	pengajuanKPR.CreatedAt = time.Now()
 	pengajuanKPR.ModifiedAt = time.Now()
+
+	salesID := service.salesRepository.GetIDByRefCode(request.ReferralCode)
+	request.SalesID = salesID
+
 	err := smapping.FillStruct(&customer, smapping.MapFields(&request))
 	if err != nil {
 		response.HttpCode = 200

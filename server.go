@@ -33,7 +33,7 @@ var (
 	otpService      service.OTPService      = service.NewOTPService(otpRepository, emailService, otpAttemptRepository)
 	authService     service.AuthService     = service.NewAuthService(userRepository, salesRepository, emailService, emailAttemptRepository, otpService, jwtService)
 	emailService    service.EmailService    = service.NewEmailService(emailAttemptRepository)
-	kprService      service.KPRService      = service.NewKPRService(customerRepository, kprRepository)
+	kprService      service.KPRService      = service.NewKPRService(customerRepository, kprRepository, salesRepository)
 	salesService    service.SalesService    = service.NewSalesService(salesRepository, userRepository)
 
 	testController     controller.TestController     = controller.NewTestController(emailService)

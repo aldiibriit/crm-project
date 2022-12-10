@@ -358,7 +358,7 @@ func (service *authService) PassthroughLogin(request authRequestDTO.PassthroughL
 	response.HttpCode = 200
 	response.MetadataResponse = nil
 	response.ResponseCode = "00"
-	response.ResponseData = nil
+	response.ResponseData = responseLoginMap["responseData"]
 	response.ResponseDesc = "Success"
 	response.Summary = nil
 	setCookieValue := `jwt=` + decryptedToken + `;Path=/;Expires=` + expiredAt + `;HttpOnly;Samesite=Lax;Domain=.homespot.id`
