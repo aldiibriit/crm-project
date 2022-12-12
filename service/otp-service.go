@@ -44,7 +44,7 @@ func (service *otpService) SendOTP(email string) string {
 	start := time.Now()
 	expired := start.Add(2 * time.Minute)
 	generatedOtp := fmt.Sprint(time.Now().Nanosecond())
-	otpCode := generatedOtp[:6]
+	otpCode := generatedOtp[:5]
 	createdOTP := entity.TblOtp{
 		ID:         uuid.New().String(),
 		MobileNo:   "",
