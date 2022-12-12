@@ -305,7 +305,7 @@ func (service *authService) PassthroughLogin(request authRequestDTO.PassthroughL
 	}
 
 	encryptedTokenFromBE := responseCreateTokenMap["responseData"].([]interface{})[0]
-	strEncryptToken := fmt.Sprintf("%v", encryptedTokenFromBE)
+	strEncryptToken := fmt.Sprintf("%v", encryptedTokenFromBE.(map[string]interface{})["token"])
 
 	decodedToken, err := base64.StdEncoding.DecodeString(strEncryptToken)
 	if err != nil {
