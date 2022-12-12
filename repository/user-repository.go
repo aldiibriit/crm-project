@@ -134,7 +134,7 @@ func (db *userConnection) GetDeveloper(request userRequestDTO.ListUserDeveloperR
 
 func (db *userConnection) GetUserReferral(request userRequestDTO.ListUserReferralRequestDTO) []userResponseDTO.UserReferralResponse {
 	var data []userResponseDTO.UserReferralResponse
-	db.connection.Raw(`SELECT name,mobile_no,properti_id from tbl_sales ts 
+	db.connection.Raw(`SELECT name,mobile_no,properti_id,tc.created_at from tbl_sales ts 
 	join tbl_customer tc on tc.sales_id = ts.id
 	join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
 	where ts.sales_email like '%` + request.SalesEmail + `%' limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + ``).Find(&data)
