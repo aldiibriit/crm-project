@@ -66,6 +66,7 @@ func (service *kprService) PengajuanKPR(request KPRRequestDTO.PengajuanKPRReques
 	}
 
 	data := service.customerRepository.Insert(customer)
+	pengajuanKPR.CustomerID = data.ID
 	service.kprRepository.Insert(pengajuanKPR)
 
 	response.HttpCode = 200

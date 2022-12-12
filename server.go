@@ -51,7 +51,7 @@ var (
 // 	// decodedNama, _ := base64.StdEncoding.DecodeString("YfWaK9aA0mybw/heC6zYRLKlhzVngablTXNJBSHSp4yB1Pg8GcO1dmLdd0ok4Yojsz9XO7pBLpRIROjSbpyi8YvkfdiVLpbpl2sNkemoOmYVO1q62aV6u6mboJ516vkvDeE09z4LgYzAXJf0SL99EuKQDL1++qzDBbr9ubmDmgAX/C3UffgBH4yqijZfG5hGpj/UkRPcBE04g3WwtYpyDXalDQYog7gxnOmUw5h4TfJnTjCZsaNHWsAavKcE9+zbyRzMXhxcvNF6H4S8lvFAE24i3dEYzCJXVFTRSrkvPS6VrT96d0QMayJTf37LzdJRrfJzI9YojeJGw0xxnuPk5Q==")
 // 	// plainNama, _ := helper.RsaDecryptFromBEInFE(decodedNama)
 // 	// fmt.Println(plainNama)
-// 	Password := "J@G04NBR1!T"
+// 	Password := "aldi.sptra86@gmail.com"
 // 	encryptedPassword, err := helper.RsaEncryptFEToBE([]byte(Password))
 // 	if err != nil {
 // 		fmt.Println(err.Error())

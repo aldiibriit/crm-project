@@ -36,6 +36,6 @@ type PengajuanKPRRequest struct {
 	UangMuka       string `json:"uangMuka" `
 	UkerCode       string `json:"ukerCode" `
 	UkerName       string `json:"ukerName" `
-	PropertiId     int    `json:"propertiID"`
+	PropertiId     int    `json:"propertiID" binding:"required"`
 	CustomerID     int    `json:"customerID" gorm:"column:customer_id"`
 }
