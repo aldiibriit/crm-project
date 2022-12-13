@@ -259,6 +259,23 @@ func (service *authService) ActivateUser(request authRequestDTO.ActivateRequestD
 		user.ModifiedAt = time.Now()
 		user.Status = "Active"
 
+		data := service.salesRepository.FindByEmail(request.Email)
+		emailRequest := emailRequestDTO.EmailRequestDTO{
+			ToAddres: request.Email,
+			Name:     data.SalesName,
+			Action:   3,
+		}
+		fmt.Println("at auth service :", emailRequest)
+		if !service.emailService.SendMessage(emailRequest) {
+			response.HttpCode = 422
+			response.MetadataResponse = nil
+			response.ResponseCode = "99"
+			response.ResponseDesc = "Cannot send message to " + emailRequest.ToAddres
+			response.ResponseData = nil
+			response.Summary = nil
+			return response
+		}
+
 		service.userRepository.UpdateOrCreate(user)
 	}
 

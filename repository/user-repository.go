@@ -91,7 +91,7 @@ func (db *userConnection) FindByEmail(email string) entity.User {
 func (db *userConnection) FindByEmail2(email string) entity.TblUser {
 	var user entity.TblUser
 	// db.connection.Where("email = ?", email).Take(&user)
-	db.connection.Raw("SELECT * from tbl_user where email = ?", email).Find(&user)
+	db.connection.Raw("SELECT *,json_extract(metadata,'$.name')as userName from tbl_user where email = ?", email).Find(&user)
 	return user
 }
 

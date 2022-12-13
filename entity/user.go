@@ -16,6 +16,7 @@ type TblUser struct {
 	ID             int    `gorm:"column:id" json:"-"`
 	IdResponse     string `json:"id" gorm:"-"`
 	Email          string
+	UserName       string `json:"userName" gorm:"column:userName"`
 	MobileNo       string `json:"mobileNo" gorm:"column:mobile_no"`
 	RegistrationId string
 	Status         string
