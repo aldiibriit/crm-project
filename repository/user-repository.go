@@ -1,9 +1,7 @@
 package repository
 
 import (
-	"fmt"
 	"log"
-	"strconv"
 
 	"go-api/dto/request/userRequestDTO"
 	"go-api/dto/response/userResponseDTO"
@@ -26,7 +24,7 @@ type UserRepository interface {
 	UpdateOrCreate(data entity.TblUser)
 	GetLatestId() entity.TblUser
 	GetDeveloper(request userRequestDTO.ListUserDeveloperRequestDTO) []userResponseDTO.UserDeveloperResponse
-	GetUserReferral(request userRequestDTO.ListUserReferralRequestDTO) []userResponseDTO.UserReferralResponse
+	GetUserReferral(request userRequestDTO.ListUserReferralRequestDTO, sqlStr string, sqlStr2 string) ([]userResponseDTO.UserReferralResponse, int)
 	ProfileUser(userID string) entity.User
 }
 
@@ -133,18 +131,12 @@ func (db *userConnection) GetDeveloper(request userRequestDTO.ListUserDeveloperR
 	return data
 }
 
-func (db *userConnection) GetUserReferral(request userRequestDTO.ListUserReferralRequestDTO) []userResponseDTO.UserReferralResponse {
+func (db *userConnection) GetUserReferral(request userRequestDTO.ListUserReferralRequestDTO, sqlStr string, sqlStr2 string) ([]userResponseDTO.UserReferralResponse, int) {
 	var data []userResponseDTO.UserReferralResponse
-	fmt.Println(request)
-	db.connection.Raw(`SELECT name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
-	join tbl_customer tc on tc.sales_id = ts.id
-	join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-	where ts.sales_email like '%` + request.SalesEmail + `%' and tc.name like '%` + request.Keyword + `%' 
-	or ts.sales_email like '%` + request.SalesEmail + `%' and tc.mobile_no like '%` + request.Keyword + `%' 
-	or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.properti_id like '%` + request.Keyword + `%'
-	or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at like '%` + request.Keyword + `%'  
-	limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + ``).Find(&data)
-	return data
+	var totalData int
+	db.connection.Raw(sqlStr).Find(&data)
+	db.connection.Raw(sqlStr2).Scan(&totalData)
+	return data, totalData
 }
 
 func hashAndSalt(pwd []byte) string {
