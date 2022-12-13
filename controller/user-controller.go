@@ -151,6 +151,6 @@ func deserializeGetUserReferralRequest(request interface{}) (userRequestDTO.List
 	result.SalesEmail = plainTextSalesEmail
 	result.Limit = otpDTO.Limit
 	result.Offset = otpDTO.Offset
-
+	result.Keyword = otpDTO.Keyword
 	return result, nil
 }
