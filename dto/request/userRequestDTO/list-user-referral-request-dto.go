@@ -5,4 +5,6 @@ type ListUserReferralRequestDTO struct {
 	Limit      int    `json:"limit"`
 	Offset     int    `json:"offset"`
 	Keyword    string `json:"keyword"`
+	StartDate  string `json:"startDate"`
+	EndDate    string `json:"endDate"`
 }

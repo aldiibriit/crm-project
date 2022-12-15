@@ -65,23 +65,50 @@ func (service *userService) ListUserReferral(request userRequestDTO.ListUserRefe
 		request.Offset = request.Offset * request.Limit
 	}
 
-	sqlStr := `SELECT name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
+	var sqlStr, sqlStr2 string
+
+	if request.StartDate != "" && request.EndDate != "" {
+		sqlStr = `SELECT name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
 	join tbl_customer tc on tc.sales_id = ts.id
 	join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-	where ts.sales_email like '%` + request.SalesEmail + `%' and tc.name like '%` + request.Keyword + `%' 
-	or ts.sales_email like '%` + request.SalesEmail + `%' and tc.mobile_no like '%` + request.Keyword + `%' 
-	or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.properti_id like '%` + request.Keyword + `%'
-	or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at like '%` + request.Keyword + `%'  
+	where ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at BETWEEN '` + request.StartDate + `' and '` + request.EndDate + `'  
 	limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + ``
 
-	sqlStr2 := `SELECT count(name) from tbl_sales ts 
+		sqlStr2 = `SELECT count(name) from tbl_sales ts 
 	join tbl_customer tc on tc.sales_id = ts.id
 	join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-	where ts.sales_email like '%` + request.SalesEmail + `%' and tc.name like '%` + request.Keyword + `%' 
-	or ts.sales_email like '%` + request.SalesEmail + `%' and tc.mobile_no like '%` + request.Keyword + `%' 
-	or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.properti_id like '%` + request.Keyword + `%'
-	or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at like '%` + request.Keyword + `%'  
-	`
+	where ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at BETWEEN '` + request.StartDate + `' and '` + request.EndDate + `'  
+ 	`
+	} else if request.EndDate == "" && request.StartDate != "" {
+		sqlStr = `SELECT name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
+		join tbl_customer tc on tc.sales_id = ts.id
+		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
+		where ts.sales_email like '%` + request.SalesEmail + `%' and date(tpkbs.created_at) >='` + request.StartDate + `'  
+		limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + ``
+
+		sqlStr2 = `SELECT count(name) from tbl_sales ts 
+		join tbl_customer tc on tc.sales_id = ts.id
+		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
+		where ts.sales_email like '%` + request.SalesEmail + `%' and date(tpkbs.created_at) >='` + request.StartDate + `'`
+
+	} else {
+		sqlStr = `SELECT name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
+		join tbl_customer tc on tc.sales_id = ts.id
+		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
+		where ts.sales_email like '%` + request.SalesEmail + `%' and tc.name like '%` + request.Keyword + `%' 
+		or ts.sales_email like '%` + request.SalesEmail + `%' and tc.mobile_no like '%` + request.Keyword + `%' 
+		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.properti_id like '%` + request.Keyword + `%'
+		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at like '%` + request.Keyword + `%' 
+		limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + ``
+
+		sqlStr2 = `SELECT count(name) from tbl_sales ts 
+		join tbl_customer tc on tc.sales_id = ts.id
+		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
+		where ts.sales_email like '%` + request.SalesEmail + `%' and tc.name like '%` + request.Keyword + `%' 
+		or ts.sales_email like '%` + request.SalesEmail + `%' and tc.mobile_no like '%` + request.Keyword + `%' 
+		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.properti_id like '%` + request.Keyword + `%'
+		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at like '%` + request.Keyword + `%'`
+	}
 
 	data, totalData := service.userRepository.GetUserReferral(request, sqlStr, sqlStr2)
 	metadataResponse.TotalData = totalData

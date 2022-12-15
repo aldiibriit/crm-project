@@ -152,5 +152,7 @@ func deserializeGetUserReferralRequest(request interface{}) (userRequestDTO.List
 	result.Limit = otpDTO.Limit
 	result.Offset = otpDTO.Offset
 	result.Keyword = otpDTO.Keyword
+	result.StartDate = otpDTO.StartDate
+	result.EndDate = otpDTO.EndDate
 	return result, nil
 }
