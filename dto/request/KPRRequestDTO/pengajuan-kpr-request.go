@@ -7,6 +7,7 @@ type PengajuanKPRRequest struct {
 	ReferralCode           string  `json:"referralCode" binding:"required"`
 	TanggalLahir           string  `json:"tanggalLahir"`
 	TempatLahir            string  `json:"tempatLahir"`
+	Email                  string  `json:"email"`
 	MaritalStatus          string  `json:"maritalStatus"`
 	JenisKelamin           string  `json:"jenisKelamin"`
 	MobileNo               string  `json:"mobileNo" binding:"required"`
@@ -28,14 +29,11 @@ type PengajuanKPRRequest struct {
 	HargaProperti          string  `json:"hargaProperti" `
 	JumlahPinjaman         string  `json:"jumlahPinjaman" `
 	Note                   string  `json:"note" `
-	// RefNoPengajuanBrispot  string  `json:"refNoPengajuanBrispot" `
-	// Status                 string  `json:"status" `
-	// StatusCodeBrispot      string  `json:"statusCodeBrispot" `
-	// StatusDescBrispot      string  `json:"statusDescBrispot" `
-	TenorFixedRate int    `json:"tenorFixedRate"`
-	UangMuka       string `json:"uangMuka" `
-	UkerCode       string `json:"ukerCode" `
-	UkerName       string `json:"ukerName" `
-	PropertiId     int    `json:"propertiID" binding:"required"`
-	CustomerID     int    `json:"customerID" gorm:"column:customer_id"`
+	TenorFixedRate         int     `json:"tenorFixedRate"`
+	UangMuka               string  `json:"uangMuka" `
+	UkerCode               string  `json:"ukerCode" `
+	UkerName               string  `json:"ukerName" `
+	PropertiId             int     `json:"propertiID" binding:"required"`
+	CustomerID             int     `json:"customerID" gorm:"column:customer_id"`
+	UTJ                    string  `json:"utj"`
 }
