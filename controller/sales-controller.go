@@ -83,12 +83,12 @@ func (controller *salesController) MISSuperAdmin(ctx *gin.Context) {
 func (controller *salesController) ListProject(ctx *gin.Context) {
 	var response responseDTO.Response
 	var request salesRequestDTO.ListProjectRequest
-	errDTO := ctx.ShouldBind(&request)
-	if errDTO != nil {
+	ctx.ShouldBind(&request)
+	if request.EmailSales == "" && request.ReferralCode == "" {
 		response.HttpCode = 400
 		response.MetadataResponse = nil
 		response.ResponseCode = "99"
-		response.ResponseDesc = errDTO.Error()
+		response.ResponseDesc = "emailSales or referralCode must be filled !"
 		response.Summary = nil
 		response.ResponseData = nil
 		ctx.AbortWithStatusJSON(response.HttpCode, response)
@@ -233,19 +233,19 @@ func deserializeMisDeveloperRequest(request interface{}) (salesRequestDTO.MISDev
 func deserializeListProjectBySales(request interface{}) (salesRequestDTO.ListProjectRequest, error) {
 	otpDTO := request.(salesRequestDTO.ListProjectRequest)
 
-	// cipheTextEmailSales, err := base64.StdEncoding.DecodeString(otpDTO.EmailSales)
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// }
+	cipheTextEmailSales, err := base64.StdEncoding.DecodeString(otpDTO.EmailSales)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	cipheTextReferralCode, err := base64.StdEncoding.DecodeString(otpDTO.ReferralCode)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	// plainTextEmailSales, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailSales))
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// 	// return salesRequestDTO.ListProjectRequest{}, err
-	// }
+	plainTextEmailSales, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailSales))
+	if err != nil {
+		fmt.Println(err.Error())
+		// return salesRequestDTO.ListProjectRequest{}, err
+	}
 	plainTextReferralCode, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextReferralCode))
 	if err != nil {
 		fmt.Println(err.Error())
@@ -254,7 +254,7 @@ func deserializeListProjectBySales(request interface{}) (salesRequestDTO.ListPro
 
 	var result salesRequestDTO.ListProjectRequest
 
-	// result.EmailSales = plainTextEmailSales
+	result.EmailSales = plainTextEmailSales
 	result.PageStart = otpDTO.PageStart
 	result.ReferralCode = plainTextReferralCode
 

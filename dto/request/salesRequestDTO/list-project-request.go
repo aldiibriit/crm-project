@@ -1,7 +1,7 @@
 package salesRequestDTO
 
 type ListProjectRequest struct {
-	// EmailSales   string `json:"emailSales" binding:"required"`
-	ReferralCode string `json:"referralCode" binding:"required"`
+	EmailSales   string `json:"emailSales"`
+	ReferralCode string `json:"referralCode"`
 	PageStart    int    `json:"pageStart"`
 }
