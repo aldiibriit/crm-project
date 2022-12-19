@@ -233,20 +233,30 @@ func deserializeMisDeveloperRequest(request interface{}) (salesRequestDTO.MISDev
 func deserializeListProjectBySales(request interface{}) (salesRequestDTO.ListProjectRequest, error) {
 	otpDTO := request.(salesRequestDTO.ListProjectRequest)
 
-	cipheTextEmailSales, err := base64.StdEncoding.DecodeString(otpDTO.EmailSales)
+	// cipheTextEmailSales, err := base64.StdEncoding.DecodeString(otpDTO.EmailSales)
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// }
+	cipheTextReferralCode, err := base64.StdEncoding.DecodeString(otpDTO.ReferralCode)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	plainTextEmailSales, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailSales))
+	// plainTextEmailSales, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmailSales))
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// 	// return salesRequestDTO.ListProjectRequest{}, err
+	// }
+	plainTextReferralCode, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextReferralCode))
 	if err != nil {
 		fmt.Println(err.Error())
-		return salesRequestDTO.ListProjectRequest{}, err
+		// return salesRequestDTO.ListProjectRequest{}, err
 	}
 
 	var result salesRequestDTO.ListProjectRequest
 
-	result.EmailSales = plainTextEmailSales
+	// result.EmailSales = plainTextEmailSales
 	result.PageStart = otpDTO.PageStart
+	result.ReferralCode = plainTextReferralCode
 
 	return result, nil
 }

@@ -209,8 +209,8 @@ func (service *salesService) ListProject(request salesRequestDTO.ListProjectRequ
 	tmp2.modified_at as modifiedAtMediaProject,
 	tp.created_at as createdAtTP,
 	tp.modified_at as modifiedAtTP,
-	(select id from tbl_sales where sales_email = '` + request.EmailSales + `' limit 1)as salesID,
-	(select refferal_code from tbl_sales where sales_email = '` + request.EmailSales + `' limit 1)as referralCode
+	(select id from tbl_sales where refferal_code = '` + request.ReferralCode + `' limit 1)as salesID,
+	(select refferal_code from tbl_sales where refferal_code = '` + request.ReferralCode + `' limit 1)as referralCode
 	FROM tbl_project tp 
 	INNER JOIN tbl_alamat_properti ap ON tp.alamat_properti_id = ap.id
 	INNER JOIN tbl_fas_properti fp ON tp.fase_properti_id = fp.id
@@ -222,7 +222,7 @@ func (service *salesService) ListProject(request salesRequestDTO.ListProjectRequ
 	INNER JOIN tbl_akses_properti tap on tap.id = tp.akses_properti_id 
 	INNER JOIN tbl_media_project tmp2 on tmp2.id = tp.media_project_id
 	INNER JOIN tbl_image_properti tip2 on tip2.id = tmp.id
-	WHERE (prop.status != 'sold') AND (prop.status != 'deleted') AND (tp.status = 'published') AND tp.email = (select developer_email from tbl_sales where sales_email = '` + request.EmailSales + `' limit 1) limit 10 offset ` + strconv.Itoa(offset) + ``
+	WHERE (prop.status != 'sold') AND (prop.status != 'deleted') AND (tp.status = 'published') AND tp.email = (select developer_email from tbl_sales where refferal_code = '` + request.ReferralCode + `' limit 1) limit 10 offset ` + strconv.Itoa(offset) + ``
 
 	data, totalDataAll := service.salesRepository.ListProject(sqlStr)
 
