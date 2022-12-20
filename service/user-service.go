@@ -68,46 +68,46 @@ func (service *userService) ListUserReferral(request userRequestDTO.ListUserRefe
 	var sqlStr, sqlStr2 string
 
 	if request.StartDate != "" && request.EndDate != "" {
-		sqlStr = `SELECT name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
+		sqlStr = `SELECT tpkbs.id,name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
 	join tbl_customer tc on tc.sales_id = ts.id
 	join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-	where ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at BETWEEN '` + request.StartDate + `' and '` + request.EndDate + `' and tpkbs.utj_status  = b'0'  
+	where ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at BETWEEN '` + request.StartDate + `' and '` + request.EndDate + `' and tpkbs.utj_status  = b'0' and tpkbs.status != 'on_deleted'  
 	limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + ``
 
 		sqlStr2 = `SELECT count(name) from tbl_sales ts 
 	join tbl_customer tc on tc.sales_id = ts.id
 	join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-	where ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at BETWEEN '` + request.StartDate + `' and '` + request.EndDate + `' and tpkbs.utj_status  = b'0'  
+	where ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at BETWEEN '` + request.StartDate + `' and '` + request.EndDate + `' and tpkbs.utj_status  = b'0' and tpkbs.status != 'on_deleted'  
  	`
 	} else if request.EndDate == "" && request.StartDate != "" {
-		sqlStr = `SELECT name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
+		sqlStr = `SELECT tpkbs.id,name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
 		join tbl_customer tc on tc.sales_id = ts.id
 		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-		where ts.sales_email like '%` + request.SalesEmail + `%' and date(tpkbs.created_at) >='` + request.StartDate + `' and tpkbs.utj_status  = b'0'  
+		where ts.sales_email like '%` + request.SalesEmail + `%' and date(tpkbs.created_at) >='` + request.StartDate + `' and tpkbs.utj_status  = b'0' and tpkbs.status != 'on_deleted'  
 		limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + ``
 
 		sqlStr2 = `SELECT count(name) from tbl_sales ts 
 		join tbl_customer tc on tc.sales_id = ts.id
 		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-		where ts.sales_email like '%` + request.SalesEmail + `%' and date(tpkbs.created_at) >='` + request.StartDate + `' and tpkbs.utj_status  = b'0'`
+		where ts.sales_email like '%` + request.SalesEmail + `%' and date(tpkbs.created_at) >='` + request.StartDate + `' and tpkbs.utj_status  = b'0' and tpkbs.status != 'on_deleted'`
 
 	} else {
-		sqlStr = `SELECT name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
+		sqlStr = `SELECT tpkbs.id,name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
 		join tbl_customer tc on tc.sales_id = ts.id
 		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-		where ts.sales_email like '%` + request.SalesEmail + `%' and tc.name like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' 
-		or ts.sales_email like '%` + request.SalesEmail + `%' and tc.mobile_no like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' 
-		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.properti_id like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0'
-		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' 
+		where ts.sales_email like '%` + request.SalesEmail + `%' and tc.name like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' and tpkbs.status != 'on_deleted' 
+		or ts.sales_email like '%` + request.SalesEmail + `%' and tc.mobile_no like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' and tpkbs.status != 'on_deleted' 
+		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.properti_id like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' and tpkbs.status != 'on_deleted'
+		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' and tpkbs.status != 'on_deleted' 
 		limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + ``
 
 		sqlStr2 = `SELECT count(name) from tbl_sales ts 
 		join tbl_customer tc on tc.sales_id = ts.id
 		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-		where ts.sales_email like '%` + request.SalesEmail + `%' and tc.name like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' 
-		or ts.sales_email like '%` + request.SalesEmail + `%' and tc.mobile_no like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' 
-		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.properti_id like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0'
-		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0'`
+		where ts.sales_email like '%` + request.SalesEmail + `%' and tc.name like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' and tpkbs.status != 'on_deleted' 
+		or ts.sales_email like '%` + request.SalesEmail + `%' and tc.mobile_no like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' and tpkbs.status != 'on_deleted' 
+		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.properti_id like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' and tpkbs.status != 'on_deleted'
+		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at like '%` + request.Keyword + `%' and tpkbs.utj_status  = b'0' and tpkbs.status != 'on_deleted'`
 	}
 
 	data, totalData := service.userRepository.GetUserReferral(request, sqlStr, sqlStr2)

@@ -18,6 +18,8 @@ type SalesController interface {
 	EditSalesByDeveloper(ctx *gin.Context)
 	DeleteSalesByDeveloper(ctx *gin.Context)
 	ListProject(ctx *gin.Context)
+	DraftDetail(ctx *gin.Context)
+	DeletePengajuan(ctx *gin.Context)
 }
 
 type salesController struct {
@@ -206,6 +208,44 @@ func (controller *salesController) DetailSalesByDeveloper(ctx *gin.Context) {
 
 	response = controller.salesService.DetailSalesByDeveloper(decryptedRequest)
 
+	ctx.JSON(response.HttpCode, response)
+}
+
+func (controller *salesController) DraftDetail(ctx *gin.Context) {
+	var response responseDTO.Response
+	var request salesRequestDTO.DraftDetailRequest
+	errDTO := ctx.ShouldBind(&request)
+	if errDTO != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+
+	response = controller.salesService.DraftDetail(request)
+	ctx.JSON(response.HttpCode, response)
+}
+
+func (controller *salesController) DeletePengajuan(ctx *gin.Context) {
+	var request salesRequestDTO.SalesDeleteRequestDTO
+	var response responseDTO.Response
+	errDTO := ctx.ShouldBind(&request)
+	if errDTO != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+
+	response = controller.salesService.DeletePengajuan(request)
 	ctx.JSON(response.HttpCode, response)
 }
 

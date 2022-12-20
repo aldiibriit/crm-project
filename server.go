@@ -34,7 +34,7 @@ var (
 	authService     service.AuthService     = service.NewAuthService(userRepository, salesRepository, emailService, emailAttemptRepository, otpService, jwtService)
 	emailService    service.EmailService    = service.NewEmailService(emailAttemptRepository)
 	kprService      service.KPRService      = service.NewKPRService(customerRepository, kprRepository, salesRepository)
-	salesService    service.SalesService    = service.NewSalesService(salesRepository, userRepository)
+	salesService    service.SalesService    = service.NewSalesService(salesRepository, userRepository, kprRepository)
 
 	testController     controller.TestController     = controller.NewTestController(emailService)
 	authController     controller.AuthController     = controller.NewAuthController(authService, jwtService)
@@ -94,6 +94,8 @@ func main() {
 		salesRoutes.POST("/editSalesByDeveloper", salesController.EditSalesByDeveloper)
 		salesRoutes.POST("/detailSalesAtDeveloper", salesController.DetailSalesByDeveloper)
 		salesRoutes.POST("/deleteSalesByDeveloper", salesController.DeleteSalesByDeveloper)
+		salesRoutes.POST("/draftDetail", salesController.DraftDetail)
+		salesRoutes.POST("/draftDelete", salesController.DeletePengajuan)
 	}
 
 	userRoutes := r.Group("api/user")

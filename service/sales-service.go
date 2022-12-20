@@ -18,17 +18,21 @@ type SalesService interface {
 	EditSalesByDeveloper(request salesRequestDTO.SalesEditRequestDTO) responseDTO.Response
 	DeleteSalesByDeveloper(request salesRequestDTO.SalesDeleteRequestDTO) responseDTO.Response
 	DetailSalesByDeveloper(request salesRequestDTO.DetailSalesRequest) responseDTO.Response
+	DraftDetail(request salesRequestDTO.DraftDetailRequest) responseDTO.Response
+	DeletePengajuan(request salesRequestDTO.SalesDeleteRequestDTO) responseDTO.Response
 }
 
 type salesService struct {
 	salesRepository repository.SalesRepository
 	userRepository  repository.UserRepository
+	kprRepository   repository.KPRRepository
 }
 
-func NewSalesService(salesRepo repository.SalesRepository, userRepo repository.UserRepository) SalesService {
+func NewSalesService(salesRepo repository.SalesRepository, userRepo repository.UserRepository, kprRepo repository.KPRRepository) SalesService {
 	return &salesService{
 		salesRepository: salesRepo,
 		userRepository:  userRepo,
+		kprRepository:   kprRepo,
 	}
 }
 
@@ -446,6 +450,33 @@ func (service *salesService) DeleteSalesByDeveloper(request salesRequestDTO.Sale
 	response.MetadataResponse = nil
 	response.ResponseCode = "00"
 	response.ResponseData = nil
+	response.ResponseDesc = "Success"
+	response.Summary = nil
+
+	return response
+}
+
+func (service *salesService) DraftDetail(request salesRequestDTO.DraftDetailRequest) responseDTO.Response {
+	var response responseDTO.Response
+	data := service.salesRepository.DraftDetail(request)
+	response.HttpCode = 200
+	response.MetadataResponse = nil
+	response.ResponseCode = "00"
+	response.ResponseData = data
+	response.ResponseDesc = "Success"
+	response.Summary = nil
+	return response
+}
+
+func (service *salesService) DeletePengajuan(request salesRequestDTO.SalesDeleteRequestDTO) responseDTO.Response {
+	var response responseDTO.Response
+
+	data := service.kprRepository.Delete(request.ID)
+
+	response.HttpCode = 200
+	response.MetadataResponse = nil
+	response.ResponseCode = "00"
+	response.ResponseData = data
 	response.ResponseDesc = "Success"
 	response.Summary = nil
 

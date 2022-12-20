@@ -37,7 +37,7 @@ func (service *kprService) PengajuanKPR(request KPRRequestDTO.PengajuanKPRReques
 	customer.ModifiedAt = time.Now()
 	pengajuanKPR.CreatedAt = time.Now()
 	pengajuanKPR.ModifiedAt = time.Now()
-
+	pengajuanKPR.Status = "on_reviewed"
 	salesID := service.salesRepository.GetIDByRefCode(request.ReferralCode)
 	request.SalesID = salesID
 
