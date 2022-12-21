@@ -20,6 +20,7 @@ type SalesService interface {
 	DetailSalesByDeveloper(request salesRequestDTO.DetailSalesRequest) responseDTO.Response
 	DraftDetail(request salesRequestDTO.DraftDetailRequest) responseDTO.Response
 	DeletePengajuan(request salesRequestDTO.SalesDeleteRequestDTO) responseDTO.Response
+	ListFinalPengajuan(request salesRequestDTO.FinalPengajuanRequest) responseDTO.Response
 }
 
 type salesService struct {
@@ -478,6 +479,81 @@ func (service *salesService) DeletePengajuan(request salesRequestDTO.SalesDelete
 	response.ResponseCode = "00"
 	response.ResponseData = data
 	response.ResponseDesc = "Success"
+	response.Summary = nil
+
+	return response
+}
+
+func (service *salesService) ListFinalPengajuan(request salesRequestDTO.FinalPengajuanRequest) responseDTO.Response {
+	var response responseDTO.Response
+	var metadataResponse responseDTO.ListUserDtoRes
+	var sqlStr, sqlStrCount string
+
+	metadataResponse.Currentpage = request.Offset
+	if request.Offset > 0 {
+		request.Offset = request.Offset * request.Limit
+	}
+
+	if request.UserType == "sales" {
+		sqlStr = `
+		SELECT sales_name,json_extract(metadata,'$.name')as developerName,tc.name as customerName,tpkbs.created_at,jenis_properti,tipe_properti from tbl_pengajuan_kpr_by_sales tpkbs
+		join tbl_customer tc on tc.id = tpkbs.customer_id 
+		join tbl_sales ts on ts.id = tc.sales_id
+		join tbl_project tp on tp.email = ts.developer_email
+		join tbl_user tu on tu.email = ts.developer_email 
+		where ts.sales_email = '` + request.Email + `' limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
+		`
+		sqlStrCount = `
+		SELECT count(sales_name) from tbl_pengajuan_kpr_by_sales tpkbs
+		join tbl_customer tc on tc.id = tpkbs.customer_id 
+		join tbl_sales ts on ts.id = tc.sales_id
+		join tbl_project tp on tp.email = ts.developer_email
+		join tbl_user tu on tu.email = ts.developer_email 
+		where ts.sales_email = '` + request.Email + `'
+		`
+	} else if request.UserType == "developer" {
+		sqlStr = `
+		SELECT sales_name,json_extract(metadata,'$.name')as developerName,tc.name as customerName,tpkbs.created_at,jenis_properti,tipe_properti from tbl_pengajuan_kpr_by_sales tpkbs
+		join tbl_customer tc on tc.id = tpkbs.customer_id 
+		join tbl_sales ts on ts.id = tc.sales_id
+		join tbl_project tp on tp.email = ts.developer_email
+		join tbl_user tu on tu.email = ts.developer_email 
+		where ts.developer_email = '` + request.Email + `' limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
+		`
+		sqlStrCount = `
+		SELECT count(sales_name) from tbl_pengajuan_kpr_by_sales tpkbs
+		join tbl_customer tc on tc.id = tpkbs.customer_id 
+		join tbl_sales ts on ts.id = tc.sales_id
+		join tbl_project tp on tp.email = ts.developer_email
+		join tbl_user tu on tu.email = ts.developer_email 
+		where ts.developer_email = '` + request.Email + `'
+		`
+	} else {
+		sqlStr = `
+		SELECT sales_name,json_extract(metadata,'$.name')as developerName,tc.name as customerName,tpkbs.created_at,jenis_properti,tipe_properti from tbl_pengajuan_kpr_by_sales tpkbs
+		join tbl_customer tc on tc.id = tpkbs.customer_id 
+		join tbl_sales ts on ts.id = tc.sales_id
+		join tbl_project tp on tp.email = ts.developer_email
+		join tbl_user tu on tu.email = ts.developer_email 
+		limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + `
+		`
+		sqlStrCount = `
+		SELECT count(sales_name) from tbl_pengajuan_kpr_by_sales tpkbs
+		join tbl_customer tc on tc.id = tpkbs.customer_id 
+		join tbl_sales ts on ts.id = tc.sales_id
+		join tbl_project tp on tp.email = ts.developer_email
+		join tbl_user tu on tu.email = ts.developer_email 
+		`
+	}
+
+	data, totalData := service.salesRepository.ListFinalPengajuan(sqlStr, sqlStrCount)
+	metadataResponse.TotalData = int(totalData)
+
+	response.HttpCode = 200
+	response.MetadataResponse = metadataResponse
+	response.ResponseCode = "00"
+	response.ResponseDesc = "Success"
+	response.ResponseData = data
 	response.Summary = nil
 
 	return response

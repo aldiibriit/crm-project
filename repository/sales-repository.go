@@ -20,6 +20,7 @@ type SalesRepository interface {
 	GetIDByRefCode(refCode string) int
 	FindByEmail(email string) entity.TblSales
 	DraftDetail(request salesRequestDTO.DraftDetailRequest) salesResponseDTO.DraftDetailDTO
+	ListFinalPengajuan(sqlstr string, sqlstrCount string) ([]salesResponseDTO.ListFinalPengajuanDTO, int64)
 }
 
 type salesConnection struct {
@@ -135,4 +136,13 @@ func (db *salesConnection) DraftDetail(request salesRequestDTO.DraftDetailReques
 	var result salesResponseDTO.DraftDetailDTO
 	db.connection.Raw(`SELECT * from tbl_pengajuan_kpr_by_sales tpkbs join tbl_customer tc on tc.id = tpkbs.customer_id where tpkbs.id = ` + request.ID + ``).Find(&result)
 	return result
+}
+
+func (db *salesConnection) ListFinalPengajuan(sqlStr string, sqlStrCount string) ([]salesResponseDTO.ListFinalPengajuanDTO, int64) {
+	var result []salesResponseDTO.ListFinalPengajuanDTO
+	var totalData int64
+
+	db.connection.Raw(sqlStr).Find(&result)
+	db.connection.Raw(sqlStrCount).Count(&totalData)
+	return result, totalData
 }

@@ -20,6 +20,7 @@ type SalesController interface {
 	ListProject(ctx *gin.Context)
 	DraftDetail(ctx *gin.Context)
 	DeletePengajuan(ctx *gin.Context)
+	ListFinalPengajuan(ctx *gin.Context)
 }
 
 type salesController struct {
@@ -246,6 +247,24 @@ func (controller *salesController) DeletePengajuan(ctx *gin.Context) {
 	}
 
 	response = controller.salesService.DeletePengajuan(request)
+	ctx.JSON(response.HttpCode, response)
+}
+
+func (controller *salesController) ListFinalPengajuan(ctx *gin.Context) {
+	var response responseDTO.Response
+	var request salesRequestDTO.FinalPengajuanRequest
+	errDTO := ctx.ShouldBind(&request)
+	if errDTO != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+	response = controller.salesService.ListFinalPengajuan(request)
 	ctx.JSON(response.HttpCode, response)
 }
 

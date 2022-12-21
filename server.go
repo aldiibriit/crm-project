@@ -96,6 +96,7 @@ func main() {
 		salesRoutes.POST("/deleteSalesByDeveloper", salesController.DeleteSalesByDeveloper)
 		salesRoutes.POST("/draftDetail", salesController.DraftDetail)
 		salesRoutes.POST("/draftDelete", salesController.DeletePengajuan)
+		salesRoutes.POST("/listFinalPengajuan", salesController.ListFinalPengajuan)
 	}
 
 	userRoutes := r.Group("api/user")
