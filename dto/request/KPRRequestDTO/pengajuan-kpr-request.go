@@ -2,6 +2,7 @@ package KPRRequestDTO
 
 type PengajuanKPRRequest struct {
 	NIK                    string  `json:"nik"`
+	SalesEmail             string  `json:"salesEmail" binding:"required"`
 	SalesID                int     `json:"salesID"`
 	Name                   string  `json:"name" binding:"required"`
 	ReferralCode           string  `json:"referralCode" binding:"required"`

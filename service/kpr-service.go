@@ -31,12 +31,15 @@ func NewKPRService(customerRepo repository.CustomerRepository, kprRepo repositor
 func (service *kprService) PengajuanKPR(request KPRRequestDTO.PengajuanKPRRequest) responseDTO.Response {
 	var response responseDTO.Response
 
+	sales := service.salesRepository.FindByEmail(request.SalesEmail)
+
 	customer := entity.TblCustomer{}
 	pengajuanKPR := entity.TblPengajuanKprBySales{}
 	customer.CreatedAt = time.Now()
 	customer.ModifiedAt = time.Now()
 	pengajuanKPR.CreatedAt = time.Now()
 	pengajuanKPR.ModifiedAt = time.Now()
+	customer.SalesID = sales.ID
 	pengajuanKPR.Status = "on_reviewed"
 	salesID := service.salesRepository.GetIDByRefCode(request.ReferralCode)
 	request.SalesID = salesID
