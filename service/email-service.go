@@ -33,11 +33,8 @@ func (service *emailService) SendMessage(request emailRequestDTO.EmailRequestDTO
 }
 
 func (service *emailService) sendMail(request emailRequestDTO.EmailRequestDTO) bool {
-
-	if service.limitExceed(request.ToAddres, request.Action, request.UrlEncoded) {
-		log.Println("Error in limit exceed")
-		return false
-	} else {
+	var result bool
+	if request.Action == 6 {
 		dailer := mail.NewDialer("email-smtp.ap-southeast-1.amazonaws.com", 587, "AKIA4RGQ2AWFS7BGLKOX", "BHa+AUiY9lqKitS9qAzregJsPwynZswwoXL4a314szp1")
 		dailer.Timeout = 5 * time.Second
 
@@ -52,8 +49,30 @@ func (service *emailService) sendMail(request emailRequestDTO.EmailRequestDTO) b
 			log.Println(err.Error())
 		}
 
-		return true
+		result = true
+	} else {
+		if service.limitExceed(request.ToAddres, request.Action, request.UrlEncoded) {
+			log.Println("Error in limit exceed")
+			result = false
+		} else {
+			dailer := mail.NewDialer("email-smtp.ap-southeast-1.amazonaws.com", 587, "AKIA4RGQ2AWFS7BGLKOX", "BHa+AUiY9lqKitS9qAzregJsPwynZswwoXL4a314szp1")
+			dailer.Timeout = 5 * time.Second
+
+			msg := mail.NewMessage()
+			msg.SetHeader("To", request.ToAddres)
+			msg.SetHeader("Subject", request.Subject)
+			msg.SetBody("text/html", generateBody(request))
+			msg.SetHeader("From", "noreply2@homespot.id")
+
+			err := dailer.DialAndSend(msg)
+			if err != nil {
+				log.Println(err.Error())
+			}
+
+			result = true
+		}
 	}
+	return result
 }
 
 func (service *emailService) limitExceed(email string, action int, urlEncoded string) bool {
@@ -105,6 +124,8 @@ func generateBody(emailRequest emailRequestDTO.EmailRequestDTO) string {
 	if emailRequest.Action == 3 {
 		body = "<html><head><style>.doneRegis_title{font-weight:700;font-size:2rem}.doneRegisifAsk{text-align:center;margin-top:2rem}.doneRegisconWrap{padding:.2rem;background:#ebebeb;text-align:center;align-items:center}.doneRegistblWrap{margin:0 auto;text-align:center}.doneRegistblTxt{margin-top:0;margin-bottom:0;font-weight:400}</style></head><body><div><h1 class=\"doneRegistitle\">Registrasi Kamu Berhasil</h1><p>Selamat<b> " + emailRequest.Name + " </b>, Kamu bisa mencari dan membeli rumah idamanmu melalui Homespot</p><p class=\"doneRegisifAsk\">Bila ada pertanyaan, Silahkan menghubungi kami :</p><div class=\"doneRegisconWrap\"><table class=\"doneRegistblWrap\"><tr><th><img src=\"https://storage.googleapis.com/artifacts.concrete-plasma-244309.appspot.com/homespot/wa-tiny.png\" alt=\"wa-tiny-icon\"></th><th><p class=\"doneRegistblTxt\">+622150864230</p></th></tr></table><table class=\"doneRegistblWrap\"><tr><th><img src=\"https://storage.googleapis.com/artifacts.concrete-plasma-244309.appspot.com/homespot/email-tiny.png\" alt=\"email-tiny-icon\"></th><th><p class=\"doneRegis_tblTxt\">support@homespot.co.id</p></th></tr></table></div></div></body></html>"
 	} else if emailRequest.Action == 4 || emailRequest.Action == 5 { //otp activation
+		return emailRequest.EmailBody
+	} else if emailRequest.Action == 6 { //otp activation
 		return emailRequest.EmailBody
 	} else {
 		body = "<html><head><link href=\"https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css\" rel=\"stylesheet\"><style>.logo{margin-bottom:.7rem}.verify_wrap{text-align:center}.verifytitle{font-weight:700;font-size:2rem}.verifylink{font-weight:700;text-decoration:underline}</style></head><body><div><div class=\"verifywrap\"><img class=\"logo\" src=\"https://storage.googleapis.com/artifacts.concrete-plasma-244309.appspot.com/homespot/logo/logo.svg\"><h1 class=\"verifytitle\">Verifikasi Email Kamu</h1><p>Data registrasi kamu telah berhasil kami terima. Verifikasi email kamu dengan mengklik tautan di bawah ini:</p><p class=\"verifylink\"><a href=\"" + emailRequest.UrlEncoded + "\">Verifikasi Email</a></p><p>Atau kamu dapat menyalin link berikut untuk memverifikasi email kamu</p><p class=\"verify_link\"><a href=\"" + emailRequest.UrlEncoded + "\">" + emailRequest.UrlEncoded + "</a></p></div></div></body></html>"

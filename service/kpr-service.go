@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-api/dto/request/KPRRequestDTO"
+	"go-api/dto/request/emailRequestDTO"
 	responseDTO "go-api/dto/response"
 	"go-api/entity"
 	"go-api/helper"
@@ -24,18 +25,21 @@ type kprService struct {
 	customerRepository repository.CustomerRepository
 	kprRepository      repository.KPRRepository
 	salesRepository    repository.SalesRepository
+	emailService       EmailService
 }
 
-func NewKPRService(customerRepo repository.CustomerRepository, kprRepo repository.KPRRepository, salesRepo repository.SalesRepository) KPRService {
+func NewKPRService(customerRepo repository.CustomerRepository, kprRepo repository.KPRRepository, salesRepo repository.SalesRepository, emailServ EmailService) KPRService {
 	return &kprService{
 		customerRepository: customerRepo,
 		kprRepository:      kprRepo,
 		salesRepository:    salesRepo,
+		emailService:       emailServ,
 	}
 }
 
 func (service *kprService) PengajuanKPR(request KPRRequestDTO.PengajuanKPRRequest) responseDTO.Response {
 	var response responseDTO.Response
+	var emailRequest emailRequestDTO.EmailRequestDTO
 
 	customer := entity.TblCustomer{}
 	pengajuanKPR := entity.TblPengajuanKprBySales{}
@@ -130,6 +134,21 @@ func (service *kprService) PengajuanKPR(request KPRRequestDTO.PengajuanKPRReques
 
 	// 	return response
 	// }
+
+	emailRequest.Action = 6
+	emailRequest.EmailBody = request.Name + ` Berminat untuk membeli salah satu properti anda. Mohon cek MIS`
+	emailRequest.Name = request.Name
+	emailRequest.Subject = "Pengajuan KPR"
+	emailRequest.ToAddres = request.SalesEmail
+
+	if !service.emailService.SendMessage(emailRequest) {
+		response.HttpCode = 422
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = "error while send email to sales"
+		response.Summary = nil
+	}
 
 	response.HttpCode = 200
 	response.MetadataResponse = nil

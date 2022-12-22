@@ -68,7 +68,7 @@ func (service *userService) ListUserReferral(request userRequestDTO.ListUserRefe
 	var sqlStr, sqlStr2 string
 
 	if request.StartDate != "" && request.EndDate != "" {
-		sqlStr = `SELECT tpkbs.id,name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
+		sqlStr = `SELECT tpkbs.id,name,mobile_no,properti_id,tpkbs.created_at,tpkbs.status from tbl_sales ts 
 	join tbl_customer tc on tc.sales_id = ts.id
 	join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
 	where ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at BETWEEN '` + request.StartDate + `' and '` + request.EndDate + `' and tpkbs.status != 'on_deleted'  
@@ -80,7 +80,7 @@ func (service *userService) ListUserReferral(request userRequestDTO.ListUserRefe
 	where ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at BETWEEN '` + request.StartDate + `' and '` + request.EndDate + `' and tpkbs.status != 'on_deleted'  
  	`
 	} else if request.EndDate == "" && request.StartDate != "" {
-		sqlStr = `SELECT tpkbs.id,name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
+		sqlStr = `SELECT tpkbs.id,name,mobile_no,properti_id,tpkbs.created_at,tpkbs.status from tbl_sales ts 
 		join tbl_customer tc on tc.sales_id = ts.id
 		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
 		where ts.sales_email like '%` + request.SalesEmail + `%' and date(tpkbs.created_at) >='` + request.StartDate + `' and tpkbs.status != 'on_deleted'  
@@ -92,7 +92,7 @@ func (service *userService) ListUserReferral(request userRequestDTO.ListUserRefe
 		where ts.sales_email like '%` + request.SalesEmail + `%' and date(tpkbs.created_at) >='` + request.StartDate + `' and tpkbs.status != 'on_deleted'`
 
 	} else {
-		sqlStr = `SELECT tpkbs.id,name,mobile_no,properti_id,tpkbs.created_at from tbl_sales ts 
+		sqlStr = `SELECT tpkbs.id,name,mobile_no,properti_id,tpkbs.created_at,tpkbs.status from tbl_sales ts 
 		join tbl_customer tc on tc.sales_id = ts.id
 		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
 		where ts.sales_email like '%` + request.SalesEmail + `%' and tc.name like '%` + request.Keyword + `%' and tpkbs.status != 'on_deleted' 
