@@ -1,17 +1,19 @@
 package KPRRequestDTO
 
 type PengajuanKPRRequest struct {
-	NIK                    string  `json:"nik"`
-	SalesEmail             string  `json:"salesEmail" binding:"required"`
-	SalesID                int     `json:"salesID"`
 	Name                   string  `json:"name" binding:"required"`
 	ReferralCode           string  `json:"referralCode" binding:"required"`
+	MobileNo               string  `json:"mobileNo" binding:"required"`
+	PropertiId             int     `json:"propertiID" binding:"required"`
+	Periode                string  `json:"periode"`
+	NIK                    string  `json:"nik"`
+	SalesEmail             string  `json:"salesEmail"`
+	SalesID                int     `json:"salesID"`
 	TanggalLahir           string  `json:"tanggalLahir"`
 	TempatLahir            string  `json:"tempatLahir"`
 	Email                  string  `json:"email"`
 	MaritalStatus          string  `json:"maritalStatus"`
 	JenisKelamin           string  `json:"jenisKelamin"`
-	MobileNo               string  `json:"mobileNo" binding:"required"`
 	AlamatKTP              string  `json:"alamatKTP"`
 	AlamatDomisili         string  `json:"alamatDomisili"`
 	KancaTerdekat          string  `json:"kancaTerdekat"`
@@ -31,10 +33,9 @@ type PengajuanKPRRequest struct {
 	JumlahPinjaman         string  `json:"jumlahPinjaman" `
 	Note                   string  `json:"note" `
 	TenorFixedRate         int     `json:"tenorFixedRate"`
+	CustomerID             int     `json:"customerID" gorm:"column:customer_id"`
 	UangMuka               string  `json:"uangMuka" `
 	UkerCode               string  `json:"ukerCode" `
 	UkerName               string  `json:"ukerName" `
-	PropertiId             int     `json:"propertiID" binding:"required"`
-	CustomerID             int     `json:"customerID" gorm:"column:customer_id"`
 	UTJ                    string  `json:"utj"`
 }

@@ -31,6 +31,7 @@ type TblPengajuanKprBySales struct {
 	CustomerID             int     `json:"customerID" gorm:"column:customer_id"`
 	UTJ                    string  `json:"utj" gorm:"column:utj"`
 	UTJStatus              bool    `json:"utjStatus" gorm:"column:utj_status"`
+	KancaTerdekat          string  `json:"kancaTerdekat" gorm:"column:kanca_terdekat"`
 	CreatedAt              time.Time
 	ModifiedAt             time.Time
 }

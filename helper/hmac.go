@@ -56,3 +56,20 @@ func SignatureBRIVA() string {
 
 	return currentTS
 }
+
+func HMACBuilder(pathOrigin string, verbOrigin string, tokenOrigin string, bodyOrigin string, key string, ts string) string {
+	path := "path=" + pathOrigin
+	verb := "&verb=" + verbOrigin
+	token := "&token=" + tokenOrigin
+	timestamp := "&timestamp=" + ts
+	body := "&body=" + bodyOrigin
+	hmacString := path + verb + token + timestamp + body
+
+	digest := hmac.New(sha256.New, []byte(key))
+
+	digest.Write([]byte(hmacString))
+
+	signature := base64.StdEncoding.EncodeToString(digest.Sum(nil))
+
+	return signature
+}
