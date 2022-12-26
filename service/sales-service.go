@@ -21,6 +21,7 @@ type SalesService interface {
 	DraftDetail(request salesRequestDTO.DraftDetailRequest) responseDTO.Response
 	DeletePengajuan(request salesRequestDTO.SalesDeleteRequestDTO) responseDTO.Response
 	ListFinalPengajuan(request salesRequestDTO.FinalPengajuanRequest) responseDTO.Response
+	EditDraftDetail(request salesRequestDTO.EditDraftDetailRequestDTO) responseDTO.Response
 }
 
 type salesService struct {
@@ -605,6 +606,21 @@ func serializeUpdatedSales(request interface{}) salesRequestDTO.SalesEditRequest
 	return result
 }
 
+func serializeUpdatedDraft(request interface{}) salesRequestDTO.EditDraftDetailRequestDTO {
+	data := request.(salesRequestDTO.EditDraftDetailRequestDTO)
+	var result salesRequestDTO.EditDraftDetailRequestDTO
+
+	encryptedEmail, _ := helper.RsaEncryptBEToFE([]byte(data.Email))
+	encryptedID, _ := helper.RsaEncryptBEToFE([]byte(data.ID))
+	encryptedNIK, _ := helper.RsaEncryptBEToFE([]byte(data.NIK))
+
+	result.Email = encryptedEmail
+	result.ID = encryptedID
+	result.NIK = encryptedNIK
+
+	return result
+}
+
 func serializeDetailSales(request interface{}) salesResponseDTO.MISDeveloper {
 	data := request.(salesResponseDTO.MISDeveloper)
 	var result salesResponseDTO.MISDeveloper
@@ -653,4 +669,43 @@ func serializeMisSuperAdmin(request interface{}) []salesResponseDTO.MISSuperAdmi
 	}
 
 	return result
+}
+
+func (service *salesService) EditDraftDetail(request salesRequestDTO.EditDraftDetailRequestDTO) responseDTO.Response {
+
+	var response responseDTO.Response
+
+	user := service.salesRepository.FindByEmailCustomer(request.Email)
+
+	if len(user.Email) > 0 {
+		response.HttpCode = 500
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = "Email already exist"
+		response.Summary = nil
+		return response
+	}
+
+	err := service.salesRepository.EditDraftDetail(request)
+	if err != nil {
+		response.HttpCode = 500
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = err.Error()
+		response.Summary = nil
+		return response
+	}
+
+	encryptedData := serializeUpdatedDraft(request)
+
+	response.HttpCode = 200
+	response.MetadataResponse = nil
+	response.ResponseCode = "00"
+	response.ResponseData = encryptedData
+	response.ResponseDesc = "Success"
+	response.Summary = nil
+
+	return response
 }

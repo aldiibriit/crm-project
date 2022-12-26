@@ -20,7 +20,9 @@ type SalesRepository interface {
 	GetIDByRefCode(refCode string) int
 	FindByEmail(email string) entity.TblSales
 	DraftDetail(request salesRequestDTO.DraftDetailRequest) salesResponseDTO.DraftDetailDTO
+	EditDraftDetail(request salesRequestDTO.EditDraftDetailRequestDTO) error
 	ListFinalPengajuan(sqlstr string, sqlstrCount string) ([]salesResponseDTO.ListFinalPengajuanDTO, int64)
+	FindByEmailCustomer(email string) entity.TblCustomer
 }
 
 type salesConnection struct {
@@ -50,6 +52,12 @@ func (db *salesConnection) FindByEmailDeveloper(sqlStr string, sqlStrCount strin
 	db.connection.Raw(sqlStrCount).Find(&totalData)
 
 	return result, totalData
+}
+
+func (db *salesConnection) FindByEmailCustomer(email string) entity.TblCustomer {
+	var customer entity.TblCustomer
+	db.connection.Raw("SELECT * from tbl_customer where email = ?", email).Find(&customer)
+	return customer
 }
 
 func (db *salesConnection) MISSuperAdmin(sqlStr string, sqlStrCount string, request salesRequestDTO.MISSuperAdminRequestDTO) ([]salesResponseDTO.MISSuperAdmin, int) {
@@ -145,4 +153,19 @@ func (db *salesConnection) ListFinalPengajuan(sqlStr string, sqlStrCount string)
 	db.connection.Raw(sqlStr).Find(&result)
 	db.connection.Raw(sqlStrCount).Count(&totalData)
 	return result, totalData
+}
+
+func (db *salesConnection) EditDraftDetail(request salesRequestDTO.EditDraftDetailRequestDTO) error {
+	var currentEmail string
+
+	db.connection.Debug().Raw(`SELECT email from tbl_customer where id = ` + request.ID + ``).Scan(&currentEmail)
+
+	tx := db.connection.Begin()
+	if err := tx.Model(&entity.TblCustomer{}).Where("id", request.ID).Updates(&entity.TblCustomer{Email: request.Email, NIK: request.NIK}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+
+	return nil
 }

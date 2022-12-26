@@ -21,6 +21,7 @@ type SalesController interface {
 	DraftDetail(ctx *gin.Context)
 	DeletePengajuan(ctx *gin.Context)
 	ListFinalPengajuan(ctx *gin.Context)
+	EditDraftDetail(ctx *gin.Context)
 }
 
 type salesController struct {
@@ -268,6 +269,38 @@ func (controller *salesController) ListFinalPengajuan(ctx *gin.Context) {
 	ctx.JSON(response.HttpCode, response)
 }
 
+func (controller *salesController) EditDraftDetail(ctx *gin.Context) {
+	var response responseDTO.Response
+	var request salesRequestDTO.EditDraftDetailRequestDTO
+
+	errDTO := ctx.ShouldBind(&request)
+	if errDTO != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+
+	decryptedRequest, err := deserializeEditDraftDetail(request)
+	if err != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		response.ResponseData = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+		return
+	}
+	response = controller.salesService.EditDraftDetail(decryptedRequest)
+
+	ctx.JSON(response.HttpCode, response)
+}
+
 func deserializeMisDeveloperRequest(request interface{}) (salesRequestDTO.MISDeveloperRequestDTO, error) {
 	otpDTO := request.(salesRequestDTO.MISDeveloperRequestDTO)
 
@@ -409,6 +442,49 @@ func deserializeDeleteSales(request interface{}) (salesRequestDTO.SalesDeleteReq
 
 	var result salesRequestDTO.SalesDeleteRequestDTO
 
+	result.ID = plainTextID
+
+	return result, nil
+}
+
+func deserializeEditDraftDetail(request interface{}) (salesRequestDTO.EditDraftDetailRequestDTO, error) {
+	otpDTO := request.(salesRequestDTO.EditDraftDetailRequestDTO)
+
+	cipheTextEmail, err := base64.StdEncoding.DecodeString(otpDTO.Email)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	cipheTextNIK, err := base64.StdEncoding.DecodeString(otpDTO.NIK)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	cipheTextID, err := base64.StdEncoding.DecodeString(otpDTO.ID)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	plainTextEmail, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.EditDraftDetailRequestDTO{}, err
+	}
+
+	plainTextNIK, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextNIK))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.EditDraftDetailRequestDTO{}, err
+	}
+
+	plainTextID, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextID))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.EditDraftDetailRequestDTO{}, err
+	}
+
+	var result salesRequestDTO.EditDraftDetailRequestDTO
+
+	result.Email = plainTextEmail
+	result.NIK = plainTextNIK
 	result.ID = plainTextID
 
 	return result, nil
