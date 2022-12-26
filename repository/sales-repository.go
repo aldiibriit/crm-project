@@ -161,7 +161,7 @@ func (db *salesConnection) EditDraftDetail(request salesRequestDTO.EditDraftDeta
 	db.connection.Debug().Raw(`SELECT email from tbl_customer where id = ` + request.ID + ``).Scan(&currentEmail)
 
 	tx := db.connection.Begin()
-	if err := tx.Model(&entity.TblCustomer{}).Where("id", request.ID).Updates(&entity.TblCustomer{Email: request.Email, NIK: request.NIK}).Error; err != nil {
+	if err := tx.Model(&entity.TblCustomer{}).Where("id", request.ID).Updates(&entity.TblCustomer{Email: request.Email, NIK: request.NIK, Name: request.Name, MobileNo: request.MobileNo, MaritalStatus: request.MartialStatus, AlamatDomisili: request.AlamatDomisili, AlamatKTP: request.AlamatKTP}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
