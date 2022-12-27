@@ -462,6 +462,26 @@ func deserializeEditDraftDetail(request interface{}) (salesRequestDTO.EditDraftD
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+	cipheTextName, err := base64.StdEncoding.DecodeString(otpDTO.Name)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	cipheTextMobileNo, err := base64.StdEncoding.DecodeString(otpDTO.MobileNo)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	cipheTextMartialStatus, err := base64.StdEncoding.DecodeString(otpDTO.MartialStatus)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	cipheTextAlamatDomisili, err := base64.StdEncoding.DecodeString(otpDTO.AlamatDomisili)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	cipheTextAlamatKTP, err := base64.StdEncoding.DecodeString(otpDTO.AlamatKTP)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 
 	plainTextEmail, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextEmail))
 	if err != nil {
@@ -480,12 +500,42 @@ func deserializeEditDraftDetail(request interface{}) (salesRequestDTO.EditDraftD
 		fmt.Println(err.Error())
 		return salesRequestDTO.EditDraftDetailRequestDTO{}, err
 	}
+	plainTextName, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextName))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.EditDraftDetailRequestDTO{}, err
+	}
+	plainTextMobileNo, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextMobileNo))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.EditDraftDetailRequestDTO{}, err
+	}
+	plainTextMartialStatus, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextMartialStatus))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.EditDraftDetailRequestDTO{}, err
+	}
+	plainTextAlamatDomisili, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextAlamatDomisili))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.EditDraftDetailRequestDTO{}, err
+	}
+	plainTextAlamatKTP, err := helper.RsaDecryptFromFEInBE([]byte(cipheTextAlamatKTP))
+	if err != nil {
+		fmt.Println(err.Error())
+		return salesRequestDTO.EditDraftDetailRequestDTO{}, err
+	}
 
 	var result salesRequestDTO.EditDraftDetailRequestDTO
 
 	result.Email = plainTextEmail
 	result.NIK = plainTextNIK
 	result.ID = plainTextID
+	result.Name = plainTextName
+	result.MobileNo = plainTextMobileNo
+	result.MartialStatus = plainTextMartialStatus
+	result.AlamatDomisili = plainTextAlamatDomisili
+	result.AlamatKTP = plainTextAlamatKTP
 
 	return result, nil
 }

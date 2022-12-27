@@ -613,10 +613,20 @@ func serializeUpdatedDraft(request interface{}) salesRequestDTO.EditDraftDetailR
 	encryptedEmail, _ := helper.RsaEncryptBEToFE([]byte(data.Email))
 	encryptedID, _ := helper.RsaEncryptBEToFE([]byte(data.ID))
 	encryptedNIK, _ := helper.RsaEncryptBEToFE([]byte(data.NIK))
+	encryptedName, _ := helper.RsaEncryptBEToFE([]byte(data.Name))
+	encryptedMobileNo, _ := helper.RsaEncryptBEToFE([]byte(data.MobileNo))
+	encryptedMartialStatus, _ := helper.RsaEncryptBEToFE([]byte(data.MartialStatus))
+	encryptedAlamatDomisili, _ := helper.RsaEncryptBEToFE([]byte(data.AlamatDomisili))
+	encryptedAlamatKTP, _ := helper.RsaEncryptBEToFE([]byte(data.AlamatKTP))
 
 	result.Email = encryptedEmail
 	result.ID = encryptedID
 	result.NIK = encryptedNIK
+	result.Name = encryptedName
+	result.MobileNo = encryptedMobileNo
+	result.MartialStatus = encryptedMartialStatus
+	result.AlamatDomisili = encryptedAlamatDomisili
+	result.AlamatKTP = encryptedAlamatKTP
 
 	return result
 }
