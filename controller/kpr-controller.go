@@ -10,6 +10,7 @@ import (
 
 type KPRController interface {
 	PengajuanKPR(ctx *gin.Context)
+	ListPengajuan(ctx *gin.Context)
 }
 
 type kprController struct {
@@ -38,5 +39,24 @@ func (c *kprController) PengajuanKPR(ctx *gin.Context) {
 	}
 
 	response = c.kprService.PengajuanKPR(request)
+	ctx.JSON(response.HttpCode, response)
+}
+
+func (c *kprController) ListPengajuan(ctx *gin.Context) {
+	var request KPRRequestDTO.ListPengajuanKPR
+	var response responseDTO.Response
+
+	errDTO := ctx.ShouldBind(&request)
+	if errDTO != nil {
+		response.HttpCode = 400
+		response.MetadataResponse = nil
+		response.ResponseCode = "99"
+		response.ResponseData = nil
+		response.ResponseDesc = errDTO.Error()
+		response.Summary = nil
+		ctx.AbortWithStatusJSON(response.HttpCode, response)
+	}
+
+	response = c.kprService.ListPengajuan(request)
 	ctx.JSON(response.HttpCode, response)
 }

@@ -65,6 +65,8 @@ func HMACBuilder(pathOrigin string, verbOrigin string, tokenOrigin string, bodyO
 	body := "&body=" + bodyOrigin
 	hmacString := path + verb + token + timestamp + body
 
+	fmt.Println(hmacString)
+
 	digest := hmac.New(sha256.New, []byte(key))
 
 	digest.Write([]byte(hmacString))

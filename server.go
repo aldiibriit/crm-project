@@ -33,7 +33,7 @@ var (
 	otpService      service.OTPService      = service.NewOTPService(otpRepository, emailService, otpAttemptRepository)
 	authService     service.AuthService     = service.NewAuthService(userRepository, salesRepository, emailService, emailAttemptRepository, otpService, jwtService)
 	emailService    service.EmailService    = service.NewEmailService(emailAttemptRepository)
-	kprService      service.KPRService      = service.NewKPRService(customerRepository, kprRepository, salesRepository, emailService)
+	kprService      service.KPRService      = service.NewKPRService(customerRepository, kprRepository, salesRepository, emailService, userRepository)
 	salesService    service.SalesService    = service.NewSalesService(salesRepository, userRepository, kprRepository)
 
 	testController     controller.TestController     = controller.NewTestController(emailService)
@@ -131,6 +131,7 @@ func main() {
 	kprRoutes := r.Group("api/kpr")
 	{
 		kprRoutes.POST("/pengajuanKPR", kprController.PengajuanKPR)
+		kprRoutes.POST("/listPengajuanAllUser", kprController.ListPengajuan)
 	}
 
 	r.Run(":7177")

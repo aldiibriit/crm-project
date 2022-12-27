@@ -13,6 +13,7 @@ import (
 
 // UserRepository is contract what userRepository can do to db
 type UserRepository interface {
+	CheckType(email string) string
 	InsertUser(user entity.User) entity.User
 	InsertUserSales(user entity.TblUser) error
 	UpdateUser(user entity.User) entity.User
@@ -137,6 +138,12 @@ func (db *userConnection) GetUserReferral(request userRequestDTO.ListUserReferra
 	db.connection.Raw(sqlStr).Find(&data)
 	db.connection.Raw(sqlStr2).Scan(&totalData)
 	return data, totalData
+}
+
+func (db *userConnection) CheckType(email string) string {
+	var userType string
+	db.connection.Raw(`SELECT type FROM tbl_user where email = '` + email + `'`).Scan(&userType)
+	return userType
 }
 
 func hashAndSalt(pwd []byte) string {
