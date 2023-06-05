@@ -1,62 +1,35 @@
 package service
 
 import (
-	"encoding/base64"
-	"go-api/entity"
-	"go-api/helper"
-	"go-api/repository"
-	"log"
+	InternalRepository "go-api/repository/internal-repo"
+
+	"gorm.io/gorm"
 )
 
 type BaseService interface {
-	ValidateToken(bearerToken, email string) (bool, string)
+	StartTransaction() *gorm.DB
+	CommitTransaction(tx *gorm.DB)
+	RollbackTransaction(tx *gorm.DB)
 }
 
 type baseService struct {
-	jwtHistRepository repository.JwtHistRepository
-	jwtService        JWTService
+	baseRepository InternalRepository.BaseRepository
 }
 
-func NewBaseService(jwtHistRepo repository.JwtHistRepository, jwtServ JWTService) BaseService {
+func NewBaseService(baseRepo InternalRepository.BaseRepository) BaseService {
 	return &baseService{
-		jwtHistRepository: jwtHistRepo,
-		jwtService:        jwtServ,
+		baseRepository: baseRepo,
 	}
 }
 
-func (service *baseService) ValidateToken(bearerToken, email string) (bool, string) {
-	token := ""
-	bearerTokenStartWith := bearerToken
+func (service *baseService) StartTransaction() *gorm.DB {
+	return service.baseRepository.StartTransaction()
+}
 
-	// decrypt from FE
-	cipherText, _ := base64.StdEncoding.DecodeString(bearerTokenStartWith[7:])
-	decryptedBearerToken, _ := helper.RsaDecryptFromFEInBE(cipherText)
+func (service *baseService) CommitTransaction(tx *gorm.DB) {
+	service.baseRepository.CommitTransaction(tx)
+}
 
-	// start validate is exist?
-	token = decryptedBearerToken
-	jwtHist := service.jwtHistRepository.FindByEmail(email)
-
-	var emptyJwtHist entity.JwtHistGo
-
-	// end validate is exist?
-	if jwtHist == emptyJwtHist {
-		log.Println("Error JwtHist Not Found !")
-		return false, "Error JwtHist Not Found !"
-	}
-
-	// validate is matching?
-	if jwtHist.Jwt != token {
-		log.Println("Error JwtHist Doesn't Match")
-		return false, "Error JwtHist Doesn't Match"
-	}
-
-	jwtToken, err := service.jwtService.ValidateToken(jwtHist.Jwt)
-	if jwtToken.Valid {
-		return true, ""
-	} else {
-		log.Println(err.Error())
-		return false, err.Error()
-	}
-
-	return false, err.Error()
+func (service *baseService) RollbackTransaction(tx *gorm.DB) {
+	service.baseRepository.RollbackTransaction(tx)
 }

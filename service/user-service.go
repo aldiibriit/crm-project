@@ -1,13 +1,10 @@
 package service
 
 import (
-	"fmt"
 	"go-api/dto"
-	"go-api/dto/request/userRequestDTO"
-	responseDTO "go-api/dto/response"
 	"go-api/entity"
-	"go-api/repository"
-	"strconv"
+	internalRepository "go-api/repository/internal-repo"
+	"log"
 
 	"github.com/mashingan/smapping"
 )
@@ -16,16 +13,14 @@ import (
 type UserService interface {
 	Update(user dto.UserUpdateDTO) entity.User
 	Profile(userID string) entity.User
-	GetDeveloper(request userRequestDTO.ListUserDeveloperRequestDTO) responseDTO.Response
-	ListUserReferral(request userRequestDTO.ListUserReferralRequestDTO) responseDTO.Response
 }
 
 type userService struct {
-	userRepository repository.UserRepository
+	userRepository internalRepository.UserRepository
 }
 
 // NewUserService creates a new instance of UserService
-func NewUserService(userRepo repository.UserRepository) UserService {
+func NewUserService(userRepo internalRepository.UserRepository) UserService {
 	return &userService{
 		userRepository: userRepo,
 	}
@@ -35,7 +30,7 @@ func (service *userService) Update(user dto.UserUpdateDTO) entity.User {
 	userToUpdate := entity.User{}
 	err := smapping.FillStruct(&userToUpdate, smapping.MapFields(&user))
 	if err != nil {
-		fmt.Println("Failed map %v:", err)
+		log.Println("Failed map %v:", err)
 	}
 	updatedUser := service.userRepository.UpdateUser(userToUpdate)
 	return updatedUser
@@ -43,80 +38,4 @@ func (service *userService) Update(user dto.UserUpdateDTO) entity.User {
 
 func (service *userService) Profile(userID string) entity.User {
 	return service.userRepository.ProfileUser(userID)
-}
-
-func (service *userService) GetDeveloper(request userRequestDTO.ListUserDeveloperRequestDTO) responseDTO.Response {
-	var response responseDTO.Response
-	data := service.userRepository.GetDeveloper(request)
-	response.HttpCode = 200
-	response.MetadataResponse = nil
-	response.ResponseCode = "Success"
-	response.ResponseData = data
-	response.Summary = nil
-	return response
-}
-
-func (service *userService) ListUserReferral(request userRequestDTO.ListUserReferralRequestDTO) responseDTO.Response {
-	var response responseDTO.Response
-	var metadataResponse responseDTO.ListUserDtoRes
-
-	metadataResponse.Currentpage = request.Offset
-	if request.Offset > 0 {
-		request.Offset = request.Offset * request.Limit
-	}
-
-	var sqlStr, sqlStr2 string
-
-	if request.StartDate != "" && request.EndDate != "" {
-		sqlStr = `SELECT tpkbs.id,name,mobile_no,properti_id,tpkbs.created_at,tpkbs.status from tbl_sales ts 
-	join tbl_customer tc on tc.sales_id = ts.id
-	join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-	where ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at BETWEEN '` + request.StartDate + `' and '` + request.EndDate + `' and tpkbs.status != 'on_deleted'  
-	limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + ``
-
-		sqlStr2 = `SELECT count(name) from tbl_sales ts 
-	join tbl_customer tc on tc.sales_id = ts.id
-	join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-	where ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at BETWEEN '` + request.StartDate + `' and '` + request.EndDate + `' and tpkbs.status != 'on_deleted'  
- 	`
-	} else if request.EndDate == "" && request.StartDate != "" {
-		sqlStr = `SELECT tpkbs.id,name,mobile_no,properti_id,tpkbs.created_at,tpkbs.status from tbl_sales ts 
-		join tbl_customer tc on tc.sales_id = ts.id
-		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-		where ts.sales_email like '%` + request.SalesEmail + `%' and date(tpkbs.created_at) >='` + request.StartDate + `' and tpkbs.status != 'on_deleted'  
-		limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + ``
-
-		sqlStr2 = `SELECT count(name) from tbl_sales ts 
-		join tbl_customer tc on tc.sales_id = ts.id
-		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-		where ts.sales_email like '%` + request.SalesEmail + `%' and date(tpkbs.created_at) >='` + request.StartDate + `' and tpkbs.status != 'on_deleted'`
-
-	} else {
-		sqlStr = `SELECT tpkbs.id,name,mobile_no,properti_id,tpkbs.created_at,tpkbs.status from tbl_sales ts 
-		join tbl_customer tc on tc.sales_id = ts.id
-		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-		where ts.sales_email like '%` + request.SalesEmail + `%' and tc.name like '%` + request.Keyword + `%' and tpkbs.status != 'on_deleted' 
-		or ts.sales_email like '%` + request.SalesEmail + `%' and tc.mobile_no like '%` + request.Keyword + `%' and tpkbs.status != 'on_deleted' 
-		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.properti_id like '%` + request.Keyword + `%' and tpkbs.status != 'on_deleted'
-		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at like '%` + request.Keyword + `%' and tpkbs.status != 'on_deleted' 
-		limit ` + strconv.Itoa(request.Limit) + ` offset ` + strconv.Itoa(request.Offset) + ``
-
-		sqlStr2 = `SELECT count(name) from tbl_sales ts 
-		join tbl_customer tc on tc.sales_id = ts.id
-		join tbl_pengajuan_kpr_by_sales tpkbs on tpkbs.customer_id = tc.id
-		where ts.sales_email like '%` + request.SalesEmail + `%' and tc.name like '%` + request.Keyword + `%' and tpkbs.status != 'on_deleted' 
-		or ts.sales_email like '%` + request.SalesEmail + `%' and tc.mobile_no like '%` + request.Keyword + `%' and tpkbs.status != 'on_deleted' 
-		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.properti_id like '%` + request.Keyword + `%' and tpkbs.status != 'on_deleted'
-		or ts.sales_email like '%` + request.SalesEmail + `%' and tpkbs.created_at like '%` + request.Keyword + `%' and tpkbs.status != 'on_deleted'`
-	}
-
-	data, totalData := service.userRepository.GetUserReferral(request, sqlStr, sqlStr2)
-	metadataResponse.TotalData = totalData
-	response.HttpCode = 200
-	response.MetadataResponse = metadataResponse
-	response.ResponseCode = "success"
-	response.ResponseData = data
-	response.Summary = nil
-
-	return response
 }

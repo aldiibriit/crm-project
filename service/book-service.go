@@ -2,10 +2,11 @@ package service
 
 import (
 	"fmt"
+	"log"
 
 	"go-api/dto"
 	"go-api/entity"
-	"go-api/repository"
+	internalRepository "go-api/repository/internal-repo"
 
 	"github.com/mashingan/smapping"
 )
@@ -21,11 +22,11 @@ type BookService interface {
 }
 
 type bookService struct {
-	bookRepository repository.BookRepository
+	bookRepository internalRepository.BookRepository
 }
 
 // NewBookService .....
-func NewBookService(bookRepo repository.BookRepository) BookService {
+func NewBookService(bookRepo internalRepository.BookRepository) BookService {
 	return &bookService{
 		bookRepository: bookRepo,
 	}
@@ -35,7 +36,7 @@ func (service *bookService) Insert(b dto.BookCreateDTO) entity.Book {
 	book := entity.Book{}
 	err := smapping.FillStruct(&book, smapping.MapFields(&b))
 	if err != nil {
-		fmt.Println("Failed map %v: ", err)
+		log.Println("Failed map %v: ", err)
 	}
 	res := service.bookRepository.InsertBook(book)
 	return res
@@ -45,7 +46,7 @@ func (service *bookService) Update(b dto.BookUpdateDTO) entity.Book {
 	book := entity.Book{}
 	err := smapping.FillStruct(&book, smapping.MapFields(&b))
 	if err != nil {
-		fmt.Println("Failed map %v: ", err)
+		log.Println("Failed map %v: ", err)
 	}
 	res := service.bookRepository.UpdateBook(book)
 	return res
