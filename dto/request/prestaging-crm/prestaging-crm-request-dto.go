@@ -32,6 +32,14 @@ type ApprovePrestaging struct {
 	Sn string `json:"sn" binding:"required"`
 }
 
+type FindBySn struct {
+	Sn string `json:"sn" binding:"required"`
+}
+
+type FindRejectedData struct {
+	IdUploader string `json:"idUploader" binding:"required"`
+}
+
 type RejectPrestaging struct {
 	IdVerifikator           string `json:"idVerifikator" form:"idVerifikator" binding:"required"`
 	Verifikator             string `json:"verifikator" form:"verifikator" binding:"required"`

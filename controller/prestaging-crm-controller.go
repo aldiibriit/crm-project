@@ -22,6 +22,8 @@ type PrestagingCRMController interface {
 	RejectPrestaging(ctx *gin.Context)
 	ReuploadPrestaging(ctx *gin.Context)
 	AllSubmittedData(ctx *gin.Context)
+	GetSubmittedDataBySn(ctx *gin.Context)
+	GetRejectedData(ctx *gin.Context)
 	PostPrestagingV2(ctx *gin.Context)
 }
 
@@ -287,6 +289,72 @@ func (controller *prestagingCRMController) ReuploadPrestaging(ctx *gin.Context) 
 
 func (controller *prestagingCRMController) AllSubmittedData(ctx *gin.Context) {
 	response := controller.prestagingCRMService.AllSubmittedData()
+	ctx.JSON(response.HttpCode, response)
+}
+
+func (controller *prestagingCRMController) GetSubmittedDataBySn(ctx *gin.Context) {
+	var request prestagingCRMRequest.FindBySn
+	var badRequestResponse response.BadRequestResponse
+	var response response.UniversalResponse
+	// var badRequestResponse response.BadRequestResponse
+	defer func() {
+		if r := recover(); r != nil {
+			response.HttpCode = 500
+			response.ResponseCode = "99"
+			response.ResponseMessage = os.Getenv("UNCHAUGHT_ERROR_MESSAGE")
+			response.Data = nil
+			ctx.JSON(response.HttpCode, response)
+			return
+		}
+	}()
+
+	err := ctx.ShouldBind(&request)
+	if err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			out := helper.CustomValidator(ve)
+			badRequestResponse.HttpCode = 400
+			badRequestResponse.ResponseCode = "99"
+			badRequestResponse.ResponseMessage = os.Getenv("INVALID_REQUEST_MESSAGE")
+			badRequestResponse.Errors = out
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, badRequestResponse)
+			return
+		}
+	}
+	response = controller.prestagingCRMService.GetSubmittedDataBySn(request)
+	ctx.JSON(response.HttpCode, response)
+}
+
+func (controller *prestagingCRMController) GetRejectedData(ctx *gin.Context) {
+	var request prestagingCRMRequest.FindRejectedData
+	var badRequestResponse response.BadRequestResponse
+	var response response.UniversalResponse
+	// var badRequestResponse response.BadRequestResponse
+	defer func() {
+		if r := recover(); r != nil {
+			response.HttpCode = 500
+			response.ResponseCode = "99"
+			response.ResponseMessage = os.Getenv("UNCHAUGHT_ERROR_MESSAGE")
+			response.Data = nil
+			ctx.JSON(response.HttpCode, response)
+			return
+		}
+	}()
+
+	err := ctx.ShouldBind(&request)
+	if err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			out := helper.CustomValidator(ve)
+			badRequestResponse.HttpCode = 400
+			badRequestResponse.ResponseCode = "99"
+			badRequestResponse.ResponseMessage = os.Getenv("INVALID_REQUEST_MESSAGE")
+			badRequestResponse.Errors = out
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, badRequestResponse)
+			return
+		}
+	}
+	response = controller.prestagingCRMService.GetRejectedData(request)
 	ctx.JSON(response.HttpCode, response)
 }
 

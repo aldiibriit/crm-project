@@ -25,6 +25,8 @@ type PrestagingCRMService interface {
 	Reject(request prestagingCRMRequest.RejectPrestaging) response.UniversalResponse
 	ReuploadPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingCRMRequest.PostPrestaging) response.UniversalResponse
 	AllSubmittedData() response.UniversalResponse
+	GetSubmittedDataBySn(request prestagingCRMRequest.FindBySn) response.UniversalResponse
+	GetRejectedData(request prestagingCRMRequest.FindRejectedData) response.UniversalResponse
 	PostPrestagingV2(request []*multipart.FileHeader) response.UniversalResponse
 }
 
@@ -421,7 +423,42 @@ func (service *prestagingCRMService) AllSubmittedData() response.UniversalRespon
 	response.ResponseMessage = "Success"
 	response.Data = data
 	return response
+}
 
+func (service *prestagingCRMService) GetSubmittedDataBySn(request prestagingCRMRequest.FindBySn) response.UniversalResponse {
+	var response response.UniversalResponse
+	data := service.prestagingRepository.FindBySn(request.Sn)
+	if len(data.Sn) == 0 {
+		response.HttpCode = 404
+		response.ResponseCode = "99"
+		response.ResponseMessage = os.Getenv("ERROR_NOT_FOUND_DATA_MESSAGE")
+		response.Data = nil
+		return response
+	}
+
+	response.HttpCode = 200
+	response.ResponseCode = "00"
+	response.ResponseMessage = "Success"
+	response.Data = data
+	return response
+}
+
+func (service *prestagingCRMService) GetRejectedData(request prestagingCRMRequest.FindRejectedData) response.UniversalResponse {
+	var response response.UniversalResponse
+	data := service.prestagingRepository.FindRejectedData(request.IdUploader)
+	if len(data) == 0 {
+		response.HttpCode = 404
+		response.ResponseCode = "99"
+		response.ResponseMessage = os.Getenv("ERROR_NOT_FOUND_DATA_MESSAGE")
+		response.Data = nil
+		return response
+	}
+
+	response.HttpCode = 200
+	response.ResponseCode = "00"
+	response.ResponseMessage = "Success"
+	response.Data = data
+	return response
 }
 
 func (service *prestagingCRMService) PostPrestagingV2(request []*multipart.FileHeader) response.UniversalResponse {
