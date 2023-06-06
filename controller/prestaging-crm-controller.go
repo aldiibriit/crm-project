@@ -21,7 +21,7 @@ type PrestagingCRMController interface {
 	ApprovePrestaging(ctx *gin.Context)
 	RejectPrestaging(ctx *gin.Context)
 	ReuploadPrestaging(ctx *gin.Context)
-	GetTotalDataEachStatus(ctx *gin.Context)
+	AllSubmittedData(ctx *gin.Context)
 	PostPrestagingV2(ctx *gin.Context)
 }
 
@@ -54,45 +54,57 @@ func (controller *prestagingCRMController) PostPrestaging(ctx *gin.Context) {
 	uploader := ctx.PostForm("uploader")
 	sn := ctx.PostForm("sn")
 	projectName := ctx.PostForm("projectName")
-	tanggalPrestaging := ctx.PostForm("tanggalPrestaging")
 	textNotes := ctx.PostForm("textNotes")
-	fotoSnCrm, _ := ctx.FormFile("fotoSnCrm")
-	fotoLembarKelengkapanCrm, _ := ctx.FormFile("fotoLembarKelengkapanCrm")
-	fotoCheckKameraAtas, _ := ctx.FormFile("fotoCheckKameraAtas")
-	fotoCheckKameraSamping, _ := ctx.FormFile("fotoCheckKameraSamping")
+	fotoMesinCrmFull, _ := ctx.FormFile("fotoMesinCrmFull")
+	fotoSnMesinCrm, _ := ctx.FormFile("fotoSnMesinCrm")
+	fotoCameraAtas, _ := ctx.FormFile("fotoCameraAtas")
+	fotoCameraCashOut, _ := ctx.FormFile("fotoCameraCashOut")
+	fotoSystemInformationCu, _ := ctx.FormFile("fotoSystemInformationCu")
+	fotoKapasitasHardisk, _ := ctx.FormFile("fotoKapasitasHardisk")
 	fotoKunciCrm, _ := ctx.FormFile("fotoKunciCrm")
-	fotoStrukErrorLog, _ := ctx.FormFile("fotoStrukErrorLog")
-	fotoContactlessReader, _ := ctx.FormFile("fotoContactlessReader")
-	fotoKomponenPc, _ := ctx.FormFile("fotoKomponenPc")
-	fotoStikerBriit, _ := ctx.FormFile("fotoStikerBriit")
+	fotoClr, _ := ctx.FormFile("fotoClr")
+	fotoPortPc, _ := ctx.FormFile("fotoPortPc")
+	fotoStikerBit, _ := ctx.FormFile("fotoStikerBit")
+	fotoStrukErrorLogTest, _ := ctx.FormFile("fotoStrukErrorLogTest")
+	fotoCeklist, _ := ctx.FormFile("fotoCeklist")
+	snCpu := ctx.PostForm("snCpu")
+	snClr := ctx.PostForm("snClr")
+	snReceiptPrinter := ctx.PostForm("snReceiptPrinter")
+	snUr := ctx.PostForm("snUr")
+	snBv := ctx.PostForm("snBv")
+	statusDeadPixelMonitor := ctx.PostForm("statusDeadPixelMonitor")
+	snMonitor := ctx.PostForm("snMonitor")
+	brand := ctx.PostForm("brand")
 	// log.Println(fotoSnCrm.Filename)
 	requestMap := make(map[string]*multipart.FileHeader)
-	requestMap[fotoSnCrm.Filename] = fotoSnCrm
-	requestMap[fotoLembarKelengkapanCrm.Filename] = fotoLembarKelengkapanCrm
-	requestMap[fotoCheckKameraAtas.Filename] = fotoCheckKameraAtas
-	requestMap[fotoCheckKameraSamping.Filename] = fotoCheckKameraSamping
-	requestMap[fotoKunciCrm.Filename] = fotoKunciCrm
-	requestMap[fotoStrukErrorLog.Filename] = fotoStrukErrorLog
-	requestMap[fotoContactlessReader.Filename] = fotoContactlessReader
-	requestMap[fotoKomponenPc.Filename] = fotoKomponenPc
-	requestMap[fotoStikerBriit.Filename] = fotoStikerBriit
+	requestMap[fotoMesinCrmFull.Filename] = fotoMesinCrmFull
 
 	request := prestagingCRMRequest.PostPrestaging{
-		IdUploader:               idUploader,
-		Uploader:                 uploader,
-		Sn:                       sn,
-		ProjectName:              projectName,
-		FotoSnCrm:                fotoSnCrm.Filename,
-		FotoLembarKelengkapanCrm: fotoLembarKelengkapanCrm.Filename,
-		FotoCheckKameraAtas:      fotoCheckKameraAtas.Filename,
-		FotoCheckKameraSamping:   fotoCheckKameraSamping.Filename,
-		FotoKunciCrm:             fotoKunciCrm.Filename,
-		FotoStrukErrorLog:        fotoStrukErrorLog.Filename,
-		FotoContactlessReader:    fotoContactlessReader.Filename,
-		FotoKomponenPc:           fotoKomponenPc.Filename,
-		FotoStikerBriit:          fotoStikerBriit.Filename,
-		TanggalPrestaging:        tanggalPrestaging,
-		TextNotes:                textNotes,
+		IdUploader:              idUploader,
+		Uploader:                uploader,
+		Sn:                      sn,
+		ProjectName:             projectName,
+		FotoMesinCrmFull:        fotoMesinCrmFull.Filename,
+		FotoSnMesinCrm:          fotoSnMesinCrm.Filename,
+		FotoCameraAtas:          fotoCameraAtas.Filename,
+		FotoCameraCashOut:       fotoCameraCashOut.Filename,
+		FotoSystemInformationCu: fotoSystemInformationCu.Filename,
+		FotoKapasitasHardisk:    fotoKapasitasHardisk.Filename,
+		FotoKunciCrm:            fotoKunciCrm.Filename,
+		FotoClr:                 fotoClr.Filename,
+		FotoPortPc:              fotoPortPc.Filename,
+		FotoStikerBit:           fotoStikerBit.Filename,
+		FotoStrukErrorLogTest:   fotoStrukErrorLogTest.Filename,
+		FotoCeklist:             fotoCeklist.Filename,
+		SnCpu:                   snCpu,
+		SnClr:                   snClr,
+		SnReceiptPrinter:        snReceiptPrinter,
+		SnUr:                    snUr,
+		SnBv:                    snBv,
+		SnMonitor:               snMonitor,
+		StatusDeadPixelMonitor:  statusDeadPixelMonitor,
+		Brand:                   brand,
+		TextNotes:               textNotes,
 	}
 
 	response = controller.prestagingCRMService.PostPrestaging(requestMap, request)
@@ -208,45 +220,57 @@ func (controller *prestagingCRMController) ReuploadPrestaging(ctx *gin.Context) 
 	uploader := ctx.PostForm("uploader")
 	sn := ctx.PostForm("sn")
 	projectName := ctx.PostForm("projectName")
-	tanggalPrestaging := ctx.PostForm("tanggalPrestaging")
 	textNotes := ctx.PostForm("textNotes")
-	fotoSnCrm, _ := ctx.FormFile("fotoSnCrm")
-	fotoLembarKelengkapanCrm, _ := ctx.FormFile("fotoLembarKelengkapanCrm")
-	fotoCheckKameraAtas, _ := ctx.FormFile("fotoCheckKameraAtas")
-	fotoCheckKameraSamping, _ := ctx.FormFile("fotoCheckKameraSamping")
+	fotoMesinCrmFull, _ := ctx.FormFile("fotoMesinCrmFull")
+	fotoSnMesinCrm, _ := ctx.FormFile("fotoSnMesinCrm")
+	fotoCameraAtas, _ := ctx.FormFile("fotoCameraAtas")
+	fotoCameraCashOut, _ := ctx.FormFile("fotoCameraCashOut")
+	fotoSystemInformationCu, _ := ctx.FormFile("fotoSystemInformationCu")
+	fotoKapasitasHardisk, _ := ctx.FormFile("fotoKapasitasHardisk")
 	fotoKunciCrm, _ := ctx.FormFile("fotoKunciCrm")
-	fotoStrukErrorLog, _ := ctx.FormFile("fotoStrukErrorLog")
-	fotoContactlessReader, _ := ctx.FormFile("fotoContactlessReader")
-	fotoKomponenPc, _ := ctx.FormFile("fotoKomponenPc")
-	fotoStikerBriit, _ := ctx.FormFile("fotoStikerBriit")
+	fotoClr, _ := ctx.FormFile("fotoClr")
+	fotoPortPc, _ := ctx.FormFile("fotoPortPc")
+	fotoStikerBit, _ := ctx.FormFile("fotoStikerBit")
+	fotoStrukErrorLogTest, _ := ctx.FormFile("fotoStrukErrorLogTest")
+	fotoCeklist, _ := ctx.FormFile("fotoCeklist")
+	snCpu := ctx.PostForm("snCpu")
+	snClr := ctx.PostForm("snClr")
+	snReceiptPrinter := ctx.PostForm("snReceiptPrinter")
+	snUr := ctx.PostForm("snUr")
+	snBv := ctx.PostForm("snBv")
+	statusDeadPixelMonitor := ctx.PostForm("statusDeadPixelMonitor")
+	snMonitor := ctx.PostForm("snMonitor")
+	brand := ctx.PostForm("brand")
 	// log.Println(fotoSnCrm.Filename)
 	requestMap := make(map[string]*multipart.FileHeader)
-	requestMap[fotoSnCrm.Filename] = fotoSnCrm
-	requestMap[fotoLembarKelengkapanCrm.Filename] = fotoLembarKelengkapanCrm
-	requestMap[fotoCheckKameraAtas.Filename] = fotoCheckKameraAtas
-	requestMap[fotoCheckKameraSamping.Filename] = fotoCheckKameraSamping
-	requestMap[fotoKunciCrm.Filename] = fotoKunciCrm
-	requestMap[fotoStrukErrorLog.Filename] = fotoStrukErrorLog
-	requestMap[fotoContactlessReader.Filename] = fotoContactlessReader
-	requestMap[fotoKomponenPc.Filename] = fotoKomponenPc
-	requestMap[fotoStikerBriit.Filename] = fotoStikerBriit
+	requestMap[fotoMesinCrmFull.Filename] = fotoMesinCrmFull
 
 	request := prestagingCRMRequest.PostPrestaging{
-		IdUploader:               idUploader,
-		Uploader:                 uploader,
-		Sn:                       sn,
-		ProjectName:              projectName,
-		FotoSnCrm:                fotoSnCrm.Filename,
-		FotoLembarKelengkapanCrm: fotoLembarKelengkapanCrm.Filename,
-		FotoCheckKameraAtas:      fotoCheckKameraAtas.Filename,
-		FotoCheckKameraSamping:   fotoCheckKameraSamping.Filename,
-		FotoKunciCrm:             fotoKunciCrm.Filename,
-		FotoStrukErrorLog:        fotoStrukErrorLog.Filename,
-		FotoContactlessReader:    fotoContactlessReader.Filename,
-		FotoKomponenPc:           fotoKomponenPc.Filename,
-		FotoStikerBriit:          fotoStikerBriit.Filename,
-		TanggalPrestaging:        tanggalPrestaging,
-		TextNotes:                textNotes,
+		IdUploader:              idUploader,
+		Uploader:                uploader,
+		Sn:                      sn,
+		ProjectName:             projectName,
+		FotoMesinCrmFull:        fotoMesinCrmFull.Filename,
+		FotoSnMesinCrm:          fotoSnMesinCrm.Filename,
+		FotoCameraAtas:          fotoCameraAtas.Filename,
+		FotoCameraCashOut:       fotoCameraCashOut.Filename,
+		FotoSystemInformationCu: fotoSystemInformationCu.Filename,
+		FotoKapasitasHardisk:    fotoKapasitasHardisk.Filename,
+		FotoKunciCrm:            fotoKunciCrm.Filename,
+		FotoClr:                 fotoClr.Filename,
+		FotoPortPc:              fotoPortPc.Filename,
+		FotoStikerBit:           fotoStikerBit.Filename,
+		FotoStrukErrorLogTest:   fotoStrukErrorLogTest.Filename,
+		FotoCeklist:             fotoCeklist.Filename,
+		SnCpu:                   snCpu,
+		SnClr:                   snClr,
+		SnReceiptPrinter:        snReceiptPrinter,
+		SnUr:                    snUr,
+		SnBv:                    snBv,
+		SnMonitor:               snMonitor,
+		StatusDeadPixelMonitor:  statusDeadPixelMonitor,
+		Brand:                   brand,
+		TextNotes:               textNotes,
 	}
 
 	response = controller.prestagingCRMService.ReuploadPrestaging(requestMap, request)
@@ -261,8 +285,9 @@ func (controller *prestagingCRMController) ReuploadPrestaging(ctx *gin.Context) 
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCRMController) GetTotalDataEachStatus(ctx *gin.Context) {
-
+func (controller *prestagingCRMController) AllSubmittedData(ctx *gin.Context) {
+	response := controller.prestagingCRMService.AllSubmittedData()
+	ctx.JSON(response.HttpCode, response)
 }
 
 func (controller *prestagingCRMController) PostPrestagingV2(ctx *gin.Context) {

@@ -91,6 +91,7 @@ func main() {
 		prestagingCRMRoutes.POST("/approve", prestagingCRMController.ApprovePrestaging)
 		prestagingCRMRoutes.PUT("/reject", prestagingCRMController.RejectPrestaging)
 		prestagingCRMRoutes.PUT("/reupload", prestagingCRMController.ReuploadPrestaging)
+		prestagingCRMRoutes.GET("/getAllSubmittedData", prestagingCRMController.AllSubmittedData)
 		prestagingCRMRoutes.POST("/post-prestaging-v2", prestagingCRMController.PostPrestagingV2)
 	}
 
