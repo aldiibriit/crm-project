@@ -38,13 +38,16 @@ var (
 	logActivityService   service.LogActivityService   = service.NewLogActivityService(logActivityRepository)
 	baseService          service.BaseService          = service.NewBaseService(baseRepository)
 	prestagingCRMService service.PrestagingCRMService = service.NewPrestagingCRMService(minioRepository, logActivityRepository, prestagingRepository, baseRepository, stagingRepository)
+	qrCodeService        service.QrCodeService        = service.NewQrCodeService(minioRepository, logActivityRepository)
 
 	authController          controller.AuthController          = controller.NewAuthController(authService, jwtService)
 	userController          controller.UserController          = controller.NewUserController(userService, jwtService)
 	bookController          controller.BookController          = controller.NewBookController(bookService, jwtService)
 	crmController           controller.CRMController           = controller.NewCRMController(crmService, jwtService)
 	cctvController          controller.CCTVController          = controller.NewCCTVController(cctvService, jwtService)
+	logActivityController   controller.LogActivityController   = controller.NewLogActivityController(logActivityService)
 	prestagingCRMController controller.PrestagingCRMController = controller.NewPrestagingCRMController(prestagingCRMService, jwtService)
+	qrCodeController        controller.QrCodeController        = controller.NewQrCodeController(qrCodeService)
 )
 
 func main() {
@@ -85,6 +88,11 @@ func main() {
 		cctvRoutes.GET("/findBySn", cctvController.FindBySN)
 	}
 
+	logActivityRoutes := r.Group("api/log-activity", middleware.AuthorizeJWT(jwtService))
+	{
+		logActivityRoutes.POST("/getTimeline", logActivityController.GetTimeLine)
+	}
+
 	prestagingCRMRoutes := r.Group("api/prestaging-crm", middleware.AuthorizeJWT(jwtService))
 	{
 		prestagingCRMRoutes.POST("/post", prestagingCRMController.PostPrestaging)
@@ -93,8 +101,13 @@ func main() {
 		prestagingCRMRoutes.PUT("/reupload", prestagingCRMController.ReuploadPrestaging)
 		prestagingCRMRoutes.GET("/getAllSubmittedData", prestagingCRMController.AllSubmittedData)
 		prestagingCRMRoutes.POST("/getSubmittedDataBySn", prestagingCRMController.GetSubmittedDataBySn)
-		prestagingCRMRoutes.POST("/getRejectedData", prestagingCRMController.GetSubmittedDataBySn)
+		prestagingCRMRoutes.POST("/getRejectedData", prestagingCRMController.GetRejectedData)
 		prestagingCRMRoutes.POST("/post-prestaging-v2", prestagingCRMController.PostPrestagingV2)
+	}
+
+	qrCodeRoutes := r.Group("api/qr-code", middleware.AuthorizeJWT(jwtService))
+	{
+		qrCodeRoutes.POST("/generateQrCode", qrCodeController.GenerateQr)
 	}
 
 	r.Run(":7177")

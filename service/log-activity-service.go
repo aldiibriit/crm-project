@@ -2,9 +2,11 @@ package service
 
 import (
 	logActivityRequest "go-api/dto/request/log-activity"
+	LogActivityResponseDTO "go-api/dto/response/log-activity"
 	"go-api/entity"
 	internalRepo "go-api/repository/internal-repo"
 	"log"
+	"strings"
 
 	"github.com/mashingan/smapping"
 	"gorm.io/gorm"
@@ -13,6 +15,7 @@ import (
 type LogActivityService interface {
 	Insert(logActivityRequest.InsertRequest) error
 	InsertWithTx(request logActivityRequest.InsertRequest, tx *gorm.DB) error
+	GetTimeLine(request logActivityRequest.GetTimeLine) LogActivityResponseDTO.Response
 }
 
 type logActivityService struct {
@@ -45,4 +48,33 @@ func (service *logActivityService) InsertWithTx(request logActivityRequest.Inser
 
 	err = service.logActivityRepository.InsertWithTx(tbActivityLog, tx)
 	return err
+}
+
+func (service *logActivityService) GetTimeLine(request logActivityRequest.GetTimeLine) LogActivityResponseDTO.Response {
+	var response LogActivityResponseDTO.Response
+	var timeline LogActivityResponseDTO.Timeline
+	sliceOfTimeline := service.logActivityRepository.FindTimeLineBySn(request.Sn)
+	log.Println(sliceOfTimeline)
+
+	for _, v := range sliceOfTimeline {
+
+		if strings.HasPrefix(v.Category, "PRESTAGING") {
+			timeline.Prestaging = v
+		}
+
+		if strings.HasPrefix(v.Category, "STAGING") && !strings.HasPrefix(v.Category, "STAGING_LIVE") {
+			timeline.Staging = v
+		}
+
+		if strings.HasPrefix(v.Category, "STAGING_LIVE") {
+			timeline.StagingLive = v
+		}
+	}
+
+	response.HttpCode = 200
+	response.ResponseCode = "00"
+	response.ResponseMessage = "Success"
+	response.Timeline = timeline
+
+	return response
 }

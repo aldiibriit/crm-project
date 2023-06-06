@@ -5,3 +5,7 @@ type InsertRequest struct {
 	Sn                string `json:"sn"`
 	StatusDescription string `json:"statusDescription"`
 }
+
+type GetTimeLine struct {
+	Sn string `json:"sn" binding:"required"`
+}
