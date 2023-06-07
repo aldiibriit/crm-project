@@ -26,5 +26,6 @@ type TbPrestagingCrm struct {
 	SnMonitor               string `json:"snMonitor"`
 	StatusDeadPixelMonitor  string `json:"statusDeadPixelMonitor"`
 	Brand                   string `json:"brand"`
+	StatusBarang            string `json:"statusBarang"`
 	TextNotes               string `json:"textNotes"`
 }

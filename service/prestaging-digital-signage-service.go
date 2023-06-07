@@ -3,7 +3,7 @@ package service
 import (
 	"encoding/json"
 	logActivityRequest "go-api/dto/request/log-activity"
-	prestagingCRMRequest "go-api/dto/request/prestaging-crm"
+	prestagingDigitalSignageRequest "go-api/dto/request/prestaging-digital-signage"
 	"go-api/dto/response"
 	"go-api/entity"
 	ExternalRepository "go-api/repository/external-repo"
@@ -12,42 +12,41 @@ import (
 	"log"
 	"mime/multipart"
 	"os"
-	"reflect"
 	"time"
 
 	"github.com/iancoleman/strcase"
 	"github.com/mashingan/smapping"
 )
 
-type PrestagingCRMService interface {
-	PostPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingCRMRequest.PostPrestaging) response.UniversalResponse
-	ApprovePrestaging(request prestagingCRMRequest.ApprovePrestaging) response.UniversalResponse
-	RejectPrestaging(request prestagingCRMRequest.RejectPrestaging) response.UniversalResponse
-	ReuploadPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingCRMRequest.PostPrestaging) response.UniversalResponse
+type PrestagingDigitalSignageService interface {
+	PostPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingDigitalSignageRequest.PostPrestaging) response.UniversalResponse
+	ApprovePrestaging(request prestagingDigitalSignageRequest.ApprovePrestaging) response.UniversalResponse
+	RejectPrestaging(request prestagingDigitalSignageRequest.RejectPrestaging) response.UniversalResponse
+	ReuploadPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingDigitalSignageRequest.PostPrestaging) response.UniversalResponse
 	AllSubmittedData() response.UniversalResponse
-	GetSubmittedDataBySn(request prestagingCRMRequest.FindBySn) response.UniversalResponse
-	GetRejectedData(request prestagingCRMRequest.FindRejectedData) response.UniversalResponse
+	GetSubmittedDataBySn(request prestagingDigitalSignageRequest.FindBySn) response.UniversalResponse
+	GetRejectedData(request prestagingDigitalSignageRequest.FindRejectedData) response.UniversalResponse
 }
 
-type prestagingCRMService struct {
-	minioRepository         ExternalRepository.MinioRepository
-	logActivityRepository   InternalRepository.LogActivityRepository
-	prestagingCrmRepository InternalRepository.PrestagingCRMRepository
-	baseRepository          InternalRepository.BaseRepository
-	stagingCrmRepository    InternalRepository.StagingCRMRepository
+type prestagingDigitalSignageService struct {
+	minioRepository                    ExternalRepository.MinioRepository
+	logActivityRepository              InternalRepository.LogActivityRepository
+	prestagingDigitalSignageRepository InternalRepository.PrestagingDigitalSignageRepository
+	baseRepository                     InternalRepository.BaseRepository
+	stagingDigitalSignageRepository    InternalRepository.StagingDigitalSignageRepository
 }
 
-func NewPrestagingCRMService(minioRepo ExternalRepository.MinioRepository, logActivityRepo InternalRepository.LogActivityRepository, prestagingCrmRepo InternalRepository.PrestagingCRMRepository, baseRepo InternalRepository.BaseRepository, stagingCrmRepo InternalRepository.StagingCRMRepository) PrestagingCRMService {
-	return &prestagingCRMService{
-		minioRepository:         minioRepo,
-		baseRepository:          baseRepo,
-		logActivityRepository:   logActivityRepo,
-		prestagingCrmRepository: prestagingCrmRepo,
-		stagingCrmRepository:    stagingCrmRepo,
+func NewPrestagingDigitalSignageService(minioRepo ExternalRepository.MinioRepository, logActivityRepo InternalRepository.LogActivityRepository, prestagingDigitalSignageRepo InternalRepository.PrestagingDigitalSignageRepository, baseRepo InternalRepository.BaseRepository, stagingDigitalSignageRepo InternalRepository.StagingDigitalSignageRepository) PrestagingDigitalSignageService {
+	return &prestagingDigitalSignageService{
+		minioRepository:                    minioRepo,
+		baseRepository:                     baseRepo,
+		logActivityRepository:              logActivityRepo,
+		prestagingDigitalSignageRepository: prestagingDigitalSignageRepo,
+		stagingDigitalSignageRepository:    stagingDigitalSignageRepo,
 	}
 }
 
-func (service *prestagingCRMService) PostPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingCRMRequest.PostPrestaging) response.UniversalResponse {
+func (service *prestagingDigitalSignageService) PostPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingDigitalSignageRequest.PostPrestaging) response.UniversalResponse {
 	var response response.UniversalResponse
 	var err error
 	ch := make(chan interface{}, 1)
@@ -68,7 +67,7 @@ func (service *prestagingCRMService) PostPrestaging(requestMap map[string]*multi
 				defer openedFile.Close()
 
 				fileReader := io.Reader(openedFile)
-				err = service.minioRepository.UploadFile(fileReader, v.Size, "crm-project", "prestaging-crm/"+v.Filename)
+				err = service.minioRepository.UploadFile(fileReader, v.Size, "crm-project", "prestaging-digital-signage/"+v.Filename)
 				if err != nil {
 					log.Println(err.Error())
 				}
@@ -93,8 +92,8 @@ func (service *prestagingCRMService) PostPrestaging(requestMap map[string]*multi
 	tx := service.baseRepository.StartTransaction()
 
 	// mapping (fill) from request to entity
-	tbPrestagingCrm := entity.TbPrestagingCrm{}
-	err = smapping.FillStruct(&tbPrestagingCrm, smapping.MapFields(&request))
+	tbPrestagingDigitalSignage := entity.TbPrestagingDigitalSignage{}
+	err = smapping.FillStruct(&tbPrestagingDigitalSignage, smapping.MapFields(&request))
 	if err != nil {
 		log.Println(err.Error())
 		response.HttpCode = 500
@@ -104,8 +103,8 @@ func (service *prestagingCRMService) PostPrestaging(requestMap map[string]*multi
 		return response
 	}
 
-	// insert to tb_prestaging_crm
-	err = service.prestagingCrmRepository.InsertWithTx(tbPrestagingCrm, tx)
+	// insert to tb_prestaging_DigitalSignage
+	err = service.prestagingDigitalSignageRepository.InsertWithTx(tbPrestagingDigitalSignage, tx)
 	if err != nil {
 		log.Println(err.Error())
 		service.baseRepository.RollbackTransaction(tx)
@@ -120,7 +119,7 @@ func (service *prestagingCRMService) PostPrestaging(requestMap map[string]*multi
 	logActivityRequest := logActivityRequest.InsertRequest{
 		Sn:                request.Sn,
 		StatusDescription: os.Getenv("LOG_SUBMITTED"),
-		Category:          os.Getenv("CATEGORY_PRESTAGING_CRM"),
+		Category:          os.Getenv("CATEGORY_PRESTAGING_DIGITAL_SIGNAGE"),
 	}
 
 	tbLogActivity := entity.TbLogActivity{}
@@ -155,7 +154,7 @@ func (service *prestagingCRMService) PostPrestaging(requestMap map[string]*multi
 	return response
 }
 
-func (service *prestagingCRMService) ApprovePrestaging(request prestagingCRMRequest.ApprovePrestaging) response.UniversalResponse {
+func (service *prestagingDigitalSignageService) ApprovePrestaging(request prestagingDigitalSignageRequest.ApprovePrestaging) response.UniversalResponse {
 	var response response.UniversalResponse
 
 	defer func() {
@@ -167,17 +166,17 @@ func (service *prestagingCRMService) ApprovePrestaging(request prestagingCRMRequ
 	// insert to tbl log
 	tx := service.baseRepository.StartTransaction()
 	tblLogActivity := entity.TbLogActivity{
-		Category:          os.Getenv("CATEGORY_PRESTAGING_CRM"),
+		Category:          os.Getenv("CATEGORY_PRESTAGING_DIGITAL_SIGNAGE"),
 		Sn:                request.Sn,
 		StatusDescription: os.Getenv("LOG_APPROVED"),
 	}
 
-	dataExist := service.stagingCrmRepository.FindBySn(request.Sn)
+	dataExist := service.stagingDigitalSignageRepository.FindBySn(request.Sn)
 	if dataExist.Sn == "" || len(dataExist.Sn) == 0 {
-		tbStagingCRM := entity.TbStagingCrm{
+		tbStagingDigitalSignage := entity.TbStagingDigitalSignage{
 			Sn: request.Sn,
 		}
-		err := service.stagingCrmRepository.InsertWithTx(tbStagingCRM, tx)
+		err := service.stagingDigitalSignageRepository.InsertWithTx(tbStagingDigitalSignage, tx)
 		if err != nil {
 			log.Println(err.Error())
 			service.baseRepository.RollbackTransaction(tx)
@@ -210,7 +209,7 @@ func (service *prestagingCRMService) ApprovePrestaging(request prestagingCRMRequ
 	return response
 }
 
-func (service *prestagingCRMService) RejectPrestaging(request prestagingCRMRequest.RejectPrestaging) response.UniversalResponse {
+func (service *prestagingDigitalSignageService) RejectPrestaging(request prestagingDigitalSignageRequest.RejectPrestaging) response.UniversalResponse {
 	var response response.UniversalResponse
 
 	// mapping from request to entity
@@ -243,7 +242,7 @@ func (service *prestagingCRMService) RejectPrestaging(request prestagingCRMReque
 	tx := service.baseRepository.StartTransaction()
 
 	// update data
-	err = service.prestagingCrmRepository.UpdateWithTx(snakeCaseMap, tx)
+	err = service.prestagingDigitalSignageRepository.UpdateWithTx(snakeCaseMap, tx)
 	if err != nil {
 		log.Println(err.Error())
 		service.baseRepository.RollbackTransaction(tx)
@@ -255,7 +254,7 @@ func (service *prestagingCRMService) RejectPrestaging(request prestagingCRMReque
 	}
 
 	tbLogActivity := entity.TbLogActivity{
-		Category:          os.Getenv("CATEGORY_PRESTAGING_CRM"),
+		Category:          os.Getenv("CATEGORY_PRESTAGING_DIGITAL_SIGNAGE"),
 		Sn:                request.Sn,
 		StatusDescription: os.Getenv("LOG_REJECTED"),
 	}
@@ -282,7 +281,7 @@ func (service *prestagingCRMService) RejectPrestaging(request prestagingCRMReque
 	return response
 }
 
-func (service *prestagingCRMService) ReuploadPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingCRMRequest.PostPrestaging) response.UniversalResponse {
+func (service *prestagingDigitalSignageService) ReuploadPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingDigitalSignageRequest.PostPrestaging) response.UniversalResponse {
 	var response response.UniversalResponse
 	var err error
 	ch := make(chan interface{}, 1)
@@ -303,7 +302,7 @@ func (service *prestagingCRMService) ReuploadPrestaging(requestMap map[string]*m
 				defer openedFile.Close()
 
 				fileReader := io.Reader(openedFile)
-				err = service.minioRepository.UploadFile(fileReader, v.Size, "crm-project", "prestaging-crm/"+v.Filename)
+				err = service.minioRepository.UploadFile(fileReader, v.Size, "crm-project", "prestaging-digital-signage/"+v.Filename)
 				if err != nil {
 					log.Println(err.Error())
 				}
@@ -355,8 +354,8 @@ func (service *prestagingCRMService) ReuploadPrestaging(requestMap map[string]*m
 		camelMap[strcase.ToSnake(key)] = v
 	}
 
-	// update to tb_prestaging_crm
-	err = service.prestagingCrmRepository.UpdateWithTx(camelMap, tx)
+	// update to tb_prestaging_DigitalSignage
+	err = service.prestagingDigitalSignageRepository.UpdateWithTx(camelMap, tx)
 	if err != nil {
 		log.Println(err.Error())
 		service.baseRepository.RollbackTransaction(tx)
@@ -371,7 +370,7 @@ func (service *prestagingCRMService) ReuploadPrestaging(requestMap map[string]*m
 	logActivityRequest := logActivityRequest.InsertRequest{
 		Sn:                request.Sn,
 		StatusDescription: os.Getenv("LOG_REUPLOADED"),
-		Category:          os.Getenv("CATEGORY_PRESTAGING_CRM"),
+		Category:          os.Getenv("CATEGORY_PRESTAGING_DIGITAL_SIGNAGE"),
 	}
 
 	tbLogActivity := entity.TbLogActivity{}
@@ -406,9 +405,9 @@ func (service *prestagingCRMService) ReuploadPrestaging(requestMap map[string]*m
 	return response
 }
 
-func (service *prestagingCRMService) AllSubmittedData() response.UniversalResponse {
+func (service *prestagingDigitalSignageService) AllSubmittedData() response.UniversalResponse {
 	var response response.UniversalResponse
-	data := service.prestagingCrmRepository.FindAllSubmittedData()
+	data := service.prestagingDigitalSignageRepository.FindAllSubmittedData()
 	if len(data) == 0 {
 		response.HttpCode = 404
 		response.ResponseCode = "99"
@@ -424,9 +423,9 @@ func (service *prestagingCRMService) AllSubmittedData() response.UniversalRespon
 	return response
 }
 
-func (service *prestagingCRMService) GetSubmittedDataBySn(request prestagingCRMRequest.FindBySn) response.UniversalResponse {
+func (service *prestagingDigitalSignageService) GetSubmittedDataBySn(request prestagingDigitalSignageRequest.FindBySn) response.UniversalResponse {
 	var response response.UniversalResponse
-	data := service.prestagingCrmRepository.FindBySn(request.Sn)
+	data := service.prestagingDigitalSignageRepository.FindBySn(request.Sn)
 	if len(data.Sn) == 0 {
 		response.HttpCode = 404
 		response.ResponseCode = "99"
@@ -442,9 +441,9 @@ func (service *prestagingCRMService) GetSubmittedDataBySn(request prestagingCRMR
 	return response
 }
 
-func (service *prestagingCRMService) GetRejectedData(request prestagingCRMRequest.FindRejectedData) response.UniversalResponse {
+func (service *prestagingDigitalSignageService) GetRejectedData(request prestagingDigitalSignageRequest.FindRejectedData) response.UniversalResponse {
 	var response response.UniversalResponse
-	data := service.prestagingCrmRepository.FindRejectedData(request.IdUploader)
+	data := service.prestagingDigitalSignageRepository.FindRejectedData(request.IdUploader)
 	if len(data) == 0 {
 		response.HttpCode = 404
 		response.ResponseCode = "99"
@@ -458,12 +457,4 @@ func (service *prestagingCRMService) GetRejectedData(request prestagingCRMReques
 	response.ResponseMessage = "Success"
 	response.Data = data
 	return response
-}
-
-func timeTrack(start time.Time, name string) {
-	log.Println("the", name, "process take", int(time.Since(start)/time.Second), "second")
-}
-
-func mappingFilesToStruct(data []*multipart.FileHeader, result any) {
-	log.Println("data type of result", reflect.TypeOf(result))
 }

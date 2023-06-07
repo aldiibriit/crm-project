@@ -25,6 +25,7 @@ type PostPrestaging struct {
 	SnMonitor               string `json:"snMonitor" form:"snMonitor" binding:"required"`
 	StatusDeadPixelMonitor  string `json:"statusDeadPixelMonitor" form:"statusDeadPixelMonitor" binding:"required"`
 	Brand                   string `json:"brand" form:"brand" binding:"required"`
+	StatusBarang            string `json:"statusBarang" form:"statusBarang" binding:"required"`
 	TextNotes               string `json:"textNotes" form:"textNotes" binding:"required"`
 }
 

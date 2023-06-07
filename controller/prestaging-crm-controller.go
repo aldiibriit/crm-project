@@ -4,7 +4,6 @@ import (
 	"errors"
 	"go-api/helper"
 	"go-api/service"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -17,14 +16,13 @@ import (
 )
 
 type PrestagingCRMController interface {
-	PostPrestaging(ctx *gin.Context)
-	ApprovePrestaging(ctx *gin.Context)
-	RejectPrestaging(ctx *gin.Context)
-	ReuploadPrestaging(ctx *gin.Context)
-	AllSubmittedData(ctx *gin.Context)
-	GetSubmittedDataBySn(ctx *gin.Context)
-	GetRejectedData(ctx *gin.Context)
-	PostPrestagingV2(ctx *gin.Context)
+	PostPrestagingCRM(ctx *gin.Context)
+	ApprovePrestagingCRM(ctx *gin.Context)
+	RejectPrestagingCRM(ctx *gin.Context)
+	ReuploadPrestagingCRM(ctx *gin.Context)
+	AllSubmittedDataPrestagingCRM(ctx *gin.Context)
+	GetSubmittedDataPrestagingCRMBySn(ctx *gin.Context)
+	GetRejectedDataPrestagingCRM(ctx *gin.Context)
 }
 
 type prestagingCRMController struct {
@@ -39,7 +37,7 @@ func NewPrestagingCRMController(prestagingCRMServ service.PrestagingCRMService, 
 	}
 }
 
-func (controller *prestagingCRMController) PostPrestaging(ctx *gin.Context) {
+func (controller *prestagingCRMController) PostPrestagingCRM(ctx *gin.Context) {
 	var response response.UniversalResponse
 	defer func() {
 		if r := recover(); r != nil {
@@ -74,12 +72,24 @@ func (controller *prestagingCRMController) PostPrestaging(ctx *gin.Context) {
 	snReceiptPrinter := ctx.PostForm("snReceiptPrinter")
 	snUr := ctx.PostForm("snUr")
 	snBv := ctx.PostForm("snBv")
+	statusBarang := ctx.PostForm("statusBarang")
 	statusDeadPixelMonitor := ctx.PostForm("statusDeadPixelMonitor")
 	snMonitor := ctx.PostForm("snMonitor")
 	brand := ctx.PostForm("brand")
 	// log.Println(fotoSnCrm.Filename)
 	requestMap := make(map[string]*multipart.FileHeader)
 	requestMap[fotoMesinCrmFull.Filename] = fotoMesinCrmFull
+	requestMap[fotoSnMesinCrm.Filename] = fotoSnMesinCrm
+	requestMap[fotoCameraAtas.Filename] = fotoCameraAtas
+	requestMap[fotoCameraCashOut.Filename] = fotoCameraCashOut
+	requestMap[fotoSystemInformationCu.Filename] = fotoSystemInformationCu
+	requestMap[fotoKapasitasHardisk.Filename] = fotoKapasitasHardisk
+	requestMap[fotoKunciCrm.Filename] = fotoKunciCrm
+	requestMap[fotoClr.Filename] = fotoClr
+	requestMap[fotoPortPc.Filename] = fotoPortPc
+	requestMap[fotoStikerBit.Filename] = fotoStikerBit
+	requestMap[fotoStrukErrorLogTest.Filename] = fotoStrukErrorLogTest
+	requestMap[fotoCeklist.Filename] = fotoCeklist
 
 	request := prestagingCRMRequest.PostPrestaging{
 		IdUploader:              idUploader,
@@ -107,6 +117,7 @@ func (controller *prestagingCRMController) PostPrestaging(ctx *gin.Context) {
 		StatusDeadPixelMonitor:  statusDeadPixelMonitor,
 		Brand:                   brand,
 		TextNotes:               textNotes,
+		StatusBarang:            statusBarang,
 	}
 
 	response = controller.prestagingCRMService.PostPrestaging(requestMap, request)
@@ -121,7 +132,7 @@ func (controller *prestagingCRMController) PostPrestaging(ctx *gin.Context) {
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCRMController) ApprovePrestaging(ctx *gin.Context) {
+func (controller *prestagingCRMController) ApprovePrestagingCRM(ctx *gin.Context) {
 	var request prestagingCRMRequest.ApprovePrestaging
 	var badRequestResponse response.BadRequestResponse
 	var response response.UniversalResponse
@@ -150,7 +161,7 @@ func (controller *prestagingCRMController) ApprovePrestaging(ctx *gin.Context) {
 			return
 		}
 	}
-	response = controller.prestagingCRMService.Approve(request)
+	response = controller.prestagingCRMService.ApprovePrestaging(request)
 	if response.ResponseCode == "" || response.ResponseMessage == "" {
 		response.HttpCode = 500
 		response.ResponseCode = "99"
@@ -163,7 +174,7 @@ func (controller *prestagingCRMController) ApprovePrestaging(ctx *gin.Context) {
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCRMController) RejectPrestaging(ctx *gin.Context) {
+func (controller *prestagingCRMController) RejectPrestagingCRM(ctx *gin.Context) {
 	var request prestagingCRMRequest.RejectPrestaging
 	var badRequestResponse response.BadRequestResponse
 	var response response.UniversalResponse
@@ -192,7 +203,7 @@ func (controller *prestagingCRMController) RejectPrestaging(ctx *gin.Context) {
 			return
 		}
 	}
-	response = controller.prestagingCRMService.Reject(request)
+	response = controller.prestagingCRMService.RejectPrestaging(request)
 	if response.ResponseCode == "" || response.ResponseMessage == "" {
 		response.HttpCode = 500
 		response.ResponseCode = "99"
@@ -205,7 +216,7 @@ func (controller *prestagingCRMController) RejectPrestaging(ctx *gin.Context) {
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCRMController) ReuploadPrestaging(ctx *gin.Context) {
+func (controller *prestagingCRMController) ReuploadPrestagingCRM(ctx *gin.Context) {
 	var response response.UniversalResponse
 	defer func() {
 		if r := recover(); r != nil {
@@ -246,6 +257,17 @@ func (controller *prestagingCRMController) ReuploadPrestaging(ctx *gin.Context) 
 	// log.Println(fotoSnCrm.Filename)
 	requestMap := make(map[string]*multipart.FileHeader)
 	requestMap[fotoMesinCrmFull.Filename] = fotoMesinCrmFull
+	requestMap[fotoSnMesinCrm.Filename] = fotoSnMesinCrm
+	requestMap[fotoCameraAtas.Filename] = fotoCameraAtas
+	requestMap[fotoCameraCashOut.Filename] = fotoCameraCashOut
+	requestMap[fotoSystemInformationCu.Filename] = fotoSystemInformationCu
+	requestMap[fotoKapasitasHardisk.Filename] = fotoKapasitasHardisk
+	requestMap[fotoKunciCrm.Filename] = fotoKunciCrm
+	requestMap[fotoClr.Filename] = fotoClr
+	requestMap[fotoPortPc.Filename] = fotoPortPc
+	requestMap[fotoStikerBit.Filename] = fotoStikerBit
+	requestMap[fotoStrukErrorLogTest.Filename] = fotoStrukErrorLogTest
+	requestMap[fotoCeklist.Filename] = fotoCeklist
 
 	request := prestagingCRMRequest.PostPrestaging{
 		IdUploader:              idUploader,
@@ -287,12 +309,12 @@ func (controller *prestagingCRMController) ReuploadPrestaging(ctx *gin.Context) 
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCRMController) AllSubmittedData(ctx *gin.Context) {
+func (controller *prestagingCRMController) AllSubmittedDataPrestagingCRM(ctx *gin.Context) {
 	response := controller.prestagingCRMService.AllSubmittedData()
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCRMController) GetSubmittedDataBySn(ctx *gin.Context) {
+func (controller *prestagingCRMController) GetSubmittedDataPrestagingCRMBySn(ctx *gin.Context) {
 	var request prestagingCRMRequest.FindBySn
 	var badRequestResponse response.BadRequestResponse
 	var response response.UniversalResponse
@@ -325,7 +347,7 @@ func (controller *prestagingCRMController) GetSubmittedDataBySn(ctx *gin.Context
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCRMController) GetRejectedData(ctx *gin.Context) {
+func (controller *prestagingCRMController) GetRejectedDataPrestagingCRM(ctx *gin.Context) {
 	var request prestagingCRMRequest.FindRejectedData
 	var badRequestResponse response.BadRequestResponse
 	var response response.UniversalResponse
@@ -355,22 +377,5 @@ func (controller *prestagingCRMController) GetRejectedData(ctx *gin.Context) {
 		}
 	}
 	response = controller.prestagingCRMService.GetRejectedData(request)
-	ctx.JSON(response.HttpCode, response)
-}
-
-func (controller *prestagingCRMController) PostPrestagingV2(ctx *gin.Context) {
-	form, err := ctx.MultipartForm()
-	if err != nil {
-		log.Println(err.Error())
-	}
-
-	files := form.File["files"]
-
-	for _, file := range files {
-		log.Println(file.Filename)
-	}
-
-	response := controller.prestagingCRMService.PostPrestagingV2(files)
-
 	ctx.JSON(response.HttpCode, response)
 }
