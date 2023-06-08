@@ -16,13 +16,13 @@ import (
 )
 
 type PrestagingCCTVController interface {
-	PostPrestagingDigitalSignage(ctx *gin.Context)
-	ApprovePrestagingDigitalSignage(ctx *gin.Context)
-	RejectPrestagingDigitalSignage(ctx *gin.Context)
-	ReuploadPrestagingDigitalSignage(ctx *gin.Context)
-	AllSubmittedDataPrestagingDigitalSignage(ctx *gin.Context)
-	GetSubmittedDataPrestagingDigitalSignageBySn(ctx *gin.Context)
-	GetRejectedDataPrestagingDigitalSignage(ctx *gin.Context)
+	PostPrestagingCCTV(ctx *gin.Context)
+	ApprovePrestagingCCTV(ctx *gin.Context)
+	RejectPrestagingCCTV(ctx *gin.Context)
+	ReuploadPrestagingCCTV(ctx *gin.Context)
+	AllSubmittedDataPrestagingCCTV(ctx *gin.Context)
+	GetSubmittedDataPrestagingCCTVBySn(ctx *gin.Context)
+	GetRejectedDataPrestagingCCTV(ctx *gin.Context)
 }
 
 type prestagingCCTVController struct {
@@ -37,7 +37,7 @@ func NewPrestagingCCTVController(prestagingCCTVServ service.PrestagingCCTVServic
 	}
 }
 
-func (controller *prestagingCCTVController) PostPrestagingDigitalSignage(ctx *gin.Context) {
+func (controller *prestagingCCTVController) PostPrestagingCCTV(ctx *gin.Context) {
 	var response response.UniversalResponse
 	defer func() {
 		if r := recover(); r != nil {
@@ -127,7 +127,7 @@ func (controller *prestagingCCTVController) PostPrestagingDigitalSignage(ctx *gi
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCCTVController) ApprovePrestagingDigitalSignage(ctx *gin.Context) {
+func (controller *prestagingCCTVController) ApprovePrestagingCCTV(ctx *gin.Context) {
 	var request prestagingCctvRequest.ApprovePrestaging
 	var badRequestResponse response.BadRequestResponse
 	var response response.UniversalResponse
@@ -169,7 +169,7 @@ func (controller *prestagingCCTVController) ApprovePrestagingDigitalSignage(ctx 
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCCTVController) RejectPrestagingDigitalSignage(ctx *gin.Context) {
+func (controller *prestagingCCTVController) RejectPrestagingCCTV(ctx *gin.Context) {
 	var request prestagingCctvRequest.RejectPrestaging
 	var badRequestResponse response.BadRequestResponse
 	var response response.UniversalResponse
@@ -211,7 +211,7 @@ func (controller *prestagingCCTVController) RejectPrestagingDigitalSignage(ctx *
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCCTVController) ReuploadPrestagingDigitalSignage(ctx *gin.Context) {
+func (controller *prestagingCCTVController) ReuploadPrestagingCCTV(ctx *gin.Context) {
 	var response response.UniversalResponse
 	defer func() {
 		if r := recover(); r != nil {
@@ -291,12 +291,12 @@ func (controller *prestagingCCTVController) ReuploadPrestagingDigitalSignage(ctx
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCCTVController) AllSubmittedDataPrestagingDigitalSignage(ctx *gin.Context) {
+func (controller *prestagingCCTVController) AllSubmittedDataPrestagingCCTV(ctx *gin.Context) {
 	response := controller.prestagingCCTVService.AllSubmittedData()
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCCTVController) GetSubmittedDataPrestagingDigitalSignageBySn(ctx *gin.Context) {
+func (controller *prestagingCCTVController) GetSubmittedDataPrestagingCCTVBySn(ctx *gin.Context) {
 	var request prestagingCctvRequest.FindBySn
 	var badRequestResponse response.BadRequestResponse
 	var response response.UniversalResponse
@@ -329,7 +329,7 @@ func (controller *prestagingCCTVController) GetSubmittedDataPrestagingDigitalSig
 	ctx.JSON(response.HttpCode, response)
 }
 
-func (controller *prestagingCCTVController) GetRejectedDataPrestagingDigitalSignage(ctx *gin.Context) {
+func (controller *prestagingCCTVController) GetRejectedDataPrestagingCCTV(ctx *gin.Context) {
 	var request prestagingCctvRequest.FindRejectedData
 	var badRequestResponse response.BadRequestResponse
 	var response response.UniversalResponse

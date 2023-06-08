@@ -3,7 +3,7 @@ package service
 import (
 	"encoding/json"
 	logActivityRequest "go-api/dto/request/log-activity"
-	prestagingCctvRequest "go-api/dto/request/prestaging-cctv"
+	stagingDigitalSignageRequest "go-api/dto/request/staging-digital-signage"
 	"go-api/dto/response"
 	"go-api/entity"
 	ExternalRepository "go-api/repository/external-repo"
@@ -18,35 +18,33 @@ import (
 	"github.com/mashingan/smapping"
 )
 
-type PrestagingCCTVService interface {
-	PostPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingCctvRequest.PostPrestaging) response.UniversalResponse
-	ApprovePrestaging(request prestagingCctvRequest.ApprovePrestaging) response.UniversalResponse
-	RejectPrestaging(request prestagingCctvRequest.RejectPrestaging) response.UniversalResponse
-	ReuploadPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingCctvRequest.PostPrestaging) response.UniversalResponse
+type StagingDigitalSignageService interface {
+	PostStaging(requestMap map[string]*multipart.FileHeader, request stagingDigitalSignageRequest.PostStaging) response.UniversalResponse
+	ApproveStaging(request stagingDigitalSignageRequest.ApproveStaging) response.UniversalResponse
+	RejectStaging(request stagingDigitalSignageRequest.RejectStaging) response.UniversalResponse
+	ReuploadStaging(requestMap map[string]*multipart.FileHeader, request stagingDigitalSignageRequest.PostStaging) response.UniversalResponse
 	AllSubmittedData() response.UniversalResponse
-	GetSubmittedDataBySn(request prestagingCctvRequest.FindBySn) response.UniversalResponse
-	GetRejectedData(request prestagingCctvRequest.FindRejectedData) response.UniversalResponse
+	GetSubmittedDataBySn(request stagingDigitalSignageRequest.FindBySn) response.UniversalResponse
+	GetRejectedData(request stagingDigitalSignageRequest.FindRejectedData) response.UniversalResponse
 }
 
-type prestagingCCTVService struct {
-	minioRepository          ExternalRepository.MinioRepository
-	logActivityRepository    InternalRepository.LogActivityRepository
-	prestagingCCTVRepository InternalRepository.PrestagingCCTVRepository
-	baseRepository           InternalRepository.BaseRepository
-	stagingCCTVRepository    InternalRepository.StagingCCTVRepository
+type stagingDigitalSignageService struct {
+	minioRepository                 ExternalRepository.MinioRepository
+	logActivityRepository           InternalRepository.LogActivityRepository
+	baseRepository                  InternalRepository.BaseRepository
+	stagingDigitalSignageRepository InternalRepository.StagingDigitalSignageRepository
 }
 
-func NewPrestagingCCTVService(minioRepo ExternalRepository.MinioRepository, logActivityRepo InternalRepository.LogActivityRepository, prestagingCCTVRepo InternalRepository.PrestagingCCTVRepository, baseRepo InternalRepository.BaseRepository, stagingCCTVRepo InternalRepository.StagingCCTVRepository) PrestagingCCTVService {
-	return &prestagingCCTVService{
-		minioRepository:          minioRepo,
-		baseRepository:           baseRepo,
-		logActivityRepository:    logActivityRepo,
-		prestagingCCTVRepository: prestagingCCTVRepo,
-		stagingCCTVRepository:    stagingCCTVRepo,
+func NewStagingDigitalSignageService(minioRepo ExternalRepository.MinioRepository, logActivityRepo InternalRepository.LogActivityRepository, baseRepo InternalRepository.BaseRepository, stagingDigitalSignageRepo InternalRepository.StagingDigitalSignageRepository) StagingDigitalSignageService {
+	return &stagingDigitalSignageService{
+		minioRepository:                 minioRepo,
+		baseRepository:                  baseRepo,
+		logActivityRepository:           logActivityRepo,
+		stagingDigitalSignageRepository: stagingDigitalSignageRepo,
 	}
 }
 
-func (service *prestagingCCTVService) PostPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingCctvRequest.PostPrestaging) response.UniversalResponse {
+func (service *stagingDigitalSignageService) PostStaging(requestMap map[string]*multipart.FileHeader, request stagingDigitalSignageRequest.PostStaging) response.UniversalResponse {
 	var response response.UniversalResponse
 	var err error
 	ch := make(chan interface{}, 1)
@@ -67,7 +65,7 @@ func (service *prestagingCCTVService) PostPrestaging(requestMap map[string]*mult
 				defer openedFile.Close()
 
 				fileReader := io.Reader(openedFile)
-				err = service.minioRepository.UploadFile(fileReader, v.Size, "crm-project", "prestaging-digital-signage/"+v.Filename)
+				err = service.minioRepository.UploadFile(fileReader, v.Size, "crm-project", "staging-digital-signage/"+v.Filename)
 				if err != nil {
 					log.Println(err.Error())
 				}
@@ -91,20 +89,44 @@ func (service *prestagingCCTVService) PostPrestaging(requestMap map[string]*mult
 	// start transaction
 	tx := service.baseRepository.StartTransaction()
 
-	// mapping (fill) from request to entity
-	tbPrestagingCctv := entity.TbPrestagingCctv{}
-	err = smapping.FillStruct(&tbPrestagingCctv, smapping.MapFields(&request))
+	var updatedData map[string]interface{}
+	data, err := json.Marshal(request)
 	if err != nil {
 		log.Println(err.Error())
 		response.HttpCode = 500
 		response.ResponseCode = "99"
-		response.ResponseMessage = os.Getenv("MAPPING_ERROR_MESSAGE")
+		response.ResponseMessage = os.Getenv("ERROR_MARSHAL_MESSAGE")
+		response.Data = nil
+		return response
+	}
+	err = json.Unmarshal(data, &updatedData)
+	if err != nil {
+		log.Println(err.Error())
+		response.HttpCode = 500
+		response.ResponseCode = "99"
+		response.ResponseMessage = os.Getenv("ERROR_UNMARSHAL_MESSAGE")
 		response.Data = nil
 		return response
 	}
 
-	// insert to tb_prestaging_DigitalSignage
-	err = service.prestagingCCTVRepository.InsertWithTx(tbPrestagingCctv, tx)
+	snakeCaseMap := make(map[string]interface{})
+
+	for key, v := range updatedData {
+		snakeCaseMap[strcase.ToSnake(key)] = v
+	}
+
+	// insert to tb_staging_digital_signage
+	dataExist := service.stagingDigitalSignageRepository.FindBySn(request.Sn)
+	if dataExist.Sn == "" || len(dataExist.Sn) == 0 {
+		log.Println(err.Error())
+		response.HttpCode = 500
+		response.ResponseCode = "99"
+		response.ResponseMessage = os.Getenv("DATA_NOT_FOUND_MESSAGE")
+		response.Data = nil
+		return response
+	}
+
+	err = service.stagingDigitalSignageRepository.UpdateWithTx(updatedData, tx)
 	if err != nil {
 		log.Println(err.Error())
 		service.baseRepository.RollbackTransaction(tx)
@@ -119,7 +141,7 @@ func (service *prestagingCCTVService) PostPrestaging(requestMap map[string]*mult
 	logActivityRequest := logActivityRequest.InsertRequest{
 		Sn:                request.Sn,
 		StatusDescription: os.Getenv("LOG_SUBMITTED"),
-		Category:          os.Getenv("CATEGORY_PRESTAGING_CCTV"),
+		Category:          os.Getenv("CATEGORY_STAGING_DIGITAL_SIGNAGE"),
 	}
 
 	tbLogActivity := entity.TbLogActivity{}
@@ -154,7 +176,7 @@ func (service *prestagingCCTVService) PostPrestaging(requestMap map[string]*mult
 	return response
 }
 
-func (service *prestagingCCTVService) ApprovePrestaging(request prestagingCctvRequest.ApprovePrestaging) response.UniversalResponse {
+func (service *stagingDigitalSignageService) ApproveStaging(request stagingDigitalSignageRequest.ApproveStaging) response.UniversalResponse {
 	var response response.UniversalResponse
 
 	defer func() {
@@ -166,28 +188,11 @@ func (service *prestagingCCTVService) ApprovePrestaging(request prestagingCctvRe
 	// insert to tbl log
 	tx := service.baseRepository.StartTransaction()
 	tblLogActivity := entity.TbLogActivity{
-		Category:          os.Getenv("CATEGORY_PRESTAGING_CCTV"),
+		Category:          os.Getenv("CATEGORY_STAGING_DIGITAL_SIGNAGE"),
 		Sn:                request.Sn,
 		StatusDescription: os.Getenv("LOG_APPROVED"),
 	}
 
-	dataExist := service.stagingCCTVRepository.FindBySn(request.Sn)
-	if dataExist.Sn == "" || len(dataExist.Sn) == 0 {
-		tbStagingCctv := entity.TbStagingCctv{
-			Sn: request.Sn,
-		}
-		err := service.stagingCCTVRepository.InsertWithTx(tbStagingCctv, tx)
-		if err != nil {
-			log.Println(err.Error())
-			service.baseRepository.RollbackTransaction(tx)
-			response.HttpCode = 500
-			response.ResponseCode = "99"
-			response.ResponseMessage = os.Getenv("DATABASE_ERROR_MESSAGE")
-			response.Data = nil
-			return response
-		}
-
-	}
 	err := service.logActivityRepository.InsertWithTx(tblLogActivity, tx)
 	if err != nil {
 		log.Println(err.Error())
@@ -209,7 +214,7 @@ func (service *prestagingCCTVService) ApprovePrestaging(request prestagingCctvRe
 	return response
 }
 
-func (service *prestagingCCTVService) RejectPrestaging(request prestagingCctvRequest.RejectPrestaging) response.UniversalResponse {
+func (service *stagingDigitalSignageService) RejectStaging(request stagingDigitalSignageRequest.RejectStaging) response.UniversalResponse {
 	var response response.UniversalResponse
 
 	// mapping from request to entity
@@ -242,7 +247,7 @@ func (service *prestagingCCTVService) RejectPrestaging(request prestagingCctvReq
 	tx := service.baseRepository.StartTransaction()
 
 	// update data
-	err = service.prestagingCCTVRepository.UpdateWithTx(snakeCaseMap, tx)
+	err = service.stagingDigitalSignageRepository.UpdateWithTx(snakeCaseMap, tx)
 	if err != nil {
 		log.Println(err.Error())
 		service.baseRepository.RollbackTransaction(tx)
@@ -254,7 +259,7 @@ func (service *prestagingCCTVService) RejectPrestaging(request prestagingCctvReq
 	}
 
 	tbLogActivity := entity.TbLogActivity{
-		Category:          os.Getenv("CATEGORY_PRESTAGING_CCTV"),
+		Category:          os.Getenv("CATEGORY_STAGING_DIGITAL_SIGNAGE"),
 		Sn:                request.Sn,
 		StatusDescription: os.Getenv("LOG_REJECTED"),
 	}
@@ -281,7 +286,7 @@ func (service *prestagingCCTVService) RejectPrestaging(request prestagingCctvReq
 	return response
 }
 
-func (service *prestagingCCTVService) ReuploadPrestaging(requestMap map[string]*multipart.FileHeader, request prestagingCctvRequest.PostPrestaging) response.UniversalResponse {
+func (service *stagingDigitalSignageService) ReuploadStaging(requestMap map[string]*multipart.FileHeader, request stagingDigitalSignageRequest.PostStaging) response.UniversalResponse {
 	var response response.UniversalResponse
 	var err error
 	ch := make(chan interface{}, 1)
@@ -302,7 +307,7 @@ func (service *prestagingCCTVService) ReuploadPrestaging(requestMap map[string]*
 				defer openedFile.Close()
 
 				fileReader := io.Reader(openedFile)
-				err = service.minioRepository.UploadFile(fileReader, v.Size, "crm-project", "prestaging-digital-signage/"+v.Filename)
+				err = service.minioRepository.UploadFile(fileReader, v.Size, "crm-project", "staging-digital-signage/"+v.Filename)
 				if err != nil {
 					log.Println(err.Error())
 				}
@@ -354,8 +359,8 @@ func (service *prestagingCCTVService) ReuploadPrestaging(requestMap map[string]*
 		camelMap[strcase.ToSnake(key)] = v
 	}
 
-	// update to tb_prestaging_DigitalSignage
-	err = service.prestagingCCTVRepository.UpdateWithTx(camelMap, tx)
+	// update to tb_staging_digital_signage
+	err = service.stagingDigitalSignageRepository.UpdateWithTx(camelMap, tx)
 	if err != nil {
 		log.Println(err.Error())
 		service.baseRepository.RollbackTransaction(tx)
@@ -370,7 +375,7 @@ func (service *prestagingCCTVService) ReuploadPrestaging(requestMap map[string]*
 	logActivityRequest := logActivityRequest.InsertRequest{
 		Sn:                request.Sn,
 		StatusDescription: os.Getenv("LOG_REUPLOADED"),
-		Category:          os.Getenv("CATEGORY_PRESTAGING_CCTV"),
+		Category:          os.Getenv("CATEGORY_STAGING_DIGITAL_SIGNAGE"),
 	}
 
 	tbLogActivity := entity.TbLogActivity{}
@@ -405,9 +410,9 @@ func (service *prestagingCCTVService) ReuploadPrestaging(requestMap map[string]*
 	return response
 }
 
-func (service *prestagingCCTVService) AllSubmittedData() response.UniversalResponse {
+func (service *stagingDigitalSignageService) AllSubmittedData() response.UniversalResponse {
 	var response response.UniversalResponse
-	data := service.prestagingCCTVRepository.FindAllSubmittedData()
+	data := service.stagingDigitalSignageRepository.FindAllSubmittedData()
 	if len(data) == 0 {
 		response.HttpCode = 404
 		response.ResponseCode = "99"
@@ -423,9 +428,9 @@ func (service *prestagingCCTVService) AllSubmittedData() response.UniversalRespo
 	return response
 }
 
-func (service *prestagingCCTVService) GetSubmittedDataBySn(request prestagingCctvRequest.FindBySn) response.UniversalResponse {
+func (service *stagingDigitalSignageService) GetSubmittedDataBySn(request stagingDigitalSignageRequest.FindBySn) response.UniversalResponse {
 	var response response.UniversalResponse
-	data := service.prestagingCCTVRepository.FindBySn(request.Sn)
+	data := service.stagingDigitalSignageRepository.FindBySn(request.Sn)
 	if len(data.Sn) == 0 {
 		response.HttpCode = 404
 		response.ResponseCode = "99"
@@ -441,9 +446,9 @@ func (service *prestagingCCTVService) GetSubmittedDataBySn(request prestagingCct
 	return response
 }
 
-func (service *prestagingCCTVService) GetRejectedData(request prestagingCctvRequest.FindRejectedData) response.UniversalResponse {
+func (service *stagingDigitalSignageService) GetRejectedData(request stagingDigitalSignageRequest.FindRejectedData) response.UniversalResponse {
 	var response response.UniversalResponse
-	data := service.prestagingCCTVRepository.FindRejectedData(request.IdUploader)
+	data := service.stagingDigitalSignageRepository.FindRejectedData(request.IdUploader)
 	if len(data) == 0 {
 		response.HttpCode = 404
 		response.ResponseCode = "99"
