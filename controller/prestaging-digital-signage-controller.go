@@ -30,9 +30,9 @@ type prestagingDigitalSignageController struct {
 	jwtService                      service.JWTService
 }
 
-func NewPrestagingDigitalSignageController(prestagingDigitalSignageServe service.PrestagingDigitalSignageService, jwtServ service.JWTService) PrestagingDigitalSignageController {
+func NewPrestagingDigitalSignageController(prestagingDigitalSignageServ service.PrestagingDigitalSignageService, jwtServ service.JWTService) PrestagingDigitalSignageController {
 	return &prestagingDigitalSignageController{
-		prestagingDigitalSignageService: prestagingDigitalSignageServe,
+		prestagingDigitalSignageService: prestagingDigitalSignageServ,
 		jwtService:                      jwtServ,
 	}
 }

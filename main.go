@@ -26,10 +26,12 @@ var (
 	prestagingCRMRepository            internalRepository.PrestagingCRMRepository            = internalRepository.NewPrestagingCRMRepository(db)
 	prestagingUPSRepository            internalRepository.PrestagingUPSRepository            = internalRepository.NewPrestagingUPSRepository(db)
 	prestagingDigitalSignageRepository internalRepository.PrestagingDigitalSignageRepository = internalRepository.NewPrestagingDigitalSignageRepository(db)
+	prestagingCCTVRepository           internalRepository.PrestagingCCTVRepository           = internalRepository.NewPrestagingCCTVRepository(db)
 	baseRepository                     internalRepository.BaseRepository                     = internalRepository.NewBaseRepository(db)
 	stagingCRMRepository               internalRepository.StagingCRMRepository               = internalRepository.NewStagingCRMRepository(db)
 	stagingUPSRepository               internalRepository.StagingUPSRepository               = internalRepository.NewStagingUPSRepository(db)
 	stagingDigitalSignageRepository    internalRepository.StagingDigitalSignageRepository    = internalRepository.NewStagingDigitalSignageRepository(db)
+	stagingCCTVRepository              internalRepository.StagingCCTVRepository              = internalRepository.NewStagingCCTVRepository(db)
 	minioRepository                    externalRepository.MinioRepository                    = externalRepository.NewMinioRepository(minioClient)
 
 	jwtService                      service.JWTService                      = service.NewJWTService()
@@ -44,6 +46,7 @@ var (
 	prestagingCRMService            service.PrestagingCRMService            = service.NewPrestagingCRMService(minioRepository, logActivityRepository, prestagingCRMRepository, baseRepository, stagingCRMRepository)
 	prestagingUPSService            service.PrestagingUPSService            = service.NewPrestagingUPSService(minioRepository, logActivityRepository, prestagingUPSRepository, baseRepository, stagingUPSRepository)
 	prestagingDigitalSignageService service.PrestagingDigitalSignageService = service.NewPrestagingDigitalSignageService(minioRepository, logActivityRepository, prestagingDigitalSignageRepository, baseRepository, stagingDigitalSignageRepository)
+	prestagingCCTVService           service.PrestagingCCTVService           = service.NewPrestagingCCTVService(minioRepository, logActivityRepository, prestagingCCTVRepository, baseRepository, stagingCCTVRepository)
 	qrCodeService                   service.QrCodeService                   = service.NewQrCodeService(minioRepository, logActivityRepository)
 
 	authController                     controller.AuthController                     = controller.NewAuthController(authService, jwtService)
@@ -55,6 +58,7 @@ var (
 	prestagingCRMController            controller.PrestagingCRMController            = controller.NewPrestagingCRMController(prestagingCRMService, jwtService)
 	prestagingUPSController            controller.PrestagingUPSController            = controller.NewPrestagingUPSController(prestagingUPSService, jwtService)
 	prestagingDigitalSignageController controller.PrestagingDigitalSignageController = controller.NewPrestagingDigitalSignageController(prestagingDigitalSignageService, jwtService)
+	prestagingCCTVController           controller.PrestagingCCTVController           = controller.NewPrestagingCCTVController(prestagingCCTVService, jwtService)
 	qrCodeController                   controller.QrCodeController                   = controller.NewQrCodeController(qrCodeService)
 )
 
@@ -132,6 +136,17 @@ func main() {
 		prestagingDigitalSignageRoutes.GET("/getAllSubmittedData", prestagingDigitalSignageController.AllSubmittedDataPrestagingDigitalSignage)
 		prestagingDigitalSignageRoutes.POST("/getSubmittedDataBySn", prestagingDigitalSignageController.GetSubmittedDataPrestagingDigitalSignageBySn)
 		prestagingDigitalSignageRoutes.POST("/getRejectedData", prestagingDigitalSignageController.GetRejectedDataPrestagingDigitalSignage)
+	}
+
+	prestagingCCTVRoutes := r.Group("api/prestaging-cctv", middleware.AuthorizeJWT(jwtService))
+	{
+		prestagingCCTVRoutes.POST("/post", prestagingCCTVController.PostPrestagingDigitalSignage)
+		prestagingCCTVRoutes.POST("/approve", prestagingCCTVController.ApprovePrestagingDigitalSignage)
+		prestagingCCTVRoutes.PUT("/reject", prestagingCCTVController.RejectPrestagingDigitalSignage)
+		prestagingCCTVRoutes.PUT("/reupload", prestagingCCTVController.ReuploadPrestagingDigitalSignage)
+		prestagingCCTVRoutes.GET("/getAllSubmittedData", prestagingCCTVController.AllSubmittedDataPrestagingDigitalSignage)
+		prestagingCCTVRoutes.POST("/getSubmittedDataBySn", prestagingCCTVController.GetSubmittedDataPrestagingDigitalSignageBySn)
+		prestagingCCTVRoutes.POST("/getRejectedData", prestagingCCTVController.GetRejectedDataPrestagingDigitalSignage)
 	}
 
 	qrCodeRoutes := r.Group("api/qr-code", middleware.AuthorizeJWT(jwtService))
