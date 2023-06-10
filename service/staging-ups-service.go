@@ -126,7 +126,7 @@ func (service *stagingUpsService) PostStaging(requestMap map[string]*multipart.F
 		return response
 	}
 
-	err = service.stagingUpsRepository.UpdateWithTx(updatedData, tx)
+	err = service.stagingUpsRepository.UpdateWithTx(snakeCaseMap, tx)
 	if err != nil {
 		log.Println(err.Error())
 		service.baseRepository.RollbackTransaction(tx)

@@ -48,6 +48,7 @@ func (c *authController) Login(ctx *gin.Context) {
 	if v, ok := authResult.(entity.User); ok {
 		generatedToken := c.jwtService.GenerateToken(strconv.FormatUint(v.ID, 10))
 		v.Token = generatedToken
+		c.authService.SaveToken(loginDTO.Email, generatedToken)
 		response := helper.BuildResponse(true, "OK!", v)
 		ctx.JSON(http.StatusOK, response)
 		return

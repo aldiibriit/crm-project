@@ -1,7 +1,9 @@
 package service
 
 import (
+	"errors"
 	"fmt"
+	InternalRepository "go-api/repository/internal-repo"
 	"os"
 	"time"
 
@@ -24,15 +26,17 @@ type jwtCustomClaim2 struct {
 }
 
 type jwtService struct {
-	secretKey string
-	issuer    string
+	secretKey      string
+	issuer         string
+	userRepository InternalRepository.UserRepository
 }
 
 // NewJWTService method is creates a new instance of JWTService
-func NewJWTService() JWTService {
+func NewJWTService(userRepo InternalRepository.UserRepository) JWTService {
 	return &jwtService{
-		issuer:    "x",
-		secretKey: getSecretKey(),
+		issuer:         "x",
+		secretKey:      getSecretKey(),
+		userRepository: userRepo,
 	}
 }
 
@@ -48,7 +52,7 @@ func (j *jwtService) GenerateToken(UserID string) string {
 	claims := &jwtCustomClaim{
 		UserID,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(1 * time.Hour).Unix(),
+			ExpiresAt: time.Now().Add(time.Duration(1 * time.Hour)).Unix(),
 			Issuer:    j.issuer,
 			IssuedAt:  time.Now().Unix(),
 		},
@@ -62,6 +66,11 @@ func (j *jwtService) GenerateToken(UserID string) string {
 }
 
 func (j *jwtService) ValidateToken(token string) (*jwt.Token, error) {
+
+	if tokenMatch := j.userRepository.FindToken(token); tokenMatch == "" {
+		return nil, errors.New("Token not match")
+	}
+
 	return jwt.Parse(token, func(t_ *jwt.Token) (interface{}, error) {
 		if _, ok := t_.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method %v", t_.Header["alg"])

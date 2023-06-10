@@ -16,6 +16,8 @@ type UserRepository interface {
 	VerifyCredential(email string, password string) interface{}
 	IsDuplicateEmail(email string) (tx *gorm.DB)
 	FindByEmail(email string) entity.User
+	SaveToken(email, token string) error
+	FindToken(token string) string
 	ProfileUser(userID string) entity.User
 }
 
@@ -70,10 +72,20 @@ func (db *userConnection) FindByEmail(email string) entity.User {
 	return user
 }
 
+func (db *userConnection) SaveToken(email, token string) error {
+	return db.connection.Debug().Model(&entity.User{}).Where("email", email).Update("token", token).Error
+}
+
 func (db *userConnection) ProfileUser(userID string) entity.User {
 	var user entity.User
 	db.connection.Preload("Books").Preload("Books.User").Find(&user, userID)
 	return user
+}
+
+func (db *userConnection) FindToken(token string) string {
+	var result string
+	db.connection.Debug().Model(&entity.User{}).Where("token", token).Select("token").Scan(&result)
+	return result
 }
 
 func hashAndSalt(pwd []byte) string {

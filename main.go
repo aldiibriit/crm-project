@@ -35,7 +35,7 @@ var (
 	stagingLiveCRMRepository           internalRepository.StagingLiveCRMRepository           = internalRepository.NewStagingLiveCRMRepository(db)
 	minioRepository                    externalRepository.MinioRepository                    = externalRepository.NewMinioRepository(minioClient)
 
-	jwtService                      service.JWTService                      = service.NewJWTService()
+	jwtService                      service.JWTService                      = service.NewJWTService(userRepository)
 	userService                     service.UserService                     = service.NewUserService(userRepository)
 	bookService                     service.BookService                     = service.NewBookService(bookRepository)
 	authService                     service.AuthService                     = service.NewAuthService(userRepository, jwtService)

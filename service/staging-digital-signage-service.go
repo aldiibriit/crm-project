@@ -126,7 +126,7 @@ func (service *stagingDigitalSignageService) PostStaging(requestMap map[string]*
 		return response
 	}
 
-	err = service.stagingDigitalSignageRepository.UpdateWithTx(updatedData, tx)
+	err = service.stagingDigitalSignageRepository.UpdateWithTx(snakeCaseMap, tx)
 	if err != nil {
 		log.Println(err.Error())
 		service.baseRepository.RollbackTransaction(tx)

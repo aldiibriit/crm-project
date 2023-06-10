@@ -126,7 +126,7 @@ func (service *stagingCctvService) PostStaging(requestMap map[string]*multipart.
 		return response
 	}
 
-	err = service.stagingCctvRepository.UpdateWithTx(updatedData, tx)
+	err = service.stagingCctvRepository.UpdateWithTx(snakeCaseMap, tx)
 	if err != nil {
 		log.Println(err.Error())
 		service.baseRepository.RollbackTransaction(tx)

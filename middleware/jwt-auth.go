@@ -1,8 +1,10 @@
 package middleware
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"go-api/dto/response"
 	"go-api/helper"
@@ -47,10 +49,28 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
+
 		if token.Valid {
 			claims := token.Claims.(jwt.MapClaims)
 			log.Println("Claim[user_id]: ", claims["user_id"])
 			log.Println("Claim[issuer] :", claims["issuer"])
+			log.Println("Claim[Expires_at]", claims["exp"])
+
+			expiration := int64(claims["exp"].(float64))
+			expirationTime := time.Unix(expiration, 0)
+			expirationFormatted := expirationTime.Format("02 January 2006 15:04:05 MST")
+
+			fmt.Println("Token kedaluwarsa pada:", expirationFormatted)
+
+			if time.Now().Unix() > expiration {
+				response.HttpCode = http.StatusBadRequest
+				response.ResponseCode = "99"
+				response.ResponseMessage = "Token is expired"
+				response.Data = nil
+				c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+				return
+			}
+
 		}
 	}
 }

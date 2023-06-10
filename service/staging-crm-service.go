@@ -117,6 +117,8 @@ func (service *stagingCRMService) PostStaging(requestMap map[string]*multipart.F
 		snakeCaseMap[strcase.ToSnake(key)] = v
 	}
 
+	// log.Println(updatedData)
+
 	// insert to tb_staging_crm
 	dataExist := service.stagingCrmRepository.FindBySn(request.Sn)
 	if dataExist.Sn == "" || len(dataExist.Sn) == 0 {
@@ -128,7 +130,7 @@ func (service *stagingCRMService) PostStaging(requestMap map[string]*multipart.F
 		return response
 	}
 
-	err = service.stagingCrmRepository.UpdateWithTx(updatedData, tx)
+	err = service.stagingCrmRepository.UpdateWithTx(snakeCaseMap, tx)
 	if err != nil {
 		log.Println(err.Error())
 		service.baseRepository.RollbackTransaction(tx)

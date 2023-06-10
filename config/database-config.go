@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"go-api/entity"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -57,7 +58,7 @@ func SetupDatabaseConnectionWithBegin() *gorm.DB {
 		panic("Failed to create a connection to database")
 	}
 	//nanti kita isi modelnya di sini
-	// db.AutoMigrate(&entity.TbPrestagingCrm{})
+	db.AutoMigrate(&entity.User{})
 	return db
 }
 
